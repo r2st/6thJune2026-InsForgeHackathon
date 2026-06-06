@@ -1,6 +1,7 @@
 # Pitch script — Hush.
 
 **Slot:** 3 min pitch + 2 min Q&A
+**Team:** Julie Oh · Subhendu Das
 **Deck:** [demo/slides/index.html](slides/index.html) · open fullscreen (press `F`), arrow-keys to advance.
 
 Read aloud with a timer. If you're over by 10s, cut a sentence. Cuts are at the bottom of this file.
