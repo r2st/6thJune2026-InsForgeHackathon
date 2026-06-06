@@ -6,6 +6,69 @@ frustration with the matching request log, patches `insforge.toml` on
 a forked InsForge branch project, and ships the PR before the user
 finishes writing the support ticket.
 
+## What problem does it solve?
+
+**Most bugs don't crash — and the silent ones are the ones that lose customers.**
+
+Error trackers like Sentry only catch bugs that throw an exception. But the
+most damaging bugs in modern SaaS are silent: a logged-in customer opens "My
+Orders" and sees an empty page even though their orders exist. A row-level-
+security policy quietly filters everyone whose JWT migrated to a new claim
+shape. The server returns `200 OK`. Nothing throws. Sentry sees nothing. The
+dev sees nothing. The customer just leaves — and the only signal is a support
+ticket days later that no one can reproduce.
+
+These silent backend bugs — RLS misfires, stale auth claims, policy
+regressions, leaked or vanished records — are invisible to every tool built
+around stack traces. **Hush is the bug-fixer for the bugs that don't crash.**
+
+## Project description
+
+**Hush** watches for the bugs your error tracker can't see, traces each one
+from the frustrated user all the way to the backend policy that caused it, and
+ships the fix as a reviewable pull request — before the user finishes writing
+the support ticket.
+
+When a user gets stuck (rage-clicks, a dead click, an abandoned form), Hush
+runs a five-step loop:
+
+1. **Watch** — captures the session with rrweb and fires on the frustration signal.
+2. **Correlate** — links that frontend symptom to the exact backend request that
+   failed, by matching the session against the request log. This turns "the page
+   is empty" into "the `orders_select` RLS policy returned 0 rows."
+3. **Diagnose** — InsForge AI reads the failing request + the relevant
+   `insforge.toml` slice and explains, in plain English, which policy or JWT
+   claim misfired and how to fix it.
+4. **Test on a fork** — Hush forks the entire backend (an **InsForge branch
+   project**), applies the proposed `insforge.toml` patch, and replays the
+   failing request against **both** prod and the fork. Prod still returns 0 rows;
+   the fork returns the 3 that were always there — falsifiable proof, not a guess.
+5. **Ship** — opens a PR with the diagnosis, the before/after policy trace, and
+   the session clip, routed by a confidence score: high → PR with the fix,
+   medium → draft PR with the failing test, low → an issue. A deterministic
+   safety rail blocks any patch that *widens* access, so a fix can never become
+   a leak.
+
+**Why it can only be built on InsForge.** To safely propose a policy patch you
+must run it against prod-shaped data and compare deterministically — which means
+forking the whole backend (schema + auth + RLS) and replaying. That's InsForge
+**branch projects**. And the fix itself is a diff against the declarative
+**`insforge.toml`** — small, reviewable, reversible, within an agent's one-shot
+range. Supabase has RLS but no branch projects; Neon has branches but no auth
+layer; neither composes. Hush exists *because* InsForge exposes a forkable
+backend with declarative auth.
+
+**It learns.** Every resolved fix is recorded in **Memoir** ("git for AI
+memory"): a past *merged* fix raises confidence on similar bugs, a *rejected*
+one lowers it — so Hush gets quieter and sharper per team over time. **Lim.run**
+boots a real cloud instance on the fork for a clickable "see the fix live" link,
+and **Replicas** / **Devin** are the background coding agents that can land the
+patch.
+
+**Stack:** InsForge (Postgres · pgvector · RLS · branch projects · Realtime · AI
+· edge functions) · rrweb · Memoir · Lim.run · Replicas · Devin · Vercel ·
+Next.js.
+
 ## Live demo
 
 **Click-path (the 90-second pitch):**
