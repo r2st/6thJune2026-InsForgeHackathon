@@ -6,6 +6,22 @@ frustration with the matching request log, patches `insforge.toml` on
 a forked InsForge branch project, and ships the PR before the user
 finishes writing the support ticket.
 
+## Live demo
+
+| Surface | URL | State |
+|---|---|---|
+| **Receipt page** (judge-facing live status) | https://w369egnp.insforge.site/ | ✅ deployed |
+| **Receipt — demo mode** (full arc, no backend needed) | https://w369egnp.insforge.site/r/demo?demo=1 | ✅ deployed · **start here** |
+| **Backend** (InsForge project `hush`, seeded demo bug) | https://w369egnp.us-east.insforge.app | ✅ live |
+| **Victim app** (`apps/demo` — "Acme Store / My Orders") | _not yet deployed_ — run locally: `pnpm --filter demo dev` → http://localhost:3000/orders | ⏳ builds clean; deploy with `cd apps/demo && vercel --prod` |
+
+> The **demo-mode receipt** (`/r/demo?demo=1`) rehearses the whole five-step
+> arc — capture → correlate → diagnose → fork-test → ship — with no backend,
+> so it can't flake on stage. The victim app is the left-screen "Acme Store"
+> where a migrated user opens **My Orders** and sees an empty page; toggling
+> to the legacy user shows the 3 orders that were always there. That contrast
+> is the 0:00 beat of the pitch.
+
 ## Quick links
 
 - **Canonical pitch** — [ideas/FINAL.html](ideas/FINAL.html)
