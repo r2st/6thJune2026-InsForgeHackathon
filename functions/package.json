@@ -11,6 +11,7 @@
     "deploy": "insforge functions deploy ingest && insforge functions deploy fix-trigger"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": ">=0.40.0",
     "@insforge/sdk": "^1.0.0"
   },
   "devDependencies": {

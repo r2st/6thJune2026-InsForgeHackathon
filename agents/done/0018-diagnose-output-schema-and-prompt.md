@@ -3,9 +3,9 @@ id: 0018
 title: Define diagnose() output schema + InsForge AI prompt v1
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: []
 demo_path: yes — drives the diagnosis card on slide 06 and the PR body
 ---
@@ -65,4 +65,19 @@ parse — fragile and not demo-safe.
   run so we can compare quality if we iterate.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+Schema + prompt v1 already existed; this ticket implemented `diagnose()` to
+fulfil the contract. The call goes to Claude directly via `@anthropic-ai/sdk`
+(`ANTHROPIC_API_KEY`, `claude-opus-4-8`) with a **forced `emit_diagnosis` tool
+call** — not the OpenRouter gateway. We stamp `promptVersion` from the prompt
+header and validate the result against `diagnosis.schema.json` (minimal
+in-house validator in `lib/validateSchema.ts`; no ajv, edge-deploy-friendly).
+Added fixture `fixtures/diagnose-input-rls-empty.json` + 10 passing tests
+(`diagnose.test.ts`, full suite 64 green) and ADR `docs/decisions/0002`.
+`infra/insforge.toml` fix-trigger secret swapped `OPENROUTER_API_KEY` →
+`ANTHROPIC_API_KEY`; ingest embeddings stay on OpenRouter.
+
+Note for downstream: the prompt's "claim paths appear in `rlsDecisions`"
+(hard rule 4) doesn't match `RlsDecision` (no claim field) — `DiagnoseInput`
+grew an optional `jwtClaims` so the caller passes claims explicitly; flag for
+0019/0030 when wiring the real input bundle.

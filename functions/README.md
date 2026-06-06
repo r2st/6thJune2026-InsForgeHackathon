@@ -10,7 +10,7 @@ Runs on InsForge. All TypeScript, ESM, no bundler — each file is deployable di
 | [`fix-trigger.ts`](fix-trigger.ts) | Orchestrates diagnose → test → ship | — |
 | [`correlate.ts`](correlate.ts) *(stub)* | session → backend-log slice | 0014 |
 | [`capture.ts`](capture.ts) *(stub)* | Pull the failing request | 0005 |
-| [`diagnose.ts`](diagnose.ts) | InsForge AI call → structured `Diagnosis` | 0018 |
+| [`diagnose.ts`](diagnose.ts) | Anthropic API call (forced tool) → structured `Diagnosis` | 0018 |
 | [`toml.ts`](toml.ts) *(stub)* | Extract current TOML slice for grounding | 0019 |
 | [`tomlPatch.ts`](tomlPatch.ts) *(stub)* | Parse/serialize `TomlPatch` | 0006 |
 | [`applyDiff.ts`](applyDiff.ts) *(stub)* | Apply patch to a branch project | 0006 |

@@ -1,0 +1,54 @@
+{
+  "_comment": "Snapshot input for the canonical demo bug (RLS returns 0 rows because the JWT claim migrated from 'tenant' to 'tenant_ids[]'). `input` feeds diagnose(); `expectedDiagnosis` is the verbatim Example 1 output from prompts/diagnose.v1.md and must validate against schemas/diagnosis.schema.json with failingPolicy === 'orders.orders_select'. Ticket 0018.",
+  "input": {
+    "session": {
+      "sessionId": "sess_8f3a01",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "userId": "user_a",
+      "startedAt": "2026-06-06T18:00:00.000Z",
+      "endedAt": "2026-06-06T18:00:42.000Z",
+      "frustrationAt": "2026-06-06T18:00:38.000Z",
+      "clipUrl": "https://example.test/clips/sess_8f3a01.json"
+    },
+    "failingRequest": {
+      "id": 4821,
+      "ts": "2026-06-06T18:00:37.500Z",
+      "sessionId": "sess_8f3a01",
+      "userId": "user_a",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "route": "/orders",
+      "method": "GET",
+      "rlsDecisions": [
+        {
+          "policy": "orders.orders_select",
+          "table": "orders",
+          "rowsBefore": 3,
+          "rowsAfter": 0
+        }
+      ],
+      "returnedRows": 0,
+      "status": 200
+    },
+    "expectedRows": 3,
+    "tomlContext": "[tables.orders]\nrls = \"tenant_id = (auth.jwt() ->> 'tenant')::uuid\"",
+    "jwtClaims": {
+      "sub": "user_a",
+      "tenant_ids": ["11111111-1111-1111-1111-111111111111"]
+    }
+  },
+  "expectedDiagnosis": {
+    "summary": "The orders policy reads 'tenant' but this user's JWT migrated to 'tenant_ids[]' last week, so it returns zero rows.",
+    "expectation": "User A expected to see their three orders on /orders.",
+    "observation": "RLS policy orders.orders_select filtered all rows because auth.jwt() ->> 'tenant' is null; the JWT carries tenant_ids[].",
+    "failingPolicy": "orders.orders_select",
+    "failingJwtClaim": "auth.jwt() ->> 'tenant'",
+    "tomlDiff": {
+      "path": "tables.orders.rls",
+      "before": "tenant_id = (auth.jwt() ->> 'tenant')::uuid",
+      "after": "tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY((auth.jwt() -> 'tenant_ids')::uuid[])"
+    },
+    "widensAccess": false,
+    "confidenceInputs": { "diffLoc": 1, "tablesTouched": 1, "policyBlast": 1 },
+    "promptVersion": "diagnose-v1.0.0"
+  }
+}
