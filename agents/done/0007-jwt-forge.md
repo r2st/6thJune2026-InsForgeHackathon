@@ -3,9 +3,9 @@ id: 0007
 title: Forge a JWT signed by the fork's key with captured claims
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0004, 0005]
 demo_path: yes — without a valid JWT, the replay 401s and the verdict is wrong
 ---
@@ -45,3 +45,8 @@ both ends of the fork. In production deployment, the security model is
 different and should be revisited in a follow-up ADR.
 
 ## Outcome
+
+- `functions/forgeJwt.ts` — `forgeForkJwt(branchId, claims|token, opts)` HS256-signs
+  with the fork's pool secret; preserves all captured claims verbatim, rewrites
+  only iss/aud/iat/exp; refuses non-positive ttl. Pool reader in `lib/pool.ts`.
+- 8 hermetic tests (`forgeJwt.test.ts`) — both claim shapes, sig verify, refusal.

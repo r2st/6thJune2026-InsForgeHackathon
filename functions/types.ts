@@ -113,6 +113,15 @@ export interface Verdict {
   bugConfirmed: boolean;      // prod < expectedRows
   fixVerified: boolean;       // fork >= expectedRows
   rationale: string;          // one-line for the PR description
+  /**
+   * How the verdict was produced (ticket 0012). Absent/'fork' = the real
+   * parallel replay against a branch project. 'trace' = the no-fork fallback:
+   * the patched predicate evaluated against the live/replica data. A trace
+   * verdict must NEVER reach the PR tier — the orchestrator caps it at
+   * draft_pr — and the receipt page renders a distinct cool badge so it can't
+   * masquerade as a real fork verdict.
+   */
+  mode?: 'fork' | 'trace';
 }
 
 export interface ReplaySide {

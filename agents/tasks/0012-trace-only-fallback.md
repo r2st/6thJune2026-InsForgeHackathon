@@ -3,9 +3,9 @@ id: 0012
 title: Trace-only fallback when branch projects are unavailable
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: in-progress
 depends_on: [0005, 0006]
 demo_path: yes — defensive; runs if the primary fork path fails
 ---
