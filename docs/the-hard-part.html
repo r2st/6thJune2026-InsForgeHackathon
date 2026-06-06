@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hush · the hard part isn't Capture</title>
+<link rel="icon" type="image/svg+xml" href="../assets/brand/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg-elev: #131418;
+    --bg-elev2: #181a20;
+    --ink: #ecedef;
+    --ink-dim: #9097a3;
+    --line: #25272e;
+    --accent: #ff6b35;
+    --good: #6ee7b7;
+    --cool: #a78bfa;
+    --warn: #fde68a;
+    --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; background: rgba(255,107,53,0.1); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+  a { color: var(--good); text-decoration: none; border-bottom: 1px dotted rgba(110,231,183,0.4); }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 64px 32px 96px; }
+
+  /* HERO */
+  header.hero { border-bottom: 1px solid var(--line); padding-bottom: 48px; margin-bottom: 56px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent);
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(44px, 6.5vw, 84px);
+    line-height: 1.0; letter-spacing: -0.03em;
+    margin: 0 0 22px;
+  }
+  h1 .q { color: var(--accent); font-style: italic; }
+  .one-line {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(20px, 2.4vw, 28px);
+    line-height: 1.4; color: var(--ink-dim);
+    max-width: 48ch; margin: 0;
+  }
+  .one-line em { color: var(--good); font-style: italic; }
+
+  /* SECTIONS */
+  section { margin-bottom: 72px; }
+  .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 12px;
+  }
+  h2 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(32px, 4.5vw, 48px); line-height: 1.05;
+    margin: 0 0 24px; letter-spacing: -0.02em;
+  }
+  h2 em { color: var(--accent); font-style: italic; }
+  h2 .hi { color: var(--good); font-style: italic; }
+  p { font-size: 17px; line-height: 1.65; color: var(--ink); max-width: 62ch; margin: 0 0 16px; }
+  p.muted { color: var(--ink-dim); }
+  p.lede { font-size: 22px; line-height: 1.5; max-width: 50ch; font-family: 'Instrument Serif', serif; color: var(--ink); }
+  p b { color: var(--ink); font-weight: 600; }
+  p em { color: var(--accent); font-style: italic; font-weight: 500; }
+
+  /* PULL QUOTE */
+  .pull {
+    margin: 32px 0;
+    padding: 28px 32px;
+    background: var(--bg-elev);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(22px, 2.4vw, 30px);
+    line-height: 1.4; color: var(--ink);
+  }
+  .pull em { color: var(--accent); font-style: italic; }
+  .pull .hi { color: var(--good); font-style: italic; }
+
+  /* FOUR STEP STRIP — costed */
+  .costed { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0 12px; }
+  .step {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 18px 18px 20px;
+    display: flex; flex-direction: column;
+  }
+  .step.hot { border-color: rgba(255,107,53,0.55); background: linear-gradient(180deg, rgba(255,107,53,0.07), transparent 70%); }
+  .step.cold { border-color: var(--line); opacity: 0.85; }
+  .step .n { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim); letter-spacing: 0.14em; }
+  .step.hot .n { color: var(--accent); }
+  .step .v { font-family: 'Instrument Serif', serif; font-size: 22px; margin-top: 4px; line-height: 1; }
+  .step .cost {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-dim); margin-top: 10px;
+  }
+  .step.hot .cost { color: var(--accent); }
+  .step .d { font-size: 13px; line-height: 1.55; color: var(--ink-dim); margin-top: 12px; }
+  .step.hot .d { color: var(--ink); }
+
+  /* COMPARISON TABLE */
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  table th {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim);
+    text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line);
+    font-weight: 500;
+  }
+  table td { padding: 14px; border-bottom: 1px solid var(--line); line-height: 1.5; vertical-align: top; }
+  table tr.us { background: linear-gradient(90deg, rgba(110,231,183,0.06), transparent 60%); }
+  table tr.us td:first-child { color: var(--good); font-weight: 600; }
+  table td .ok { color: var(--good); }
+  table td .no { color: var(--ink-dim); }
+  table td .gap { color: var(--bad); }
+
+  /* DIAGRAM */
+  .diagram {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 14px; padding: 24px; margin: 20px 0;
+  }
+  .diagram svg { width: 100%; height: auto; display: block; }
+
+  /* PILLARS */
+  .pillars { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 24px 0; }
+  .pillar {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 24px;
+    border-left: 3px solid var(--good);
+  }
+  .pillar .tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: var(--good); text-transform: uppercase; }
+  .pillar h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 22px; margin: 6px 0 8px; }
+  .pillar p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--ink-dim); max-width: none; }
+  .pillar p b { color: var(--ink); }
+  .pillar p code { font-size: 12.5px; }
+
+  /* MOAT */
+  .moat {
+    margin-top: 24px; padding: 28px 32px;
+    background: linear-gradient(180deg, rgba(110,231,183,0.08), transparent 80%);
+    border: 1px solid rgba(110,231,183,0.4); border-radius: 14px;
+  }
+  .moat .label-m { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: var(--good); text-transform: uppercase; margin-bottom: 10px; }
+  .moat p { font-family: 'Instrument Serif', serif; font-size: clamp(22px, 2.4vw, 30px); line-height: 1.35; color: var(--ink); margin: 0; max-width: none; }
+  .moat p em { color: var(--good); font-style: italic; }
+  .moat p code { font-size: 0.7em; }
+
+  footer {
+    margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    color: var(--ink-dim); font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+  }
+
+  @media (max-width: 780px) {
+    .costed, .pillars { grid-template-columns: 1fr; }
+    table { font-size: 13px; }
+    table th, table td { padding: 10px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="eyebrow">Hush · positioning brief · 2026-06-06</div>
+    <h1>Is <span class="q">Capture</span> the important part?</h1>
+    <p class="one-line">Short answer: no. The hard part is <em>proving the fix without breaking production.</em> Capture is the cheapest step in the loop. Test-on-a-fork is the one nobody else can do.</p>
+  </header>
+
+  <!-- 01 — THE QUESTION -->
+  <section>
+    <div class="label">01 · The question</div>
+    <h2>The loop has four steps. Which one is load-bearing?</h2>
+    <p>Hush watches a session, diagnoses the silent backend bug, tests the proposed fix on a forked backend, and ships a PR. Of those four steps, exactly one is genuinely hard to replicate. The others are commodities or close to it.</p>
+
+    <div class="costed">
+      <div class="step cold">
+        <div class="n">01</div>
+        <div class="v">Capture</div>
+        <div class="cost">// cost · low</div>
+        <div class="d"><b>rrweb + an HTTP header.</b> Open-source, productionized by FullStory, LogRocket, Replay.io. Frustration signals (rage-click, dead-click) are detectable in &lt;30 lines.</div>
+      </div>
+      <div class="step cold">
+        <div class="n">02</div>
+        <div class="v">Diagnose</div>
+        <div class="cost">// cost · medium</div>
+        <div class="d"><b>Structured LLM call.</b> Hard to do well; not hard to do at all. Every AI coding tool ships a version of this. The prompt quality is the differentiator, not the existence of the step.</div>
+      </div>
+      <div class="step hot">
+        <div class="n">03</div>
+        <div class="v">Test on a fork</div>
+        <div class="cost">// cost · high · moat</div>
+        <div class="d"><b>This is the part nobody else can do.</b> Forking the entire backend — schema, auth, RLS, seeded data — in seconds, replaying the failing session against it, and getting a falsifiable verdict. No competitor has this primitive at this fidelity.</div>
+      </div>
+      <div class="step cold">
+        <div class="n">04</div>
+        <div class="v">Ship</div>
+        <div class="cost">// cost · low</div>
+        <div class="d"><b>Devin + GitHub API.</b> Open a PR, attach the clip, score the confidence. Plumbing.</div>
+      </div>
+    </div>
+
+    <p class="muted">Pricing the steps honestly is what reveals the moat. Capture has a thousand alternatives. Devin and the GitHub API are commodities. Diagnose is just a good prompt. Test-on-a-fork has <em>one</em> implementation path, and it requires a primitive nobody else ships.</p>
+  </section>
+
+  <!-- 02 — WHY CAPTURE ISN'T -->
+  <section>
+    <div class="label">02 · Why Capture isn't the hard part</div>
+    <h2>Three reasons the capture column is cheap.</h2>
+    <p><b>It's been done.</b> rrweb has been a commodity since 2018. FullStory's frustration-signal detection is published. Anyone building a session-capture SDK in 2026 is doing systems integration, not invention.</p>
+    <p><b>It's not the differentiator.</b> Replay.io captures sessions. So does Sentry. So does Hotjar. They all have it. None of them ship a fix. Adding capture to a fix-loop doesn't give you the loop — capture is a precondition.</p>
+    <p><b>The interesting input isn't the session.</b> It's the <em>correlation</em> between the session and the backend decision. The session timestamps the symptom; the backend log holds the cause. Hush's edge function does the join, but that's a lookup against an indexed column, not a research problem.</p>
+
+    <div class="pull">If a competitor copied our Capture step verbatim tomorrow, <em>they still couldn't ship the fix.</em> Because they have nowhere safe to test it.</div>
+  </section>
+
+  <!-- 03 — THE REAL HARD PART -->
+  <section>
+    <div class="label">03 · The real hard part</div>
+    <h2>Proving the fix <span class="hi">without touching production.</span></h2>
+    <p class="lede">Every step before this one produces a <b>hypothesis</b> — the user expected X, the failing policy is Y, the fix is Z. Hypotheses can be wrong. To ship them as a PR you need <em>proof</em>, and the only way to get proof is to actually run the patched system against the actual failing input.</p>
+    <p>That's a tractable problem only if you can fork the entire backend — schema, RLS, auth, seeded data — in seconds. And then re-fire the captured request against the fork with the user's real claims. And then compare the verdict against prod.</p>
+    <p>This is what we mean by <em>test on a fork.</em> It is the structural problem Hush solves, and it is the structural reason Hush exists on InsForge.</p>
+
+    <div class="diagram">
+      <svg viewBox="0 0 860 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="dh" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ff6b35" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/>
+          </radialGradient>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#9097a3"/>
+          </marker>
+          <marker id="arrG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#6ee7b7"/>
+          </marker>
+          <marker id="arrR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#f87171"/>
+          </marker>
+          <style>
+            .box { fill: #131418; stroke: #25272e; stroke-width: 1.5; }
+            .box-a { fill: #131418; stroke: #ff6b35; stroke-width: 1.5; }
+            .box-r { fill: #131418; stroke: #f87171; stroke-width: 1.5; }
+            .box-g { fill: #131418; stroke: #6ee7b7; stroke-width: 1.5; }
+            .ti { font-family: 'Instrument Serif', serif; font-size: 18px; fill: #ecedef; }
+            .lb { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; }
+            .lb-d { fill: #9097a3; }
+            .lb-a { fill: #ff6b35; }
+            .lb-r { fill: #f87171; }
+            .lb-g { fill: #6ee7b7; }
+            .ln { fill: none; stroke: #9097a3; stroke-width: 1.5; }
+            .ln-r { fill: none; stroke: #f87171; stroke-width: 1.5; }
+            .ln-g { fill: none; stroke: #6ee7b7; stroke-width: 1.5; }
+            .el { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #9097a3; }
+          </style>
+        </defs>
+
+        <!-- captured session -->
+        <rect x="20" y="140" width="180" height="80" rx="10" class="box-a"/>
+        <text x="34" y="164" class="lb lb-a">CAPTURED · INPUT</text>
+        <text x="34" y="188" class="ti">session + JWT</text>
+        <text x="34" y="206" class="lb lb-d">the failing request</text>
+
+        <!-- prod -->
+        <rect x="320" y="40" width="200" height="100" rx="10" class="box-r"/>
+        <text x="334" y="64" class="lb lb-r">PROD · UNCHANGED</text>
+        <text x="334" y="88" class="ti">orders_select</text>
+        <text x="334" y="108" class="lb lb-d">policy reads</text>
+        <text x="334" y="124" class="lb lb-d">auth.jwt() -&gt; 'tenant'</text>
+
+        <!-- branch fork -->
+        <rect x="320" y="220" width="200" height="100" rx="10" class="box-g"/>
+        <text x="334" y="244" class="lb lb-g">BRANCH · PATCHED</text>
+        <text x="334" y="268" class="ti">orders_select</text>
+        <text x="334" y="288" class="lb lb-d">policy reads ALSO</text>
+        <text x="334" y="304" class="lb lb-d">auth.jwt() -&gt; 'tenant_ids'</text>
+
+        <!-- prod verdict -->
+        <rect x="620" y="40" width="200" height="100" rx="10" class="box-r"/>
+        <text x="634" y="64" class="lb lb-r">VERDICT</text>
+        <text x="634" y="92" class="ti" style="font-size: 28px; fill: #f87171;">FAIL</text>
+        <text x="634" y="116" class="lb lb-d">rows: 0 · user sees empty</text>
+        <text x="634" y="130" class="lb lb-d">bug confirmed</text>
+
+        <!-- branch verdict -->
+        <rect x="620" y="220" width="200" height="100" rx="10" class="box-g"/>
+        <text x="634" y="244" class="lb lb-g">VERDICT</text>
+        <text x="634" y="272" class="ti" style="font-size: 28px; fill: #6ee7b7;">PASS</text>
+        <text x="634" y="296" class="lb lb-d">rows: 3 · expected</text>
+        <text x="634" y="310" class="lb lb-d">fix verified</text>
+
+        <!-- arrows from input -->
+        <path d="M 200 170 L 320 90" class="ln-r" marker-end="url(#arrR)"/>
+        <path d="M 200 190 L 320 270" class="ln-g" marker-end="url(#arrG)"/>
+        <text x="220" y="140" class="el">replay · same JWT</text>
+        <text x="220" y="252" class="el">replay · forged JWT</text>
+
+        <!-- arrows to verdict -->
+        <path d="M 520 90 L 620 90" class="ln-r" marker-end="url(#arrR)"/>
+        <path d="M 520 270 L 620 270" class="ln-g" marker-end="url(#arrG)"/>
+
+      </svg>
+    </div>
+    <p class="muted">Two independent signals. Prod fails → the bug is real. Fork passes → the fix is real. Both are required before Hush opens a PR. If only one fires, the run drops a confidence tier.</p>
+  </section>
+
+  <!-- 04 — COMPARISON -->
+  <section>
+    <div class="label">04 · The competitive matrix</div>
+    <h2>Who else has each column?</h2>
+    <p>Mapping the loop onto the prior art reveals the gap. Every competitor has at least one column; <em>only Hush has the Test column.</em></p>
+    <table>
+      <tr>
+        <th>Tool</th>
+        <th>Capture</th>
+        <th>Diagnose</th>
+        <th>Test on a fork</th>
+        <th>Ship</th>
+      </tr>
+      <tr>
+        <td>Sentry · Seer · Autofix</td>
+        <td><span class="no">stack trace only</span></td>
+        <td><span class="ok">yes (from trace)</span></td>
+        <td><span class="gap">no fork primitive</span></td>
+        <td><span class="ok">PR via GitHub</span></td>
+      </tr>
+      <tr>
+        <td>FullStory · LogRocket</td>
+        <td><span class="ok">session replay</span></td>
+        <td><span class="no">human watches</span></td>
+        <td><span class="gap">—</span></td>
+        <td><span class="gap">—</span></td>
+      </tr>
+      <tr>
+        <td>Replay.io</td>
+        <td><span class="ok">time-travel</span></td>
+        <td><span class="no">human steps through</span></td>
+        <td><span class="gap">replay isn't a fix test</span></td>
+        <td><span class="gap">—</span></td>
+      </tr>
+      <tr>
+        <td>Cursor · Devin (alone)</td>
+        <td><span class="gap">—</span></td>
+        <td><span class="ok">LLM on code</span></td>
+        <td><span class="no">unit tests, not prod state</span></td>
+        <td><span class="ok">PR</span></td>
+      </tr>
+      <tr>
+        <td>Supabase + AI agent</td>
+        <td><span class="no">DIY</span></td>
+        <td><span class="ok">possible</span></td>
+        <td><span class="gap">no branch-fork at this fidelity</span></td>
+        <td><span class="ok">PR</span></td>
+      </tr>
+      <tr class="us">
+        <td>Hush.</td>
+        <td><span class="ok">rrweb + edge fn</span></td>
+        <td><span class="ok">LLM on (session × log × RLS)</span></td>
+        <td><span class="ok">branch project · forged JWT · parallel replay</span></td>
+        <td><span class="ok">confidence-scored PR</span></td>
+      </tr>
+    </table>
+    <p class="muted">Sentry's analog is closest in shape — they could add session replay. They cannot add branch-project forks. The Test column is the column that doesn't get caught up to by a quarterly release.</p>
+  </section>
+
+  <!-- 05 — HOW WE SOLVE IT UNIQUELY -->
+  <section>
+    <div class="label">05 · How we solve it uniquely</div>
+    <h2>Four moving parts. <em>None of them are Capture.</em></h2>
+    <p>The Test step is built out of four pieces. Each is small. Together they're the unique system.</p>
+
+    <div class="pillars">
+      <div class="pillar">
+        <div class="tag">PIECE 01</div>
+        <h3>Branch projects as ephemeral test sandboxes</h3>
+        <p>InsForge forks the entire backend — <b>schema, RLS, auth, seeded data</b> — in &lt;2s. We pre-warm a pool of two so the demo never waits on a cold spin-up. The fork burns when the test ends.</p>
+      </div>
+      <div class="pillar">
+        <div class="tag">PIECE 02</div>
+        <h3>JWT forging against the fork's signing key</h3>
+        <p>The captured JWT is signed by prod and won't validate on the fork. We re-sign the <b>same claims</b> with the fork's key. That means the policy receives the user's <em>real</em> claim shape — which is the whole reason the bug exists.</p>
+      </div>
+      <div class="pillar">
+        <div class="tag">PIECE 03</div>
+        <h3>Parallel replay → falsifiable verdict</h3>
+        <p>We fire the captured request at prod (unchanged) and the fork (patched) <b>in parallel</b>. The verdict is two independent signals: prod returns 0 rows; fork returns the expected 3. <em>Either signal alone proves nothing.</em> Both together prove everything.</p>
+      </div>
+      <div class="pillar">
+        <div class="tag">PIECE 04</div>
+        <h3>Verdict gates the confidence score</h3>
+        <p>If the fork doesn't pass, confidence caps at 30 — Hush opens an <b>issue</b>, not a PR. The replay verdict is the single strongest signal in the score. <em>No replay, no PR.</em> Ever.</p>
+      </div>
+    </div>
+
+    <p class="muted">Each piece is small. None is the moat by itself. The system is the moat — and the system runs because branch projects exist and `insforge.toml` makes the fix a declarative 4-line diff. Both are InsForge primitives. Neither is replicable in a competitor's substrate.</p>
+  </section>
+
+  <!-- 06 — MOAT SENTENCE -->
+  <section>
+    <div class="label">06 · The moat, in one sentence</div>
+    <h2>What we'd say to a technical judge.</h2>
+    <div class="moat">
+      <div class="label-m">// the moat</div>
+      <p>Capture is a commodity. Diagnose is a prompt. Ship is the GitHub API. <em>Test-on-a-fork is what makes Hush exist</em> — and it only exists because InsForge gives us forkable backends and a declarative <code>insforge.toml</code> as the unit of change. Take either away, and the product collapses.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>// positioning brief · v1 · 2026-06-06</span>
+    <span>see also: <a href="architecture.html">architecture.html</a> · <a href="deployment.md">deployment.md</a> · <a href="../ideas/FINAL.html">FINAL.html</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
