@@ -65,5 +65,16 @@ export function getEntry(branchId: string, path = poolPath()): PoolEntry {
  * job; this is a read-time selection only.
  */
 export function firstFree(path = poolPath()): PoolEntry | null {
-  return readPool(path).entries.find((e) => e.claimedBy === null) ?? null;
+  // No pool file (e.g. the deployed edge runtime, where prewarm's local
+  // .hush/pool.json doesn't exist) means "no fork available" — return null so
+  // the orchestrator falls back to trace-only replay, not a hard crash. A
+  // *malformed* pool is a real misconfiguration and still rethrows.
+  let pool: ReturnType<typeof readPool>;
+  try {
+    pool = readPool(path);
+  } catch (err) {
+    if (err instanceof Error && /not found/.test(err.message)) return null;
+    throw err;
+  }
+  return pool.entries.find((e) => e.claimedBy === null) ?? null;
 }

@@ -202,10 +202,10 @@ export interface DiagnoseOptions {
 const TIMEOUT = Symbol('diagnose-timeout');
 
 async function defaultCreateClient(): Promise<AnthropicLike> {
-  // Lazy import: pure-helper tests never resolve @anthropic-ai/sdk. `new Anthropic()`
-  // reads ANTHROPIC_API_KEY and throws clearly if unset.
-  const { default: Anthropic } = await import('@anthropic-ai/sdk');
-  return new Anthropic() as unknown as AnthropicLike;
+  // Provider-agnostic: HUSH_LLM_PROVIDER selects Gemini (default) or Anthropic.
+  // Lazy import keeps pure-helper tests SDK-free and only loads the chosen path.
+  const { createLlmClient } = await import('./llm.js');
+  return createLlmClient();
 }
 
 /** 429/500/529 and connection errors are transient; 400/401 are not. */
