@@ -124,6 +124,51 @@ Each test path:
 - **Read-path / pure-logic tickets** test against the seeded rows and via their
   vitest suites as before.
 
+## Real fork verdict — proven end-to-end (2026-06-06)
+
+Manually exercised the real fork path against the live `hush-fix-sandbox`
+branch (`branch switch` → set up → patch → measure → `branch switch --parent`).
+The fork was empty (forked before the schema existed at 19:19 UTC), so it was
+given the buggy schema + seed first, then the patch was applied — exactly the
+fork-then-apply flow.
+
+| Project | `orders_select` policy | migrated `tenant_ids[]` JWT | Globex JWT |
+|---|---|---|---|
+| **PROD** (parent `hush`) | buggy (`-> 'tenant'`) | **0 rows** — the bug | — |
+| **FORK** (`hush-fix-sandbox`) | patched (OR branch) | **3 rows** — the fix | **0** — no widening |
+
+Two separate InsForge projects, different deployed policies, different results
+for the same query+claims. That's the slide-06 money shot, real.
+
+### ⚠️ The fork caught a demo-critical bug the trace path masked
+
+The canonical patch shape used across the codebase —
+`ANY((auth.jwt() -> 'tenant_ids')::uuid[])` — is **invalid Postgres**:
+
+```
+ERROR: cannot cast type jsonb to uuid[]
+```
+
+You cannot direct-cast jsonb to `uuid[]`. The correct form is:
+
+```sql
+ANY(array(select jsonb_array_elements_text(auth.jwt() -> 'tenant_ids'))::uuid[])
+```
+
+No unit test caught it — they treat the patch as a *string* (safety does widening
+analysis; traceReplay evaluates `ANY(...)` in JavaScript). Only the live fork runs
+real SQL. This is the concrete payoff of the fork path over trace mode, and the
+reason [`agents/inbox/0044`](../agents/inbox/0044-patch-cast-jsonb-uuid-array.md)
+exists. The runtime source (diagnose prompts + fixture) is fixed; the remaining
+test/slide constants are tracked in 0044.
+
+### Fork state note
+
+`hush-fix-sandbox` currently holds the buggy schema + seed + the *patched*
+policy (left over from this proof). For a clean demo run, reset and re-fork
+*after* prod has the schema, or `branch reset hush-fix-sandbox` and re-apply the
+buggy schema so Hush can apply the patch live.
+
 ## Reset / reseed
 
 ```bash
