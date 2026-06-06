@@ -71,6 +71,8 @@ Next.js.
 
 ## Live demo
 
+**Pitch deck:** [https://w369egnp.insforge.site/pitch.html](https://w369egnp.insforge.site/pitch.html) — 10 slides, arrow-keys / click to advance, `F` for fullscreen.
+
 **Click-path (the 90-second pitch):**
 [1) Acme Store — empty orders](https://hush-acme-store.vercel.app/orders?user=migrated) →
 [2) Receipt demo-mode — capture→ship](https://w369egnp.insforge.site/r/demo?demo=1) →
@@ -78,6 +80,7 @@ Next.js.
 
 | Surface | URL | State |
 |---|---|---|
+| **Pitch deck** (the 10-slide presentation) | https://w369egnp.insforge.site/pitch.html | ✅ deployed |
 | **Receipt page** (judge-facing live status) | https://w369egnp.insforge.site/ | ✅ deployed |
 | **Receipt — demo mode** (full arc, no backend needed) | https://w369egnp.insforge.site/r/demo?demo=1 | ✅ deployed · **start here** |
 | **Backend** (InsForge project `hush`, seeded demo bug) | https://w369egnp.us-east.insforge.app/api/health | ✅ live — API host; bare `/` returns `Cannot GET /` by design, check `/api/health` |

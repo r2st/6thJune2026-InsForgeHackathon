@@ -183,7 +183,7 @@ export function playDemoSequence(
     { at: 600, event: () => ({ runId, step: 'correlated', at: now(), detail: { route: '/api/orders', expectedRows: 3 } }) },
     { at: 1600, event: () => ({ runId, step: 'diagnosed', at: now(), detail: DEMO_DIAGNOSIS }) },
     { at: 2800, event: () => ({ runId, step: 'testing', at: now(), detail: { mode: 'fork', prodRows: 0, forkRows: 3 } }) },
-    { at: 4400, event: () => ({ runId, step: 'shipped', at: now(), detail: { tier: 'pr', confidence: 92, prUrl: 'https://github.com/acme/store/pull/482', mode: 'fork', verified: true, prodRows: 0, forkRows: 3 } }) },
+    { at: 4400, event: () => ({ runId, step: 'shipped', at: now(), detail: { tier: 'pr', confidence: 92, prUrl: 'https://github.com/r2st/hush-victim-acme/pull/1', mode: 'fork', verified: true, prodRows: 0, forkRows: 3 } }) },
   ];
   const timers = beats.map((b) => setTimeout(() => onEvent(b.event()), b.at));
   return () => timers.forEach(clearTimeout);

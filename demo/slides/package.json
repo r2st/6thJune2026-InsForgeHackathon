@@ -1,0 +1,8 @@
+{
+  "name": "hush-deck",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "vercel-build": "mkdir -p public && cp index.html favicon.svg public/"
+  }
+}
