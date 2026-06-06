@@ -1,0 +1,7 @@
+# The fix Hush proposes for the demo bug (ticket 0016).
+# Drop-in replacement for the `[tables.orders]` rls line in infra/insforge.toml.
+# The OR branch adds the migrated `tenant_ids[]` claim shape while keeping the
+# legacy `tenant` claim working — so users on either JWT shape see their rows,
+# and the predicate is still scoped to tenant_id (no widening).
+[tables.orders]
+rls = "tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY(ARRAY(SELECT jsonb_array_elements_text(auth.jwt() -> 'tenant_ids'))::uuid[])"

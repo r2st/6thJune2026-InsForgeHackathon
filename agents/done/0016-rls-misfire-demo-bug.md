@@ -5,7 +5,7 @@ role: architect
 priority: P0
 owner: claude-app-layer
 started: 2026-06-06T13:00Z
-status: in_progress
+status: done
 depends_on: [0013]
 demo_path: yes — this IS the bug the receipt page diagnoses
 ---
@@ -56,3 +56,6 @@ that.
 correlate() returns `no_logs`, and every run lands `captured_no_logs` —
 the symptom→cause link silently breaks. The toy-app fetch shim already
 sends `x-hush-session-id`; you just need to log it on the server side.
+
+## Outcome
+Built /orders page (legacy vs migrated user toggle) + /api/orders route that serves rows under the buggy policy AND logs the RLS decision (rows_before/after, session id) to request_log via a server-side requestLog mirror. Fix fixture at tests/fixtures/orders-rls-fix.toml. Legacy sees 3, migrated sees 0. tsc + next build pass.

@@ -5,7 +5,7 @@ role: architect
 priority: P0
 owner: claude-app-layer
 started: 2026-06-06T13:00Z
-status: in_progress
+status: done
 depends_on: [0004]
 demo_path: yes — without this, prod/branch row counts are not reproducible
 ---
@@ -45,3 +45,6 @@ Keep the schema tiny — `orders(id, tenant_id, total, created_at)` is
 plenty. Anything more is decoration.
 
 ## Outcome
+
+## Outcome
+infra/seed/demo.sql: idempotent (TRUNCATE+INSERT), 2 tenants, 3 Acme orders, 0 Globex. scripts/seed.sh --env prod|<branchId>. Documented contract: prod=0 buggy, fork=3 fixed.
