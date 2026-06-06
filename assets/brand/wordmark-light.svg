@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 140" role="img" aria-label="Witness.">
+  <title>Witness.</title>
+  <defs>
+    <radialGradient id="dotHaloLight" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff6b35" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#ff6b35" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/>
+    </radialGradient>
+    <style>
+      .w { font-family: 'Instrument Serif', 'Times New Roman', serif; font-size: 116px; fill: #0b0c0f; letter-spacing: -0.03em; }
+    </style>
+  </defs>
+  <text x="32" y="104" class="w">Witness</text>
+  <circle cx="412" cy="98" r="30" fill="url(#dotHaloLight)"/>
+  <circle cx="412" cy="98" r="10" fill="#ff6b35"/>
+</svg>

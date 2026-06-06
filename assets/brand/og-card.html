@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Witness — OG card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg-elev: #131418;
+    --ink: #ecedef;
+    --ink-dim: #9097a3;
+    --line: #25272e;
+    --accent: #ff6b35;
+    --good: #6ee7b7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #1a1a1a;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--ink);
+  }
+  .card {
+    width: 1200px;
+    height: 630px;
+    background:
+      radial-gradient(1100px 700px at 78% 70%, rgba(255,107,53,0.18), transparent 60%),
+      radial-gradient(900px 500px at 15% 20%, rgba(110,231,183,0.06), transparent 65%),
+      var(--bg);
+    border: 1px solid var(--line);
+    padding: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    position: relative;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 16px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
+  }
+  .eyebrow::before {
+    content: ""; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 24px var(--accent);
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 200px;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    margin-top: 8px;
+    display: flex;
+    align-items: baseline;
+  }
+  h1 .dot {
+    display: inline-block;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 60px rgba(255,107,53,0.6);
+    margin-left: 6px;
+    transform: translateY(-12px);
+  }
+  .tagline {
+    font-family: 'Instrument Serif', serif;
+    font-size: 52px;
+    line-height: 1.15;
+    color: var(--ink);
+    max-width: 22ch;
+    margin-top: 32px;
+  }
+  .tagline em { color: var(--good); font-style: italic; }
+  .footer {
+    display: flex; justify-content: space-between; align-items: end;
+    font-family: 'JetBrains Mono', monospace; font-size: 18px;
+    color: var(--ink-dim); letter-spacing: 0.08em;
+  }
+  .built { color: var(--ink); }
+  .built .key { color: var(--good); }
+
+  /* a faint diagonal grid in the corner — adds depth without adding noise */
+  .grain {
+    position: absolute;
+    inset: auto -60px -60px auto;
+    width: 460px; height: 460px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    opacity: 0.45;
+  }
+  .grain::after {
+    content: ""; position: absolute; inset: 60px;
+    border: 1px solid var(--line); border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div>
+    <div class="eyebrow">Built on InsForge</div>
+    <h1>Witness<span class="dot"></span></h1>
+    <p class="tagline">The bug-fixer for <em>the bugs that don't crash.</em></p>
+  </div>
+  <div class="footer">
+    <span class="built">witness · <span class="key">live</span> · 6 June 2026</span>
+    <span>insforge · vercel · limrun · devin</span>
+  </div>
+  <div class="grain"></div>
+</div>
+</body>
+</html>

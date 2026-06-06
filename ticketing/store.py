@@ -186,7 +186,9 @@ def update(conn: sqlite3.Connection, ticket_id: int, **fields) -> dict:
     sets.append("updated_at = ?")
     params.append(now())
     params.append(ticket_id)
-    cur = conn.execute(
+    # Safe: column names in `sets` come from the `allowed` allowlist above (line 178); values are parameterised.
+    # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
+    cur = conn.execute(  # nosemgrep
         f"UPDATE tickets SET {', '.join(sets)} WHERE id = ?", params
     )
     if cur.rowcount == 0:

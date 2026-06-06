@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 360" role="img" aria-label="Witness color palette">
+  <title>Witness color palette</title>
+  <defs>
+    <style>
+      .label { font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+      .hex   { font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 13px; }
+      .role  { font-family: 'Inter', system-ui, sans-serif; font-size: 11px; }
+      .title { font-family: 'Instrument Serif', serif; font-size: 28px; fill: #ecedef; letter-spacing: -0.02em; }
+      .sub   { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #9097a3; letter-spacing: 0.16em; text-transform: uppercase; }
+    </style>
+    <radialGradient id="haloP" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff6b35" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="920" height="360" fill="#0b0c0f"/>
+
+  <!-- header -->
+  <text x="40" y="48" class="sub" fill="#ff6b35">// palette · v1</text>
+  <text x="40" y="86" class="title">The four-accent system.</text>
+
+  <!-- surfaces row -->
+  <g transform="translate(40, 120)">
+    <g>
+      <rect width="120" height="120" rx="12" fill="#0b0c0f" stroke="#25272e"/>
+      <text x="12" y="20" class="label" fill="#9097a3">SURFACE</text>
+      <text x="12" y="100" class="hex" fill="#ecedef">#0b0c0f</text>
+      <text x="12" y="115" class="role" fill="#9097a3">--bg</text>
+    </g>
+    <g transform="translate(130, 0)">
+      <rect width="120" height="120" rx="12" fill="#131418" stroke="#25272e"/>
+      <text x="12" y="20" class="label" fill="#9097a3">ELEV 1</text>
+      <text x="12" y="100" class="hex" fill="#ecedef">#131418</text>
+      <text x="12" y="115" class="role" fill="#9097a3">--bg-elev</text>
+    </g>
+    <g transform="translate(260, 0)">
+      <rect width="120" height="120" rx="12" fill="#181a20" stroke="#25272e"/>
+      <text x="12" y="20" class="label" fill="#9097a3">ELEV 2</text>
+      <text x="12" y="100" class="hex" fill="#ecedef">#181a20</text>
+      <text x="12" y="115" class="role" fill="#9097a3">--bg-elev2</text>
+    </g>
+    <g transform="translate(390, 0)">
+      <rect width="120" height="120" rx="12" fill="#25272e"/>
+      <text x="12" y="20" class="label" fill="#9097a3">LINE</text>
+      <text x="12" y="100" class="hex" fill="#ecedef">#25272e</text>
+      <text x="12" y="115" class="role" fill="#9097a3">--line</text>
+    </g>
+    <g transform="translate(520, 0)">
+      <rect width="120" height="120" rx="12" fill="#ecedef"/>
+      <text x="12" y="20" class="label" fill="#0b0c0f">INK</text>
+      <text x="12" y="100" class="hex" fill="#0b0c0f">#ecedef</text>
+      <text x="12" y="115" class="role" fill="#0b0c0f">--ink</text>
+    </g>
+    <g transform="translate(650, 0)">
+      <rect width="120" height="120" rx="12" fill="#9097a3"/>
+      <text x="12" y="20" class="label" fill="#0b0c0f">INK DIM</text>
+      <text x="12" y="100" class="hex" fill="#0b0c0f">#9097a3</text>
+      <text x="12" y="115" class="role" fill="#0b0c0f">--ink-dim</text>
+    </g>
+  </g>
+
+  <!-- accents row -->
+  <g transform="translate(40, 250)">
+    <g>
+      <rect width="180" height="80" rx="12" fill="#131418" stroke="#ff6b35"/>
+      <circle cx="32" cy="40" r="22" fill="url(#haloP)"/>
+      <circle cx="32" cy="40" r="9" fill="#ff6b35"/>
+      <text x="68" y="34" class="hex" fill="#ff6b35">#ff6b35</text>
+      <text x="68" y="50" class="role" fill="#9097a3">--accent · live</text>
+    </g>
+    <g transform="translate(190, 0)">
+      <rect width="180" height="80" rx="12" fill="#131418" stroke="#6ee7b7"/>
+      <circle cx="32" cy="40" r="9" fill="#6ee7b7"/>
+      <text x="68" y="34" class="hex" fill="#6ee7b7">#6ee7b7</text>
+      <text x="68" y="50" class="role" fill="#9097a3">--good · shipped</text>
+    </g>
+    <g transform="translate(380, 0)">
+      <rect width="180" height="80" rx="12" fill="#131418" stroke="#a78bfa"/>
+      <circle cx="32" cy="40" r="9" fill="#a78bfa"/>
+      <text x="68" y="34" class="hex" fill="#a78bfa">#a78bfa</text>
+      <text x="68" y="50" class="role" fill="#9097a3">--cool · info</text>
+    </g>
+    <g transform="translate(570, 0)">
+      <rect width="180" height="80" rx="12" fill="#131418" stroke="#fde68a"/>
+      <circle cx="32" cy="40" r="9" fill="#fde68a"/>
+      <text x="68" y="34" class="hex" fill="#fde68a">#fde68a</text>
+      <text x="68" y="50" class="role" fill="#9097a3">--warn · draft</text>
+    </g>
+  </g>
+</svg>
