@@ -5,7 +5,7 @@ role: architect
 priority: P1
 owner: claude-opus-4-7
 started: 2026-06-06
-status: in-progress
+status: done
 depends_on: [0018, 0019]
 demo_path: yes — Q&A defense ("won't this ship a bad patch?")
 ---
@@ -67,4 +67,8 @@ backed by code, not vibes.
   before shipping the demo.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- **Shipped:** `functions/safety.ts` (`validateDiff`) — three-rule deny-by-default check against `TomlPatch.before` / `.after`: top-level AND conjunct count, new unscoped OR branch, and per-column binding-strength loosening. Helpers (`splitTopLevel`, `bindingOf`) respect parenthesis depth and single-quoted strings.
+- **Tests:** `functions/safety.test.ts` — 16 cases covering all acceptance criteria (demo bug fix not flagged, `= → IS NOT NULL` flagged, conjunct drop flagged, unscoped OR branch flagged, equality → membership allowed per spec, plus edge cases for case-insensitivity, quoted-string OR, word-boundary column matching). `pnpm -F @hush/functions test` → 16/16 pass.
+- **Verify:** `cd functions && npx vitest run safety.test.ts`. Orchestrator (ticket 0030) consumes `SafetyResult` to override `Diagnosis.widensAccess`.
+- **Scope handed off:** sub-select widening (`tenant_id IN (SELECT id FROM tenants)`) is intentionally out of scope here — it's the ticket-0032 (TOML AST validation) responsibility. The two rails compose: either rejecting → drop to issue.
