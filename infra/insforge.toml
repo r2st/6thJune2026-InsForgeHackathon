@@ -96,14 +96,16 @@ events = ["captured", "correlated", "diagnosed", "testing", "shipped", "failed"]
 
 [functions.ingest]
 entry  = "functions/ingest.ts"
-secret = ["INSFORGE_SERVICE_KEY", "OPENROUTER_API_KEY"]
+secret = ["INSFORGE_URL", "INSFORGE_SERVICE_KEY", "OPENROUTER_API_KEY"]
 
 [functions.fix-trigger]
 entry  = "functions/fix-trigger.ts"
 secret = [
+  "INSFORGE_URL",
   "INSFORGE_SERVICE_KEY",
   "INSFORGE_BRANCH_PROJECT_ID",
   "ANTHROPIC_API_KEY",
   "DEVIN_API_KEY",
+  "GITHUB_REPO",
   "GITHUB_TOKEN",
 ]

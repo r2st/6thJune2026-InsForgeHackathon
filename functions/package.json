@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "echo 'no linter yet'",
     "test": "vitest run",
-    "deploy": "npx @insforge/cli functions deploy ingest --file ./ingest.ts && npx @insforge/cli functions deploy fix-trigger --file ./fix-trigger.ts"
+    "deploy": "node ../scripts/deploy-insforge-functions.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": ">=0.40.0",

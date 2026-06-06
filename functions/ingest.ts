@@ -124,7 +124,7 @@ export function triggerFix(runId: string): void {
   const base = process.env.INSFORGE_URL;
   const key = process.env.INSFORGE_SERVICE_KEY;
   if (!base || !key) return;
-  void fetch(`${base}/functions/v1/fix-trigger`, {
+  void fetch(`${base}/functions/fix-trigger`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ runId }),

@@ -1,6 +1,8 @@
 # functions/ — Hush edge functions
 
-Runs on InsForge. All TypeScript, ESM, no bundler — each file is deployable directly.
+Runs on InsForge. Source stays TypeScript/ESM; deployment bundles the entrypoints
+into Deno-compatible single-file artifacts because the InsForge CLI uploads one
+source file per function.
 
 ## What's here
 
@@ -41,8 +43,7 @@ Read each function header — the required env vars are listed there. The full s
 ## Deploy
 
 ```bash
-insforge functions deploy ingest
-insforge functions deploy fix-trigger
+pnpm -F @hush/functions run deploy
 ```
 
 ## House rules

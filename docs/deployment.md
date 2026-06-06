@@ -107,10 +107,10 @@ Set these repository **variables** unless you prefer to store them as secrets:
 
 | GitHub variable | Notes |
 |---|---|
-| `NEXT_PUBLIC_INSFORGE_URL` | Public base URL. Defaults to the current Hush InsForge URL if omitted. |
-| `NEXT_PUBLIC_INGEST_URL` | Public ingest function URL. Defaults to `/functions/ingest` on the current Hush InsForge URL. |
-| `NEXT_PUBLIC_RECEIPT_URL` | Deployed receipt app URL once known. |
-| `DEVIN_TARGET_REPO` | Victim repo in `owner/repo` form. Can be a secret instead. |
+| `NEXT_PUBLIC_INSFORGE_URL` | Public base URL. PR validation has a Hush fallback; production deploy requires this or secret `INSFORGE_URL`. |
+| `NEXT_PUBLIC_INGEST_URL` | Public ingest function URL. Production deploy requires this. |
+| `NEXT_PUBLIC_RECEIPT_URL` | Deployed receipt app URL once known. Production deploy requires this. |
+| `DEVIN_TARGET_REPO` | Victim repo in `owner/repo` form. Can be a secret instead. The workflow syncs this into InsForge as runtime secret `GITHUB_REPO`. |
 
 ## 3. InsForge backend (T+0h to T+1h)
 
