@@ -258,11 +258,21 @@ self-report.
 
 | Provider | Used for | Auth | Fallback if it dies |
 |---|---|---|---|
-| InsForge | DB, auth/RLS, edge fns, Storage, Realtime, branch projects, AI | Project keys | Pre-recorded screencast (`demo/recordings/latest.mp4`). |
+| **InsForge** (sponsor) | DB, auth/RLS, edge fns, Storage, Realtime, branch projects, AI — the structural core | Project keys | Pre-recorded screencast (`demo/recordings/latest.mp4`). |
+| **Replicas** (sponsor) | "Watch" — production session capture feeding `ingest` (ticket 0041) | `REPLICAS_API_KEY` | rrweb capture in the toy app (built-in fallback). |
+| **Lim.run** (sponsor) | "Test on a fork" — cloud browser re-verifies the fix on the fork + live preview URL (ticket 0042) | org key → per-instance token | Policy replay verdict stands alone; preview link omitted. |
+| **Memoir** (sponsor) | Learning loop — versioned memory of fix outcomes; real similarity neighbour for the scorer (ticket 0043) | `MEMOIR_API_KEY` | Scorer uses neutral pgvector 50; no recall. |
 | GitHub | PR open, status checks | GitHub App | Pre-rendered PR screenshot embedded in slide 7. |
+| Anthropic (Claude) | Diagnosis step (`functions/diagnose.ts`, `claude-opus-4-8`) | `ANTHROPIC_API_KEY` | Cached diagnosis fixture for the demo bug. |
+| OpenRouter | Embeddings via the InsForge AI gateway | `OPENROUTER_API_KEY` | Precomputed embeddings. |
+| Vercel | Hosts the demo storefront + receipt page | CLI / CI token | `vercel dev` on the demo laptop. |
 
-**Devin and pgvector are referenced in the pitch but are not in the build
-plan — see Critical analysis §D.**
+**Sponsor integrations must be real, not checkboxes.** Each row ships behind a
+vendor-agnostic seam with a working fallback, so the demo never hard-depends on
+a network API — but a sponsor box is only checked once that provider is the live
+default path in a run we can demo (tickets 0041–0043). The earlier note that
+"Devin and pgvector are referenced but not built" still holds for **Devin**
+(dropped); pgvector is now in `infra/insforge.toml` and feeds the scorer.
 
 ## Data model
 

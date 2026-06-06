@@ -48,6 +48,12 @@ Two honest routes were considered:
    history rows. That's hours across unbuilt plumbing, not a copy fix.
 
 Option 2 is recorded as a future enhancement (see Notes), not this ticket.
+**Update:** [[0043-memoir-learn-from-rejections-memory]] now owns the legitimate
+path to a real 92 — Memoir recalls one prior merged neighbour at similarity 60,
+so the badge computes `40+20+20+12=92` from a real prior, not a neutral default.
+If 0043 lands before the demo, do option 2 (badge reads 92 honestly) and skip
+the copy edits below. If 0043 is not done, do option 1 now (copy → 90). Either
+way deck and code must agree.
 
 ## Acceptance criteria
 
