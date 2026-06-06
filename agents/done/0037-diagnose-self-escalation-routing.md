@@ -3,9 +3,9 @@ id: 0037
 title: Route model self-escalation (widensAccess / empty diff) straight to issue
 role: architect
 priority: P2
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0018, 0030, 0020]
 demo_path: partial — the "Hush knows when NOT to ship" objection-handler
 ---
@@ -58,4 +58,11 @@ of a clean "escalated to issue."
   this is the consumer agreeing on what `""` means.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- `fix-trigger.ts` short-circuits to issue BEFORE acquiring a fork when the
+  diagnosis is non-actionable (widensAccess / empty / no-op after). Receipt
+  event carries `reason: 'issue-from-escalation'`. All dispatch reasons now
+  surface in the shipped event.
+- `score.ts` hard cap 3: widensAccess=true never reaches pr/draft_pr.
+- Semantic correction recorded in docs/decisions/0003; inverted one score test.
+- Fixture `fixtures/diagnose-escalation.json`; 2 orchestrator + 2 score tests.
