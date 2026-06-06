@@ -22,15 +22,26 @@ infra: judges reward agents that **do something visible, on real infra, that
 another engineer would want to install**. See [`ideas/guidelines.html`](../ideas/guidelines.html)
 for the operating playbook.
 
-## Tracks & prizes
+## Prizes (confirmed — see [`ideas/guidelines.html`](../ideas/guidelines.html))
+
+| Place | Reward |
+|---|---|
+| **1st** | Mac mini or $800 cash · **+ $1,000 Limrun credits** · YC P26 founder dinner |
+| **2nd** | Mac mini or $800 · + $750 InsForge · + $500 Limrun |
+| **3rd** | Mac mini or $800 · + $250 InsForge · + $200 Limrun |
+
+The founder dinner is arguably the real prize; the Mac is the prop. Sponsor
+credit pools: Limrun $200–$1,000 (largest), InsForge $250–$750.
+
+## Tracks & sponsors
 
 | Track / sponsor | Required tech | Notes |
 |---|---|---|
-| **InsForge (primary)** | InsForge backend — must be load-bearing | We use branch projects + `insforge.toml` as the moat (see [`docs/the-hard-part.html`](the-hard-part.html)). |
-| **Vercel** | Vercel hosting | Two apps: `apps/demo` storefront and `apps/receipt` live status page. |
-| **Cognition (Devin)** | Devin opens the PR | Wired in `functions/fix-trigger.ts`. Pre-staged PR is our fallback. |
-| **Limrun** | Browser sandbox for replay | Used for prod/fork parallel replay verification. |
-| **Replicas** | Plug-in capture only | rrweb is the primary; Replicas is wired only if the sponsor surfaces a working API demo-day. See [`ideas/FINAL-analysis.md` §2.4](../ideas/FINAL-analysis.md). |
+| **InsForge (primary)** | `@insforge/sdk` + `insforge` CLI (branches, migrations) — must be load-bearing | Branch projects + `insforge.toml` are the moat (see [`docs/the-hard-part.html`](the-hard-part.html)). Killer move: branch project for prod-data testing. |
+| **Vercel** | `vercel deploy`; Next.js App Router + Fluid Compute | Two apps: `apps/demo` storefront and `apps/receipt` live status page. Killer move: preview URL = the demo link. |
+| **Cognition (Devin)** | API token (sponsor table at check-in); session → poll → consume PR | Wired in `functions/fix-trigger.ts` / `functions/openPr.ts`. Pre-staged PR is our fallback. |
+| **Limrun** | REST: create sandbox → exec → fetch logs → destroy | Used for prod/fork parallel replay verification. Biggest credit pool. |
+| **Replicas** | Plug-in capture only | rrweb is the primary; Replicas wired only if the sponsor surfaces a working API demo-day. See [`ideas/FINAL-analysis.md` §2.4](../ideas/FINAL-analysis.md). |
 
 ## Judging rubric
 
