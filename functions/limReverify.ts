@@ -78,10 +78,18 @@ export async function reverifyOnFork(
       sdk.renderAndCount({ url: input.forkBaseUrl, sessionJwt: input.forkJwt }),
       timeoutMs,
     );
+    const previewUrl = result.previewUrl || null;
+
+    // rowsShown < 0 ⇒ instance is live (previewUrl works) but no automated count
+    // ran. Honest middle state: surface the clickable fork, claim no pass.
+    if (result.rowsShown < 0) {
+      return { rendered: false, previewUrl, shotUrl: result.shotUrl, reason: 'preview_only' };
+    }
+
     const rendered = result.rowsShown >= input.expectedRows && input.expectedRows > 0;
     return {
       rendered,
-      previewUrl: result.previewUrl ?? null,
+      previewUrl,
       shotUrl: result.shotUrl,
       reason: rendered ? undefined : 'mismatch',
     };

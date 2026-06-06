@@ -99,5 +99,21 @@ only ever *adds* visual confidence — it can never block or fabricate a pass.
   honestly `unavailable`. Don't check the Lim.run sponsor box until a real adapter
   renders a fork in a demoable run. architecture.md sponsor-map note deferred —
   that file has parallel-agent edits in flight.
+- **LIVE-TESTED 2026-06-06 (key provided):** Lim.run is **mobile infra**, not a
+  cloud browser — but it fits. Real SDK is `@limrun/api` v0.30.0. Verified against
+  the live API: `androidInstances.create({ wait:true, spec:{ sandbox:{
+  playwrightAndroid:{ enabled:true } } } })` reaches state `ready` and returns a
+  `signedStreamUrl` (the clickable live preview ✓) plus a Playwright `wss://`
+  endpoint (✓). Teardown via `delete(id)` works. Auth via the org key works.
+- **Real adapter shipped:** `functions/lib/limSdk.ts` (`createLimSdk`) wires the
+  `LimSdk` port to `@limrun/api`. fix-trigger's default `reverifyFork` now uses it
+  when `LIMRUN_API_KEY` is set. Ran `reverifyOnFork` end-to-end through the live
+  adapter: provisioned → got a real `signedStreamUrl` → `preview_only` → torn down.
+- **`preview_only` state added:** the instance + clickable preview are real; the
+  automated row-count needs a `countRows` Playwright driver (injectable seam in
+  limSdk.ts) which can only be verified once the toy app is deployed against a
+  live fork. Until then reverify honestly returns `preview_only` — judge gets a
+  live fork link, we claim no automated pass. Corroboration rail intact.
+
 - **Verify:** `pnpm --filter @hush/functions test` (238) · demo (15) · both typecheck clean.
 

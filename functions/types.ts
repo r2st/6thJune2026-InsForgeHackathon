@@ -174,19 +174,29 @@ export interface ReplaySide {
 }
 
 /**
- * Lim.run cloud-browser re-verification on the fork (ticket 0042). The fork's
- * data + JWT + policy are ours, so the page render is reproducible (unlike a
- * prod session). Corroboration only — see Verdict.reverify.
+ * Lim.run re-verification on the fork (ticket 0042). Lim.run provisions a real
+ * Android instance (verified: signedStreamUrl + Playwright sandbox); we open the
+ * toy app on the FORK inside it. The fork's data + JWT + policy are ours, so the
+ * render is reproducible (unlike a prod session). Corroboration only — see
+ * Verdict.reverify; never gates the score.
  */
 export interface Reverification {
   /** Did the orders page render `expectedRows` on the forked backend? */
   rendered: boolean;
-  /** Shareable Lim.run live-preview URL, TTL'd past the pitch. Null if unavailable. */
+  /** Shareable Lim.run signed-stream URL, TTL'd past the pitch. Null if unavailable. */
   previewUrl: string | null;
   /** Optional still screenshot URL for the PR body. */
   shotUrl?: string;
-  /** Why, when rendered=false — 'unavailable' | 'mismatch' | 'timeout' | 'error'. */
-  reason?: 'unavailable' | 'mismatch' | 'timeout' | 'error';
+  /**
+   * Why, when rendered=false:
+   *  'unavailable'  — no key / SDK not wired; nothing provisioned.
+   *  'preview_only' — instance is live and previewUrl works, but the automated
+   *                   row-count wasn't run (no page driver). Honest middle state:
+   *                   the judge gets a clickable live fork; we don't claim a pass.
+   *  'mismatch'     — counted, fork showed fewer rows than expected.
+   *  'timeout' | 'error' — provisioning/drive failed.
+   */
+  reason?: 'unavailable' | 'preview_only' | 'mismatch' | 'timeout' | 'error';
 }
 
 /**

@@ -51,4 +51,16 @@ describe('reverifyOnFork (0042) — corroboration only', () => {
     const r = await reverifyOnFork({ ...input, expectedRows: 0 }, { apiKey: 'k', sdk: sdk(0) });
     expect(r.rendered).toBe(false);
   });
+
+  it('maps rowsShown < 0 to preview_only — live link, no claimed pass', async () => {
+    // The real Lim.run adapter returns -1 when it provisioned the instance and
+    // got a previewUrl but did not run the automated row count.
+    const previewOnly: LimSdk = {
+      async renderAndCount() { return { rowsShown: -1, previewUrl: 'https://console.limrun.com/signedStream?token=x' }; },
+    };
+    const r = await reverifyOnFork(input, { apiKey: 'k', sdk: previewOnly });
+    expect(r.rendered).toBe(false);
+    expect(r.reason).toBe('preview_only');
+    expect(r.previewUrl).toContain('limrun');
+  });
 });

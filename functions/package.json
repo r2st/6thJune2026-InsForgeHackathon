@@ -13,6 +13,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": ">=0.40.0",
     "@insforge/sdk": "^1.0.0",
+    "@limrun/api": "^0.30.0",
     "@llm-guardrails/core": "^0.4.1"
   },
   "devDependencies": {

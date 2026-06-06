@@ -24,7 +24,8 @@ import type {
   BugRun, ConfidenceResult, Diagnosis, ReceiptEvent, ReplayPayload,
   RequestLogEntry, Reverification, SafetyResult, Verdict,
 } from './types.js';
-import { correlate } from './correlate.js';
+import { createHmac } from 'node:crypto';
+import { correlate, fetchRequestLogWindow } from './correlate.js';
 import { toReplayPayload } from './capture.js';
 import { extractTomlContext } from './toml.js';
 import { diagnose as realDiagnose, DiagnoseError } from './diagnose.js';
@@ -36,8 +37,10 @@ import { forgeForkJwt } from './forgeJwt.js';
 import { replayBoth } from './replay.js';
 import { traceReplay } from './traceReplay.js';
 import { reverifyOnFork, type ReverifyInput } from './limReverify.js';
+import { createLimSdk } from './lib/limSdk.js';
 import { scoreConfidence } from './score.js';
 import { createMemoirClient, recallSimilarity, type RecallQuery } from './memory.js';
+import { INFRA_TOML } from './infraToml.js';
 import { firstFree, type PoolEntry } from './lib/pool.js';
 import { getClient, publishReceipt } from './lib/insforgeClient.js';
 import { defaultShip } from './ship.js';
@@ -108,7 +111,7 @@ export async function fixTrigger(runId: string, deps?: Partial<OrchestratorDeps>
     //    (timeout / overload / truncation, ticket 0036) is NOT a hard crash:
     //    degrade visibly to a failed step with the reason, so the receipt shows
     //    *why* instead of hanging on "diagnosing…".
-    const tomlContext = extractTomlContext({ table });
+    const tomlContext = extractTomlContext({ table, toml: INFRA_TOML });
     let diagnosis: Diagnosis;
     try {
       diagnosis = await d.diagnose({
@@ -206,6 +209,10 @@ export async function fixTrigger(runId: string, deps?: Partial<OrchestratorDeps>
     return await dispatch(d, emit, runId, diagnosis, verdict, 'ship', { ...confidence, tier });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
+    // Surface the reason in function.logs — the 'failed' receipt event rides
+    // realtime, which may itself be unavailable, so logging is the reliable path.
+    // eslint-disable-next-line no-console
+    console.error('[hush] fixTrigger failed', { runId, message, stack: err instanceof Error ? err.stack : undefined });
     await emit('failed', { error: message });
     await d.updateRun(runId, { status: 'failed' });
     return { runId, tier: null, prUrl: null, status: 'failed' };
@@ -360,8 +367,11 @@ function withDefaults(deps?: Partial<OrchestratorDeps>): OrchestratorDeps {
     replayFork: deps?.replayFork ?? ((payload, fork, forkJwt) =>
       replayBoth({ payload, branchId: fork.branchId, forkJwt }, { forkBaseUrl: fork.baseUrl })),
     traceReplay: deps?.traceReplay ?? ((payload, patch) => traceReplay({ payload, patch })),
-    reverifyFork: deps?.reverifyFork ?? ((input) =>
-      reverifyOnFork(input, { apiKey: process.env.LIMRUN_API_KEY })), // 0042 — no key ⇒ unavailable no-op
+    reverifyFork: deps?.reverifyFork ?? ((input) => {
+      // 0042 — real Lim.run adapter when keyed; no key ⇒ unavailable no-op.
+      const apiKey = process.env.LIMRUN_API_KEY;
+      return reverifyOnFork(input, { apiKey, sdk: apiKey ? createLimSdk({ apiKey }) : undefined });
+    }),
     ship: deps?.ship ?? ((decision) => defaultShip(decision)), // 0011 → openPr via ship.ts
     recallSimilarity: deps?.recallSimilarity ?? ((q) => recallSimilarity(createMemoirClient(), q)),
     now: deps?.now ?? (() => new Date().toISOString()),
@@ -369,15 +379,84 @@ function withDefaults(deps?: Partial<OrchestratorDeps>): OrchestratorDeps {
 }
 
 async function defaultLoadContext(runId: string): Promise<RunContext> {
-  // Default loader is intentionally thin; the demo wires a richer one that also
-  // resolves the prod JWT. Throwing here surfaces a misconfiguration loudly
-  // rather than silently shipping with an empty token.
-  throw new Error(`fix-trigger: no loadContext configured for run ${runId} — inject one`);
+  const client = getClient();
+
+  // 1. Read the bug_runs row.
+  const res = await client.database.from('bug_runs').select('*').eq('id', runId).single();
+  if (res.error || !res.data) {
+    throw new Error(`loadContext: run ${runId} not found: ${res.error?.message ?? 'no data'}`);
+  }
+  const row = res.data as Record<string, unknown>;
+  const sessionId = String(row.session_id ?? '');
+  const capturedAt = String(row.captured_at ?? new Date().toISOString());
+
+  // 2. Window: prefer the stored slice, else query request_log for the session.
+  //    Wide window — the demo capture and its failing request may straddle the
+  //    default ±10s if a smoke test seeded them apart.
+  let window = (row.request_log_window as RequestLogEntry[] | null) ?? [];
+  if (!Array.isArray(window) || window.length === 0) {
+    window = await fetchRequestLogWindow(sessionId, capturedAt, 86_400);
+  }
+
+  // 3. Mint a prod JWT for the captured user. The migrated user carries the NEW
+  //    claim shape (`tenant_ids[]`); prod RLS still reads the old singular
+  //    `tenant` claim, so prod returns 0 rows — that mismatch IS the demo bug.
+  const failing = window.find((w) => (w.returnedRows ?? 0) === 0) ?? window[0];
+  const tenantId = String(failing?.tenantId ?? row.tenant_id ?? '');
+  const jwtClaims: Record<string, unknown> = {
+    sub: String(failing?.userId ?? row.user_id ?? ''),
+    role: 'authenticated',
+    tenant_ids: tenantId ? [tenantId] : [],
+  };
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('loadContext: JWT_SECRET not set in function env');
+
+  return {
+    run: {
+      id: runId,
+      tenantId,
+      capturedAt,
+      sessionClipUrl: (row.session_clip_url as string | null) ?? null,
+      diagnosis: null,
+      tomlDiff: null,
+      confidence: null,
+      tier: null,
+      status: 'captured',
+      prUrl: null,
+      promptVersion: null,
+    },
+    requestLogWindow: window,
+    prodJwt: mintHs256(jwtClaims, secret),
+    jwtClaims,
+  };
+}
+
+/**
+ * Mint a Bearer-ready HS256 JWT. Buffer-free: the InsForge edge runtime is Deno,
+ * which has no Node `Buffer` global, so we use web-standard btoa/TextEncoder.
+ */
+function mintHs256(claims: Record<string, unknown>, secret: string): string {
+  const iat = Math.floor(Date.now() / 1000);
+  const payload = { ...claims, iat, exp: iat + 300 };
+  const input = `${b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))}.${b64url(JSON.stringify(payload))}`;
+  const sig = createHmac('sha256', secret).update(input).digest('base64');
+  return `${input}.${toUrlSafe(sig)}`;
+}
+
+function b64url(s: string): string {
+  const bytes = new TextEncoder().encode(s);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]!);
+  return toUrlSafe(btoa(bin));
+}
+
+function toUrlSafe(b64: string): string {
+  return b64.replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
 }
 
 function defaultTableColumns(table: string): string[] {
   try {
-    const ctx = extractTomlContext({ table });
+    const ctx = extractTomlContext({ table, toml: INFRA_TOML });
     return [...ctx.matchAll(/"\s*(\w+)\s+[a-z]/gi)].map((m) => m[1]!).filter(Boolean);
   } catch {
     return [];
