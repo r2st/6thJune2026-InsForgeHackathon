@@ -3,9 +3,9 @@ id: 0019
 title: TOML context extractor for target table
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (impl session)
+started: 2026-06-06
+status: done
 depends_on: [0018]
 demo_path: yes — without it, the LLM hallucinates the diff
 ---
@@ -58,4 +58,22 @@ referencing a column that doesn't exist. Demo dead.
   by header → next-blank-line is fine for the demo schema.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- **Shipped:** `functions/toml.ts` — pure `sliceTomlContext(toml, table)` core +
+  `extractTomlContext({table, toml?})` resolver; `functions/fixtures/insforge.demo.toml`;
+  11 tests in `functions/toml.test.ts`. toml.ts typechecks clean; full functions
+  suite green (75/75).
+- Header-delimited block scan (no semantic TOML parse, per the ticket). Output:
+  target `[tables.X]` block verbatim + any `[auth.policies.*]` named in its RLS +
+  a minimal (id + tenant-scoping cols only) slice of each FK-referenced table.
+  4kb-capped; FK slices evicted last-first, target never dropped.
+- **Deviation from AC's "read applied TOML from the InsForge API":** implemented
+  the disk source (`HUSH_TOML_PATH` or canonical `infra/insforge.toml`) as the
+  reliable default, plus a `toml?` param so the orchestrator can pass the
+  *applied* config it already exported. The live config-export fetch is left to
+  the call site ([[0030-fix-trigger-orchestrator]]) since it needs the service
+  key + network — kept out of this pure, unit-testable unit. For the demo the
+  canonical toml IS the applied config (we `config apply` it), so grounding is
+  correct either way.
+- Consumed by the now-built `diagnose.ts` (`DiagnoseInput.tomlContext`) and the
+  [[0008-parallel-replay-and-verdict]] column-existence check.

@@ -1,0 +1,34 @@
+# Hush — minimal demo schema fixture (ticket 0019 test input).
+# A trimmed mirror of infra/insforge.toml: just enough to exercise the
+# extractor — the buggy orders RLS, its tenants FK, and an unrelated table
+# (bug_runs) that must NOT leak into the orders slice.
+
+[tables.tenants]
+columns = [
+  "id uuid pk default gen_random_uuid()",
+  "name text not null",
+  "created_at timestamptz not null default now()",
+]
+
+[tables.orders]
+columns = [
+  "id uuid pk default gen_random_uuid()",
+  "tenant_id uuid not null references tenants(id)",
+  "user_id uuid not null",
+  "total numeric(10,2) not null",
+  "created_at timestamptz not null default now()",
+]
+# The demo bug: reads `tenant` (singular) while the JWT migrated to `tenant_ids`.
+rls = "tenant_id = (auth.jwt() ->> 'tenant')::uuid"
+
+[tables.bug_runs]
+columns = [
+  "id uuid pk default gen_random_uuid()",
+  "tenant_id uuid not null references tenants(id)",
+  "status text not null default 'captured'",
+]
+rls = "tenant_id = (auth.jwt() ->> 'tenant')::uuid"
+
+[auth.policies.tenant_scope]
+description = "maps the tenant JWT claim to the row-level tenant_id"
+claim = "tenant"
