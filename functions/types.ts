@@ -182,6 +182,20 @@ export interface ConfidenceResult {
 
 export type ConfidenceTier = 'pr' | 'draft_pr' | 'issue';
 
+/**
+ * Structural validity of an LLM-proposed TomlPatch — ticket 0032. Complements
+ * safety.ts: safety catches *widening*; this catches *structurally broken*
+ * (column in the wrong table, bad cast, fabricated function, widening
+ * sub-select). Either rail rejecting drops the run to 'issue'.
+ */
+export type ValidationResult = { ok: true } | { ok: false; reasons: string[] };
+
+/** Minimal column shape the validator checks identifiers and casts against. */
+export interface TableSchema {
+  table: string;
+  columns: { name: string; type: string }[];
+}
+
 /** Safety rail output — see ticket 0021. */
 export interface SafetyResult {
   widens: boolean;
