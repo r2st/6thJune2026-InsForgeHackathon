@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hush — use cases</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg-elev: #131418;
+    --bg-elev2: #181a20;
+    --ink: #ecedef;
+    --ink-dim: #9097a3;
+    --line: #25272e;
+    --accent: #ff6b35;
+    --good: #6ee7b7;
+    --cool: #a78bfa;
+    --warn: #fde68a;
+    --bad: #fca5a5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; background: rgba(255,107,53,0.1); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+  a { color: var(--good); text-decoration: none; border-bottom: 1px dotted rgba(110,231,183,0.4); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 64px 32px 96px; }
+
+  /* HERO */
+  header.hero { border-bottom: 1px solid var(--line); padding-bottom: 44px; margin-bottom: 56px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent);
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(52px, 8vw, 104px); line-height: 0.92;
+    margin: 0 0 24px; letter-spacing: -0.03em;
+  }
+  .one-line {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(20px, 2.4vw, 26px); line-height: 1.4;
+    color: var(--ink); max-width: 44ch; margin: 0;
+  }
+  .one-line .hi { color: var(--good); font-style: italic; }
+  .built-on {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.08em; color: var(--ink-dim); margin-top: 30px;
+  }
+  .built-on .key { color: var(--good); }
+
+  /* SECTIONS */
+  section { margin-bottom: 60px; }
+  .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(32px, 4.6vw, 48px); line-height: 1;
+    margin: 0 0 22px; letter-spacing: -0.02em;
+  }
+  p { font-size: 17px; line-height: 1.6; color: var(--ink); max-width: 64ch; margin: 0 0 18px; }
+  p.muted { color: var(--ink-dim); }
+  p b { color: var(--ink); font-weight: 600; }
+  p em { color: var(--accent); font-style: italic; font-weight: 500; }
+
+  /* USE-CASE GRID (bug classes) */
+  .cases { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+  .case {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 14px; padding: 22px 24px; display: flex; flex-direction: column;
+  }
+  .case .kicker {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 10px; display: flex; justify-content: space-between; gap: 12px;
+  }
+  .case h3 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 24px; margin: 0 0 14px; line-height: 1.1;
+  }
+  .case .pair { margin: 0 0 10px; font-size: 13.5px; line-height: 1.5; }
+  .case .pair .t {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim);
+    display: block; margin-bottom: 3px;
+  }
+  .case .pair.symptom .t { color: var(--bad); }
+  .case .pair.cause .t { color: var(--warn); }
+  .case .pair.fix .t { color: var(--good); }
+  .case .pair span.body { color: var(--ink); }
+  .case .pair.symptom span.body, .case .pair.cause span.body { color: var(--ink-dim); }
+  .case .tierline {
+    margin-top: auto; padding-top: 14px; border-top: 1px dashed var(--line);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot.hi { background: var(--good); }
+  .dot.mid { background: var(--warn); }
+  .dot.lo { background: var(--cool); }
+  .case .tierline b { color: var(--ink); font-weight: 500; }
+
+  /* WHO IT'S FOR */
+  .who { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 22px 0; }
+  .persona {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 20px 22px; border-left: 3px solid var(--cool);
+  }
+  .persona h4 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 21px; margin: 0 0 8px;
+  }
+  .persona p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-dim); max-width: none; }
+  .persona p b { color: var(--ink); }
+
+  /* MOMENTS — when you reach for it */
+  .moments { margin: 22px 0; }
+  .moment {
+    display: grid; grid-template-columns: 150px 1fr; gap: 24px;
+    align-items: start; padding: 16px 0; border-bottom: 1px dashed var(--line);
+  }
+  .moment:last-child { border-bottom: none; }
+  .moment .when {
+    font-family: 'Instrument Serif', serif; font-size: 19px; color: var(--good);
+    line-height: 1.25;
+  }
+  .moment .what { font-size: 14.5px; line-height: 1.6; color: var(--ink-dim); }
+  .moment .what b { color: var(--ink); font-weight: 600; }
+
+  /* NOT-FOR */
+  .bounds {
+    background: var(--bg-elev2); border: 1px dashed var(--line);
+    border-radius: 12px; padding: 20px 24px; margin-top: 8px;
+  }
+  .bounds h3 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 22px; margin: 0 0 12px;
+  }
+  .bounds ul { margin: 0; padding-left: 20px; }
+  .bounds li { font-size: 14px; line-height: 1.7; color: var(--ink-dim); }
+  .bounds li b { color: var(--ink); }
+
+  footer {
+    margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    color: var(--ink-dim); font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+  }
+
+  @media (max-width: 820px) {
+    .cases, .who { grid-template-columns: 1fr; }
+    .moment { grid-template-columns: 1fr; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="eyebrow">Hush · use cases · built on InsForge</div>
+    <h1>Where Hush earns its keep.</h1>
+    <p class="one-line">One job: catch the backend bugs that <span class="hi">return 200 and still break your customer</span> — then ship the policy fix.</p>
+    <div class="built-on">Each case is the same loop: <span class="key">watch → correlate → diagnose → fork &amp; test → fix &amp; ship</span></div>
+  </header>
+
+  <!-- INTRO -->
+  <section>
+    <div class="label">00 · The shape of the problem</div>
+    <h2>All of these fail at the policy layer, not the code path.</h2>
+    <p>A request comes in. The server runs. It returns <code>200 OK</code>. But the wrong rows came back — too few, too many, or someone else's. Nothing throws, so your error tracker stays silent. The only signal is a frustrated user on the frontend and a quiet decision in the backend logs. <em>Hush correlates the two, then fixes the policy that misfired.</em></p>
+    <p class="muted">The use cases below are the bug classes Hush is built for, the teams that need it, and the moments you reach for it. Every one is a real <code>insforge.toml</code> diff — small, structured, and testable on a forked branch project before it ever reaches your repo.</p>
+  </section>
+
+  <!-- BUG CLASSES -->
+  <section>
+    <div class="label">01 · Bug classes it catches</div>
+    <h2>Six silent bugs. One fix shape.</h2>
+
+    <div class="cases">
+
+      <!-- 1 -->
+      <div class="case">
+        <div class="kicker"><span>// vanished records</span></div>
+        <h3>Their own data is invisible</h3>
+        <div class="pair symptom"><span class="t">Symptom</span><span class="body">A customer opens "My Orders." It's empty. They refresh, rage-click, give up — but the orders exist.</span></div>
+        <div class="pair cause"><span class="t">Cause</span><span class="body">An over-restrictive RLS policy filters legitimate rows. Often a tenant or owner check that's too tight.</span></div>
+        <div class="pair fix"><span class="t">Hush ships</span><span class="body">A one-policy <code>insforge.toml</code> diff that widens the predicate, proven on a branch where the rows reappear.</span></div>
+        <div class="tierline"><span class="dot hi"></span><b>High confidence</b> · single policy → open PR</div>
+      </div>
+
+      <!-- 2 -->
+      <div class="case">
+        <div class="kicker"><span>// cross-tenant leak</span></div>
+        <h3>They saw another company's rows</h3>
+        <div class="pair symptom"><span class="t">Symptom</span><span class="body">For a moment, a list shows records that belong to a different tenant. The user notices before you do.</span></div>
+        <div class="pair cause"><span class="t">Cause</span><span class="body">A policy is missing its tenant scope, or a new route skipped the RLS check entirely. A leak, not a filter.</span></div>
+        <div class="pair fix"><span class="t">Hush ships</span><span class="body">The tenant predicate added back, with a branch replay proving the foreign rows vanish. High blast radius, so a human signs off.</span></div>
+        <div class="tierline"><span class="dot mid"></span><b>Security-critical</b> · draft PR + trace for review</div>
+      </div>
+
+      <!-- 3 -->
+      <div class="case">
+        <div class="kicker"><span>// claim drift</span></div>
+        <h3>Auth changed, the policy didn't</h3>
+        <div class="pair symptom"><span class="t">Symptom</span><span class="body">A whole cohort of users suddenly sees nothing — usually right after an auth or onboarding change ships.</span></div>
+        <div class="pair cause"><span class="t">Cause</span><span class="body">The JWT shape moved (e.g. <code>tenant</code> → <code>tenant_ids[]</code>) but the policy still reads the old claim path.</span></div>
+        <div class="pair fix"><span class="t">Hush ships</span><span class="body">A diff that reads the new claim. The branch replays the same session and the cohort gets its data back.</span></div>
+        <div class="tierline"><span class="dot hi"></span><b>High confidence</b> · single policy → open PR</div>
+      </div>
+
+      <!-- 4 -->
+      <div class="case">
+        <div class="kicker"><span>// leaked file</span></div>
+        <h3>A signed URL serves a stranger's file</h3>
+        <div class="pair symptom"><span class="t">Symptom</span><span class="body">A receipt or document link returns 200 but loads the wrong customer's PDF. The content is real — just not theirs.</span></div>
+        <div class="pair cause"><span class="t">Cause</span><span class="body">A Storage bucket policy is too open, or object paths aren't scoped to the owner.</span></div>
+        <div class="pair fix"><span class="t">Hush ships</span><span class="body">A bucket-policy diff scoping access to the owner, verified against the same request on a fork.</span></div>
+        <div class="tierline"><span class="dot mid"></span><b>Medium</b> · touches storage rules → draft PR</div>
+      </div>
+
+      <!-- 5 -->
+      <div class="case">
+        <div class="kicker"><span>// silent write drop</span></div>
+        <h3>They saved it — and it's gone</h3>
+        <div class="pair symptom"><span class="t">Symptom</span><span class="body">A user submits a form, sees success, comes back later and the record isn't there.</span></div>
+        <div class="pair cause"><span class="t">Cause</span><span class="body">An <code>INSERT</code>/<code>UPDATE</code> policy silently rejects the write while the API still returns a success shape.</span></div>
+        <div class="pair fix"><span class="t">Hush ships</span><span class="body">A write-policy diff so the row commits, proven by replaying the submission on the branch project.</span></div>
+        <div class="tierline"><span class="dot hi"></span><b>High confidence</b> · single policy → open PR</div>
+      </div>
+
+      <!-- 6 -->
+      <div class="case">
+        <div class="kicker"><span>// post-migration regression</span></div>
+        <h3>A deploy quietly broke a route</h3>
+        <div class="pair symptom"><span class="t">Symptom</span><span class="body">A page that worked yesterday returns empty or wrong data today. No error, no alert — just a new wave of tickets.</span></div>
+        <div class="pair cause"><span class="t">Cause</span><span class="body">A recent migration tightened or reshaped a policy and clipped a route nobody re-tested.</span></div>
+        <div class="pair fix"><span class="t">Hush ships</span><span class="body">A diff that restores the intended access, with a branch showing the route healthy again.</span></div>
+        <div class="tierline"><span class="dot mid"></span><b>Medium</b> · verify intent → draft PR</div>
+      </div>
+
+    </div>
+    <p class="muted">When the branch project can't reproduce the anomaly cleanly, Hush doesn't guess. It opens a GitHub issue with the session clip and the request-log diff attached — <span style="color:var(--cool)">low-confidence, human's call</span>. The action always matches the certainty.</p>
+  </section>
+
+  <!-- WHO IT'S FOR -->
+  <section>
+    <div class="label">02 · Who reaches for it</div>
+    <h2>Built for anyone running multi-tenant SaaS on InsForge.</h2>
+    <div class="who">
+      <div class="persona">
+        <h4>The small team with no QA</h4>
+        <p>Three engineers shipping fast. No one owns the policy layer. <b>Hush is the QA for your RLS</b> — it watches real sessions and flags the silent leak before it becomes a postmortem.</p>
+      </div>
+      <div class="persona">
+        <h4>The platform team at scale</h4>
+        <p>Dozens of policies, many tenants, frequent auth changes. <b>Hush gives every silent bug an audit row</b> and routes the safe fixes straight to a PR, the risky ones to a human.</p>
+      </div>
+      <div class="persona">
+        <h4>The security &amp; compliance owner</h4>
+        <p>"Did customer A ever see customer B's data?" becomes an answerable question. <b>Every correlation is logged</b>, every fix is a reviewable diff with a before/after trace — evidence, not folklore.</p>
+      </div>
+      <div class="persona">
+        <h4>The on-call engineer</h4>
+        <p>A ticket says "my orders disappeared" with no repro. <b>Hush already has the session, the log, and a candidate fix</b> waiting — triage time drops from hours to a glance.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOMENTS -->
+  <section>
+    <div class="label">03 · When you reach for it</div>
+    <h2>Three moments in a team's week.</h2>
+    <div class="moments">
+      <div class="moment">
+        <div class="when">Every day, quietly</div>
+        <div class="what">Hush sits behind your live app. A user gets stuck, Hush correlates and (when confident) opens a PR. <b>The default state is a safety net you don't think about</b> until it catches something.</div>
+      </div>
+      <div class="moment">
+        <div class="when">Right after a migration</div>
+        <div class="what">Auth schema or policy just changed. This is when claim-drift and regression bugs land. <b>Hush watches the first real sessions through the new policies</b> and flags drift before the tickets pile up. (This is where it overlaps with Migration Pilot.)</div>
+      </div>
+      <div class="moment">
+        <div class="when">During an incident</div>
+        <div class="what">A leak is reported. Instead of asking the user for a repro that never comes, <b>you open the receipt page and read the symptom-to-policy trace</b> — the failing policy and a tested fix are already there.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOUNDS -->
+  <section>
+    <div class="label">04 · Where Hush stays out of the way</div>
+    <h2>What it deliberately doesn't do.</h2>
+    <p>Being honest about the edges is what makes the rest trustworthy.</p>
+    <div class="bounds">
+      <h3>Not in scope</h3>
+      <ul>
+        <li><b>Crashes and stack traces.</b> That's Sentry's job, and it's good at it. Hush only takes the bugs that <i>don't</i> throw.</li>
+        <li><b>Arbitrary app-code bugs.</b> Race conditions, state-management bugs, CSS regressions — Hush fixes <code>insforge.toml</code>, not your React.</li>
+        <li><b>Anything it can't reproduce on a fork.</b> No branch-project proof, no PR. Unreproducible anomalies become issues, never auto-fixes.</li>
+        <li><b>Changes a human rejected before.</b> Close a PR as "by design" and Hush remembers the shape — it won't raise it again.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>// hush · use cases · drafted 2026-06-06</span>
+    <span>see: <a href="../ideas/FINAL.html">FINAL.html</a> · <a href="the-hard-part.html">the-hard-part.html</a> · <a href="architecture.html">architecture.html</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
