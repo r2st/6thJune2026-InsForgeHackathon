@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hush — real examples</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg-elev: #131418;
+    --bg-elev2: #181a20;
+    --ink: #ecedef;
+    --ink-dim: #9097a3;
+    --line: #25272e;
+    --accent: #ff6b35;
+    --good: #6ee7b7;
+    --cool: #a78bfa;
+    --warn: #fde68a;
+    --bad: #fca5a5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; background: rgba(255,107,53,0.1); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+  a { color: var(--good); text-decoration: none; border-bottom: 1px dotted rgba(110,231,183,0.4); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 64px 32px 96px; }
+
+  /* HERO */
+  header.hero { border-bottom: 1px solid var(--line); padding-bottom: 44px; margin-bottom: 56px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+  h1 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(52px, 8vw, 104px); line-height: 0.92;
+    margin: 0 0 24px; letter-spacing: -0.03em;
+  }
+  .one-line {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(20px, 2.4vw, 26px); line-height: 1.4;
+    color: var(--ink); max-width: 46ch; margin: 0;
+  }
+  .one-line .hi { color: var(--good); font-style: italic; }
+  .built-on {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.08em; color: var(--ink-dim); margin-top: 30px;
+  }
+  .built-on .key { color: var(--good); }
+
+  /* SECTIONS */
+  section { margin-bottom: 60px; }
+  .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(32px, 4.6vw, 48px); line-height: 1;
+    margin: 0 0 22px; letter-spacing: -0.02em;
+  }
+  p { font-size: 17px; line-height: 1.6; color: var(--ink); max-width: 64ch; margin: 0 0 18px; }
+  p.muted { color: var(--ink-dim); }
+  p b { color: var(--ink); font-weight: 600; }
+  p em { color: var(--accent); font-style: italic; font-weight: 500; }
+
+  /* ANATOMY LEGEND */
+  .anatomy {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    background: var(--bg-elev); margin: 24px 0 8px;
+  }
+  .anatomy .step {
+    padding: 16px 16px; border-right: 1px solid var(--line);
+  }
+  .anatomy .step:last-child { border-right: none; }
+  .anatomy .n {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.14em; color: var(--accent); margin-bottom: 8px;
+  }
+  .anatomy .t { font-family: 'Instrument Serif', serif; font-size: 18px; line-height: 1.1; margin-bottom: 6px; }
+  .anatomy .d { font-size: 11.5px; line-height: 1.5; color: var(--ink-dim); }
+
+  /* CASE FILE */
+  .case {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 16px; padding: 26px 28px 24px; margin-bottom: 20px;
+    position: relative; overflow: hidden;
+  }
+  .case::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--accent);
+  }
+  .case.ship::before { background: var(--good); }
+  .case.draft::before { background: var(--warn); }
+  .case.issue::before { background: var(--cool); }
+
+  .case-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 6px; }
+  .case-id {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 12px;
+  }
+  .case-id b { color: var(--accent); font-weight: 500; }
+  .case h3 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 27px; margin: 0 0 8px; line-height: 1.08; letter-spacing: -0.01em;
+  }
+  .scene { font-size: 14.5px; line-height: 1.6; color: var(--ink-dim); margin: 0 0 20px; max-width: 70ch; }
+  .scene b { color: var(--ink); font-weight: 500; }
+
+  /* TIER BADGE */
+  .tier {
+    flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 6px 11px;
+    border-radius: 999px; border: 1px solid var(--line); white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .tier .d { width: 7px; height: 7px; border-radius: 50%; }
+  .tier.ship { color: var(--good); border-color: rgba(110,231,183,0.4); }
+  .tier.ship .d { background: var(--good); box-shadow: 0 0 8px rgba(110,231,183,0.7); }
+  .tier.draft { color: var(--warn); border-color: rgba(253,230,138,0.4); }
+  .tier.draft .d { background: var(--warn); }
+  .tier.issue { color: var(--cool); border-color: rgba(167,139,250,0.4); }
+  .tier.issue .d { background: var(--cool); }
+
+  /* TRACE STRIP — moment / user saw / monitoring saw */
+  .trace { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-bottom: 18px; }
+  .trace .cell { background: var(--bg-elev2); padding: 13px 15px; }
+  .trace .ct {
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 7px; display: block;
+  }
+  .trace .cell.signal .ct { color: var(--accent); }
+  .trace .cell.user .ct { color: var(--bad); }
+  .trace .cell.mon .ct { color: var(--ink-dim); }
+  .trace .cb { font-size: 13px; line-height: 1.5; color: var(--ink); }
+  .trace .cell.mon .cb { color: var(--ink-dim); }
+  .trace .cb .green { color: var(--good); }
+
+  /* ROOT CAUSE LINE */
+  .root {
+    font-size: 13.5px; line-height: 1.55; color: var(--ink-dim);
+    margin: 0 0 14px; padding-left: 14px; border-left: 2px solid var(--warn);
+  }
+  .root .lab { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--warn); display: block; margin-bottom: 4px; }
+  .root b { color: var(--ink); font-weight: 500; }
+
+  /* DIFF BLOCK */
+  .diff {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.7;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
+    overflow-x: auto; margin: 0 0 16px;
+  }
+  .diff .fname {
+    padding: 8px 14px; border-bottom: 1px solid var(--line); color: var(--ink-dim);
+    font-size: 11px; letter-spacing: 0.06em;
+  }
+  .diff .fname b { color: var(--ink); font-weight: 500; }
+  .diff .row { padding: 2px 14px; white-space: pre; }
+  .diff .row.del { background: rgba(255,107,53,0.09); color: var(--accent); }
+  .diff .row.add { background: rgba(110,231,183,0.09); color: var(--good); }
+  .diff .row.ctx { color: var(--ink-dim); }
+  .diff .row .sign { opacity: 0.7; }
+
+  /* VERDICT CHIPS */
+  .verdict { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .chip {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    background: var(--bg-elev2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 12px; color: var(--ink-dim); display: inline-flex; gap: 7px; align-items: baseline;
+  }
+  .chip b { color: var(--ink); font-weight: 600; font-size: 13px; }
+  .chip .up { color: var(--good); }
+  .chip .down { color: var(--accent); }
+  .chip.score b { color: var(--good); }
+  .chip.score.mid b { color: var(--warn); }
+  .chip.score.lo b { color: var(--cool); }
+
+  /* PATTERN STRIP */
+  .pattern { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 22px 0; }
+  .pcard { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
+  .pcard h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 20px; margin: 0 0 8px; }
+  .pcard p { font-size: 13.5px; line-height: 1.55; color: var(--ink-dim); margin: 0; max-width: none; }
+  .pcard p b { color: var(--ink); }
+
+  footer {
+    margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    color: var(--ink-dim); font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+  }
+
+  @media (max-width: 820px) {
+    .anatomy { grid-template-columns: 1fr 1fr; }
+    .trace { grid-template-columns: 1fr; }
+    .pattern { grid-template-columns: 1fr; }
+    .case-head { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="eyebrow">Hush · real examples · built on InsForge</div>
+    <h1>Six bugs that<br>never paged anyone.</h1>
+    <p class="one-line">Each one returned <span class="hi">200 OK</span> and still cost a customer. Here's the session, the policy that misfired, and the diff Hush shipped.</p>
+    <div class="built-on">Same loop every time: <span class="key">watch → correlate → diagnose → fork &amp; test → fix &amp; ship</span></div>
+  </header>
+
+  <!-- INTRO + ANATOMY -->
+  <section>
+    <div class="label">00 · How to read a case file</div>
+    <h2>Symptom on the screen, cause in the policy.</h2>
+    <p>These are the bugs your error tracker can't see — the request ran, the server answered <code>200</code>, and the wrong rows came back. The only evidence is a frustrated user on the frontend and a quiet RLS decision in the backend log. <em>Hush links the two and proves the fix on a forked branch before it opens a PR.</em></p>
+    <p class="muted">Every example below is a real <code>insforge.toml</code> diff — one policy, a handful of lines — with the branch-replay row counts that confirmed it. Companies are illustrative; the bugs and the fixes are exactly the shapes Hush handles.</p>
+    <div class="anatomy">
+      <div class="step"><div class="n">01</div><div class="t">The signal</div><div class="d">A rage-click, dead-click, or abandoned form fires the capture.</div></div>
+      <div class="step"><div class="n">02</div><div class="t">The screen</div><div class="d">What the user saw — empty, wrong, or someone else's data.</div></div>
+      <div class="step"><div class="n">03</div><div class="t">The policy</div><div class="d">The single RLS or storage rule that misfired.</div></div>
+      <div class="step"><div class="n">04</div><div class="t">The diff</div><div class="d">The smallest TOML change that fixes it.</div></div>
+      <div class="step"><div class="n">05</div><div class="t">The proof</div><div class="d">Prod vs fork row counts. Action matches certainty.</div></div>
+    </div>
+  </section>
+
+  <!-- CASE 1 -->
+  <section>
+    <div class="label">01 · The canonical one</div>
+    <h2>Worked examples.</h2>
+
+    <div class="case ship">
+      <div class="case-id">CASE-01 · <b>claim drift</b> · b2b billing SaaS "Ledgerly"</div>
+      <div class="case-head">
+        <h3>The whole finance team lost their invoices overnight.</h3>
+        <span class="tier ship"><span class="d"></span>Opened PR</span>
+      </div>
+      <p class="scene">An SSO migration shipped Thursday. Friday morning, <b>everyone at three customer accounts</b> opens <b>Invoices</b> and sees an empty table. They refresh, they re-login, they file tickets that all say "your app is down." It isn't. The invoices are right there in the database.</p>
+      <div class="trace">
+        <div class="cell signal"><span class="ct">// signal</span><div class="cb">3× rage-click on "Reload", then tab closed. 09:14.</div></div>
+        <div class="cell user"><span class="ct">// user saw</span><div class="cb">"No invoices yet." — expected 8 rows, got 0.</div></div>
+        <div class="cell mon"><span class="ct">// monitoring saw</span><div class="cb"><span class="green">200 OK</span>, 38ms. No error. Sentry green.</div></div>
+      </div>
+      <p class="root"><span class="lab">Root cause</span>The SSO change moved the tenant claim from <code>org</code> to <code>org_ids[]</code>. The policy still reads the old claim path, so <b>auth.jwt() ->> 'org' is null</b> and every row is filtered out.</p>
+      <div class="diff">
+        <div class="fname"># <b>insforge.toml</b> · tables.invoices.rls</div>
+        <div class="row del"><span class="sign">- </span>rls = "tenant_id = (auth.jwt() ->> 'org')::uuid"</div>
+        <div class="row add"><span class="sign">+ </span>rls = "tenant_id = (auth.jwt() ->> 'org')::uuid OR tenant_id = ANY((auth.jwt() -> 'org_ids')::uuid[])"</div>
+      </div>
+      <div class="verdict">
+        <span class="chip">prod <b class="down">0 rows</b></span>
+        <span class="chip">fork <b class="up">8 rows</b></span>
+        <span class="chip score">confidence <b>94%</b></span>
+        <span class="chip">single policy · 1 table</span>
+        <span class="chip">rage-click → PR in <b>41s</b></span>
+      </div>
+    </div>
+
+    <!-- CASE 2 -->
+    <div class="case ship">
+      <div class="case-id">CASE-02 · <b>silent write drop</b> · helpdesk SaaS "Tendril"</div>
+      <div class="case-head">
+        <h3>Support replies vanished the moment agents reloaded.</h3>
+        <span class="tier ship"><span class="d"></span>Opened PR</span>
+      </div>
+      <p class="scene">An agent types a reply, hits send, sees the <b>"Sent"</b> toast, moves on. The customer never gets it. The agent reopens the ticket an hour later and the reply <b>isn't there</b> — so they type it again, and again. The API said success every time.</p>
+      <div class="trace">
+        <div class="cell signal"><span class="ct">// signal</span><div class="cb">Same reply submitted 3× in 4 min — duplicate-submit pattern.</div></div>
+        <div class="cell user"><span class="ct">// user saw</span><div class="cb">"Sent ✓" toast, then an empty thread on reload.</div></div>
+        <div class="cell mon"><span class="ct">// monitoring saw</span><div class="cb"><span class="green">201 Created</span> shape returned. Zero rows actually committed.</div></div>
+      </div>
+      <p class="root"><span class="lab">Root cause</span>An auth rename left the <code>INSERT</code> policy checking <code>author_id</code> against a claim that's now null, so the write is <b>silently rejected by RLS</b> while the endpoint still returns a created-shape body.</p>
+      <div class="diff">
+        <div class="fname"># <b>insforge.toml</b> · tables.messages.insert</div>
+        <div class="row del"><span class="sign">- </span>insert = "author_id = (auth.jwt() ->> 'uid')::uuid"</div>
+        <div class="row add"><span class="sign">+ </span>insert = "author_id = auth.uid()"</div>
+      </div>
+      <div class="verdict">
+        <span class="chip">prod write <b class="down">rejected</b></span>
+        <span class="chip">fork write <b class="up">committed</b></span>
+        <span class="chip score">confidence <b>91%</b></span>
+        <span class="chip">single policy · 1 table</span>
+        <span class="chip">dead-state → PR in <b>52s</b></span>
+      </div>
+    </div>
+
+    <!-- CASE 3 -->
+    <div class="case draft">
+      <div class="case-id">CASE-03 · <b>cross-tenant leak</b> · HR platform "Rosterly"</div>
+      <div class="case-head">
+        <h3>A manager glimpsed another company's employees.</h3>
+        <span class="tier draft"><span class="d"></span>Draft PR + human sign-off</span>
+      </div>
+      <p class="scene">A manager at Company A types into the people-search box. For a flash, the dropdown shows names from <b>Company B</b> before the UI re-renders. They screenshot it and email security. This is the one bug where being fast <b>and</b> careful both matter.</p>
+      <div class="trace">
+        <div class="cell signal"><span class="ct">// signal</span><div class="cb">Manual "Report a problem" with screenshot attached.</div></div>
+        <div class="cell user"><span class="ct">// user saw</span><div class="cb">Foreign tenant's employees in a search result.</div></div>
+        <div class="cell mon"><span class="ct">// monitoring saw</span><div class="cb"><span class="green">200 OK</span>. A leak never throws — it just over-returns.</div></div>
+      </div>
+      <p class="root"><span class="lab">Root cause</span>A new <code>/directory/search</code> query path was added against <code>employees</code> without a tenant predicate — its policy evaluates to <b>true</b>, so it returns across tenants.</p>
+      <div class="diff">
+        <div class="fname"># <b>insforge.toml</b> · tables.employees.select</div>
+        <div class="row del"><span class="sign">- </span>select = "true"</div>
+        <div class="row add"><span class="sign">+ </span>select = "tenant_id = (auth.jwt() ->> 'tenant')::uuid"</div>
+      </div>
+      <div class="verdict">
+        <span class="chip">prod <b class="down">cross-tenant</b></span>
+        <span class="chip">fork <b class="up">own tenant only</b></span>
+        <span class="chip score mid">confidence <b>88%</b></span>
+        <span class="chip">high blast radius → human</span>
+        <span class="chip">tightening access · never auto-merged</span>
+      </div>
+    </div>
+
+    <!-- CASE 4 -->
+    <div class="case draft">
+      <div class="case-id">CASE-04 · <b>leaked file</b> · e-commerce "Cartwheel"</div>
+      <div class="case-head">
+        <h3>A receipt link opened a stranger's order PDF.</h3>
+        <span class="tier draft"><span class="d"></span>Draft PR (touches storage)</span>
+      </div>
+      <p class="scene">A shopper clicks "Download receipt." The PDF loads — but it's <b>someone else's order</b>, with someone else's name and address. The link works perfectly. That's the problem.</p>
+      <div class="trace">
+        <div class="cell signal"><span class="ct">// signal</span><div class="cb">Rapid back-button + re-click; then support chat opened.</div></div>
+        <div class="cell user"><span class="ct">// user saw</span><div class="cb">A valid PDF belonging to a different customer.</div></div>
+        <div class="cell mon"><span class="ct">// monitoring saw</span><div class="cb"><span class="green">200 OK</span> from Storage. Correct file served — to the wrong person.</div></div>
+      </div>
+      <p class="root"><span class="lab">Root cause</span>The <code>receipts</code> bucket read policy was left open during launch and never scoped to the owner, so any authenticated user can fetch any object path.</p>
+      <div class="diff">
+        <div class="fname"># <b>insforge.toml</b> · storage.buckets.receipts.read</div>
+        <div class="row del"><span class="sign">- </span>read = "true"</div>
+        <div class="row add"><span class="sign">+ </span>read = "(storage.foldername(name))[1] = auth.uid()::text"</div>
+      </div>
+      <div class="verdict">
+        <span class="chip">prod <b class="down">any file</b></span>
+        <span class="chip">fork <b class="up">owner only</b></span>
+        <span class="chip score mid">confidence <b>86%</b></span>
+        <span class="chip">storage rule → draft PR</span>
+        <span class="chip">report → trace in <b>9s</b></span>
+      </div>
+    </div>
+
+    <!-- CASE 5 -->
+    <div class="case draft">
+      <div class="case-id">CASE-05 · <b>post-migration regression</b> · analytics SaaS "Pulse"</div>
+      <div class="case-head">
+        <h3>Every analyst's dashboard went blank after a deploy.</h3>
+        <span class="tier draft"><span class="d"></span>Draft PR (verify intent)</span>
+      </div>
+      <p class="scene">A migration tightened a role check on Tuesday. By Wednesday, <b>analysts</b> open their dashboards to empty charts. Admins are fine, so it slips past the smoke test. The tickets say "no data" — which reads like a pipeline outage, not a policy.</p>
+      <div class="trace">
+        <div class="cell signal"><span class="ct">// signal</span><div class="cb">Dead-clicks on chart filters; reloads; tab abandoned.</div></div>
+        <div class="cell user"><span class="ct">// user saw</span><div class="cb">"No data for this range" on every chart.</div></div>
+        <div class="cell mon"><span class="ct">// monitoring saw</span><div class="cb"><span class="green">200 OK</span>, empty arrays. Looks like an empty range, not a bug.</div></div>
+      </div>
+      <p class="root"><span class="lab">Root cause</span>The migration added <code>role = 'admin'</code> to the <code>events</code> select policy, clipping the <b>analyst</b> role that legitimately needs read access.</p>
+      <div class="diff">
+        <div class="fname"># <b>insforge.toml</b> · tables.events.select</div>
+        <div class="row ctx">  select = "account_id = (auth.jwt() ->> 'account')::uuid</div>
+        <div class="row del"><span class="sign">- </span>           AND role = 'admin'"</div>
+        <div class="row add"><span class="sign">+ </span>           AND role IN ('admin', 'analyst')"</div>
+      </div>
+      <div class="verdict">
+        <span class="chip">prod (analyst) <b class="down">0 rows</b></span>
+        <span class="chip">fork (analyst) <b class="up">1,204 rows</b></span>
+        <span class="chip score mid">confidence <b>83%</b></span>
+        <span class="chip">restores intent → review</span>
+        <span class="chip">caught on first post-deploy session</span>
+      </div>
+    </div>
+
+    <!-- CASE 6 -->
+    <div class="case issue">
+      <div class="case-id">CASE-06 · <b>can't reproduce</b> · marketplace "Stallpoint"</div>
+      <div class="case-head">
+        <h3>The intermittent empty cart — where Hush refuses to guess.</h3>
+        <span class="tier issue"><span class="d"></span>Opened issue, no auto-fix</span>
+      </div>
+      <p class="scene">A seller's listings sometimes show zero, sometimes show all. It correlates with traffic, not with any one user. Hush forks the backend, replays the failing request — and <b>the fork returns rows too</b>. No clean reproduction means no PR. Hush does the honest thing.</p>
+      <div class="trace">
+        <div class="cell signal"><span class="ct">// signal</span><div class="cb">Rage-clicks, but on only ~1 in 20 page loads.</div></div>
+        <div class="cell user"><span class="ct">// user saw</span><div class="cb">Listings present, then gone, then back.</div></div>
+        <div class="cell mon"><span class="ct">// monitoring saw</span><div class="cb"><span class="green">200 OK</span> throughout. The policy isn't the smoking gun.</div></div>
+      </div>
+      <p class="root"><span class="lab">Outcome</span>Prod and fork <b>both return rows</b> on replay — the anomaly likely lives in a read-replica lag or cache, not in <code>insforge.toml</code>. Hush opens a GitHub issue with the session clip and the request-log diff attached, and stops. <b>No proof, no PR.</b></p>
+      <div class="verdict">
+        <span class="chip">prod <b class="up">12 rows</b></span>
+        <span class="chip">fork <b class="up">12 rows</b></span>
+        <span class="chip score lo">confidence <b>34%</b></span>
+        <span class="chip">no reproduction → issue</span>
+        <span class="chip">clip + log attached for a human</span>
+      </div>
+    </div>
+
+    <p class="muted" style="margin-top:18px;">Notice CASE-06. <span style="color:var(--cool)">The action always matches the certainty.</span> A high-confidence single-policy fix opens a PR. A security-critical or storage change opens a draft for a human. An anomaly that won't reproduce on a fork becomes an issue — never a speculative patch. That restraint is what makes the green PRs trustworthy.</p>
+  </section>
+
+  <!-- THE PATTERN -->
+  <section>
+    <div class="label">02 · What the six have in common</div>
+    <h2>One fix shape, proven before it ships.</h2>
+    <div class="pattern">
+      <div class="pcard"><h4>It returned 200.</h4><p>Every case answered successfully. <b>No stack trace, no alert, no log line that looks wrong</b> — which is exactly why these bugs survive in production for weeks.</p></div>
+      <div class="pcard"><h4>The frontend was the only witness.</h4><p>A rage-click, a dead-click, an abandoned form, a "report a problem." <b>The frustrated user is the signal</b> your monitoring doesn't have.</p></div>
+      <div class="pcard"><h4>The fix was a few lines of policy.</h4><p>Not application code — <code>insforge.toml</code>. One predicate, one bucket rule, one claim path. <b>Small, structured, reviewable.</b></p></div>
+      <div class="pcard"><h4>It was tested on a real fork.</h4><p>Prod still broke, the branch was fixed — measured in row counts. <b>The replay delta is the proof</b> stapled to the PR, not a promise.</p></div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section>
+    <div class="label">03 · The line that holds it together</div>
+    <h2>Sentry needs a stack trace. Hush doesn't.</h2>
+    <p>It watches the session, correlates it to the backend request that failed it, replays that request on a forked InsForge backend, patches the policy, and opens the PR — <em>before support sees the ticket.</em></p>
+    <p class="muted">For the taxonomy of bug classes, the personas, and the moments you reach for it, see <a href="use-cases.html">use-cases.html</a>. For why this is hard to do well, see <a href="the-hard-part.html">the-hard-part.html</a>.</p>
+  </section>
+
+  <footer>
+    <span>// hush · real examples · drafted 2026-06-06</span>
+    <span>companies illustrative · bugs &amp; diffs real</span>
+    <span>see: <a href="use-cases.html">use-cases.html</a> · <a href="../ideas/FINAL.html">FINAL.html</a> · <a href="architecture.html">architecture.html</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
