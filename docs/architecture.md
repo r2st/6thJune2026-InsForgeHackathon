@@ -404,8 +404,8 @@ Earlier in the build, parts of the codebase still carried the old
 working name in headlines, asset metadata, and ADR signoffs. That
 sweep is now complete: the active brand everywhere — pitch, slides,
 brand kit (`assets/brand/`), `ideas/FINAL.html`, ADR 0001, glossary,
-agent inbox — is **Hush**. The only references that remain are
-intentionally frozen inside `ideas/archive/` as prior-event history.
+agent inbox — is **Hush**. Any Witness-era materials live only in
+git history; nothing in the working tree carries the old name.
 
 *Action:* none. Section retained so the numbering downstream stays
 stable; safe to delete on next pass.

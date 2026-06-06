@@ -6,5 +6,21 @@
 .env.*
 !.env.example
 ticketing/__pycache__/
+tickets.db
 tickets.db-shm
 tickets.db-wal
+
+# Opsera security scan artifacts (regenerated each run)
+gitleaks-report.json
+gitleaks-stderr.txt
+semgrep-report.json
+semgrep-stderr.txt
+grype-report.json
+grype-stderr.txt
+checkov-report.json
+checkov-stderr.txt
+hadolint-report.json
+hadolint-stderr.txt
+npm-audit.json
+npm-audit-stderr.txt
+package-leakage-report.json

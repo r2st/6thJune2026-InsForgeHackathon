@@ -8,6 +8,9 @@ every kind of context, so you don't have to grep.
 
 | You need…                          | Look in                                  |
 |------------------------------------|------------------------------------------|
+| **Canonical pitch (Hush v7)**      | `ideas/FINAL.html`                       |
+| Day-of operating playbook          | `ideas/guidelines.html`                  |
+| Critical analysis of the pitch     | `ideas/FINAL-analysis.md`                |
 | The hackathon brief & rubric       | `docs/brief.md`                          |
 | Current system design              | `docs/architecture.md`                   |
 | Why a decision was made            | `docs/decisions/` (ADRs)                 |
@@ -17,9 +20,10 @@ every kind of context, so you don't have to grep.
 | Work in progress                   | `agents/tasks/` (claimed tasks)          |
 | Completed work                     | `agents/done/`                           |
 | Role definitions                   | `agents/roles.md`                        |
-| Pitch script & demo plan           | `demo/`                                  |
-| Brand, mockups, sample data        | `assets/`                                |
+| Pitch script, slides, demo plan    | `demo/`                                  |
+| Brand kit (wordmark, mark, colors) | `assets/brand/`                          |
 | Dev / build / deploy scripts       | `scripts/`                               |
+| Local ticket CLI (optional, infra) | `ticketing/` · `./tickets`               |
 
 ## Coordination rules (read this)
 
