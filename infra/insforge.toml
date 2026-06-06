@@ -38,6 +38,8 @@ columns = [
   "tenant_id uuid not null references tenants(id)",
   "captured_at timestamptz not null default now()",
   "session_clip_url text",
+  "request_log_window jsonb",     # ticket 0014 — correlated backend log slice
+  "session_id text",              # x-hush-session-id that produced this run
   "diagnosis jsonb",
   "toml_diff jsonb",
   "confidence integer",

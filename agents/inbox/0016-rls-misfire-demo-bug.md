@@ -48,3 +48,11 @@ one.
 The seed-user contrast is the storytelling device — "this user is fine,
 this user sees nothing, and the difference is one JWT claim." Don't lose
 that.
+
+**From 0014 (now done):** the orders read path MUST call
+`logRequest(...)` from `functions/lib/requestLog.ts`, passing
+`sessionIdFromHeaders(req)` plus the RLS decision counts
+(`rowsBefore`/`rowsAfter`). Without that call, `request_log` stays empty,
+correlate() returns `no_logs`, and every run lands `captured_no_logs` —
+the symptom→cause link silently breaks. The toy-app fetch shim already
+sends `x-hush-session-id`; you just need to log it on the server side.

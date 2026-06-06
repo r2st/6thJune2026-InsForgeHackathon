@@ -16,6 +16,7 @@ import { getClient } from './lib/insforgeClient.js';
 import { gzipJson } from './lib/gzip.js';
 import { scrubPii } from './lib/scrubPii.js';
 import { decodeJwtBody, tenantFromClaims } from './lib/jwt.js';
+import { fetchRequestLogWindow, correlate } from './correlate.js';
 
 const REALTIME_CHANNEL = 'receipt';
 const CLIPS_BUCKET = 'clips';
@@ -53,10 +54,12 @@ export async function ingest(
 
   // 4. Insert the bug_runs row. status='captured' is the trigger 0030
   //    will pick up to start the diagnose → test → ship loop.
+  const capturedAt = new Date().toISOString();
   const insertRes = await client.database
     .from('bug_runs')
     .insert({
       tenant_id: authedUser.tenantId,
+      session_id: sessionId,
       session_clip_url: clipUrl,
       status: 'captured',
     })
@@ -67,14 +70,40 @@ export async function ingest(
   }
   const runId = (insertRes.data as { id: string }).id;
 
-  // 5. Broadcast on the receipt channel so the receipt page wakes up.
-  //    Payload kept tiny — receipt page can read the row by id.
+  // 5. Broadcast 'captured' so the receipt page wakes up immediately.
   await client.realtime.publish(REALTIME_CHANNEL, 'captured', {
     runId,
     tenantId: authedUser.tenantId,
     signal: signal.kind,
-    capturedAt: new Date().toISOString(),
+    capturedAt,
   });
+
+  // 6. Correlate: pull the backend request-log slice for this session and
+  //    pick the one failing request. Persisted onto the run so diagnose
+  //    (0018) and fix-trigger (0030) can read it. Best-effort — a run with
+  //    no logs still proceeds (status 'captured_no_logs') and the receipt
+  //    page handles the empty case.
+  try {
+    const window = await fetchRequestLogWindow(sessionId, capturedAt);
+    const result = correlate(window);
+    await client.database
+      .from('bug_runs')
+      .update({
+        request_log_window: window,
+        status: result.ok ? 'correlated' : 'captured_no_logs',
+      })
+      .eq('id', runId);
+    await client.realtime.publish(REALTIME_CHANNEL, 'correlated', {
+      runId,
+      ok: result.ok,
+      route: result.ok ? result.entry.route : null,
+      reason: result.ok ? null : result.reason,
+    });
+  } catch (err) {
+    // Correlation failure must not fail capture — the clip is already saved.
+    // eslint-disable-next-line no-console
+    console.warn('[hush] correlate failed', err);
+  }
 
   return { runId, clipUrl };
 }

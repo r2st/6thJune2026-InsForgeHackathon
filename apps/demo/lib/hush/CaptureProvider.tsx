@@ -4,12 +4,15 @@
 // checks ("flush from the console", "fire a rage-click") work without
 // instrumenting the page.
 //
-// Ticket 0013 will replace the console.log stub with a real POST to
-// the /capture edge function.
+// On a signal it flushes the rrweb buffer and POSTs it to the ingest
+// edge function via sendCapture() (ticket 0014). The session id that
+// tags those events is the same one the wrapped client stamps on every
+// InsForge request, so the backend can correlate symptom → cause.
 
 import { useEffect } from 'react';
 import { start as startCapture, flush, peek, size } from './capture';
 import { start as startSignals, type Signal } from './signals';
+import { sendCapture, sessionId } from './insforge-client';
 
 declare global {
   interface Window {
@@ -17,6 +20,7 @@ declare global {
       flush: typeof flush;
       peek: typeof peek;
       size: typeof size;
+      sessionId: typeof sessionId;
       lastSignal?: Signal | null;
     };
   }
@@ -27,15 +31,26 @@ export function CaptureProvider(): null {
     startCapture();
     const stopSignals = startSignals({
       onSignal(s) {
-        // TODO(0013): POST { signal: s, events: flush(), ctx } to /capture.
-        // For now: log + stash on window so the demo and tests can see it.
         const events = flush();
-        // eslint-disable-next-line no-console
-        console.info('[hush] signal', s.kind, { target: s.target, events: events.length });
         if (window.Hush) window.Hush.lastSignal = s;
+        // Fire and forget — capture must never block the app.
+        void sendCapture({
+          sessionId: sessionId(),
+          signal: { kind: s.kind, target: s.target, at: s.at, url: s.url },
+          events,
+          ctx: {
+            url: s.url,
+            route: typeof location !== 'undefined' ? location.pathname : undefined,
+            viewport:
+              typeof window !== 'undefined'
+                ? { w: window.innerWidth, h: window.innerHeight }
+                : undefined,
+            buildSha: process.env.NEXT_PUBLIC_BUILD_SHA,
+          },
+        });
       },
     });
-    window.Hush = { flush, peek, size, lastSignal: null };
+    window.Hush = { flush, peek, size, sessionId, lastSignal: null };
     return stopSignals;
   }, []);
   return null;
