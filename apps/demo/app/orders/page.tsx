@@ -76,6 +76,21 @@ export default function OrdersPage() {
           </p>
         </div>
       )}
+
+      {/* Payment on file. `maskAllInputs` redacts every input value in the
+          rrweb recording; data-hush="mask" makes the masking explicit for the
+          demo. The card number never leaves the browser in the clip (0017). */}
+      <div style={s.payment}>
+        <label style={s.payLabel}>Card on file</label>
+        <input
+          data-hush="mask"
+          defaultValue="4242 4242 4242 4242"
+          inputMode="numeric"
+          style={s.payInput}
+          aria-label="card number (masked in capture)"
+        />
+        <span style={s.muted}>masked in capture · never stored</span>
+      </div>
     </main>
   );
 }
@@ -93,4 +108,7 @@ const s: Record<string, React.CSSProperties> = {
   oid: { color: '#5b6470', fontFamily: 'monospace' },
   empty: { border: '1px dashed #d6dae0', borderRadius: 8, padding: '28px 22px', textAlign: 'center', color: '#1a1d22' },
   muted: { color: '#8b94a0', fontSize: 14, margin: 0 },
+  payment: { marginTop: 28, paddingTop: 20, borderTop: '1px solid #f1f3f5', display: 'flex', flexDirection: 'column', gap: 6 },
+  payLabel: { fontSize: 12, color: '#5b6470', fontWeight: 600 },
+  payInput: { padding: '10px 12px', border: '1px solid #d6dae0', borderRadius: 6, fontSize: 14, fontFamily: 'monospace', maxWidth: 220 },
 };

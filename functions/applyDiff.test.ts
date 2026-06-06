@@ -22,7 +22,8 @@ describe('applyTomlDiff', () => {
         return { ok: true, version: 'v42' };
       },
     });
-    expect(r).toEqual({ ok: true, version: 'v42', changed: true });
+    expect(r).toMatchObject({ ok: true, version: 'v42', changed: true });
+    if (r.ok) expect(r.schemaFingerprint).toMatch(/^[0-9a-f]{64}$/);
     expect(applied).toContain(DIFF.after);
   });
 
@@ -54,6 +55,6 @@ describe('applyTomlDiff', () => {
       loadToml: () => TOML.replace(DIFF.before, DIFF.after),
       runApply: async () => ({ ok: true, version: 'v42' }),
     });
-    expect(r).toEqual({ ok: true, version: 'v42', changed: false });
+    expect(r).toMatchObject({ ok: true, version: 'v42', changed: false });
   });
 });

@@ -3,9 +3,9 @@ id: 0034
 title: Pre-run state fingerprint + temporal anchor
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0008, 0033]
 demo_path: yes — defends the verdict from "the world moved while we
 were running"
@@ -82,3 +82,19 @@ time: `prod re-fingerprint · matches baseline ✓`. Visible discipline.
 
 ## Outcome
 <!-- Fill in when moving to done/. -->
+
+## Outcome
+
+- `functions/fingerprint.ts` — `snapshotState()`, `verifyAnchor()`,
+  `fingerprintSchema()` (sha256 of sorted columns + rls), `expectedForkFingerprint()`,
+  `verifyPostApply()`. Schema drift = HARD (inconclusive→issue); row-count drift
+  = SOFT warn.
+- `applyDiff.ts` now returns `schemaFingerprint` of the patched config.
+- `fix-trigger.ts` runs the post-apply check after applyDiff: a fingerprint
+  mismatch (silent no-op apply) → issue with `reason: 'issue-from-apply-noop'`,
+  before the fork is replayed. Guarded on fingerprint presence so injected mocks
+  that omit it skip the check.
+- 11 fingerprint tests + 1 orchestrator no-op test. Pre-run snapshot + post-suite
+  prod re-fingerprint (the live row-count/schema requery) are the documented
+  orchestrator seam for the live-backend pass; the fingerprint + drift logic are
+  fully unit-tested here.

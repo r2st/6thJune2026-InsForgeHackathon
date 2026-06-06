@@ -16,10 +16,11 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 import { applyPatch } from './tomlPatch.js';
+import { fingerprintSchema } from './fingerprint.js';
 import type { TomlPatch } from './types.js';
 
 export type ApplyResult =
-  | { ok: true; version: string; changed: boolean }
+  | { ok: true; version: string; changed: boolean; schemaFingerprint?: string }
   | { ok: false; lintError: string };
 
 /** Outcome of the underlying `insforge config apply`. */
@@ -51,7 +52,15 @@ export async function applyTomlDiff(
   if (!res.ok || !res.version) {
     return { ok: false, lintError: res.lintError ?? 'insforge config apply failed (no version)' };
   }
-  return { ok: true, version: res.version, changed: patched.changed };
+  // Post-apply schema fingerprint (ticket 0034) — lets the orchestrator confirm
+  // the branch actually holds the intended patch (catches a silent no-op apply).
+  const table = diff.path.split('.')[1] ?? '';
+  return {
+    ok: true,
+    version: res.version,
+    changed: patched.changed,
+    schemaFingerprint: fingerprintSchema(patched.toml, table),
+  };
 }
 
 // ── defaults ────────────────────────────────────────────────────────────────

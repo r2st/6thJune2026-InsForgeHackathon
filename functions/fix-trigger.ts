@@ -30,6 +30,7 @@ import { extractTomlContext } from './toml.js';
 import { diagnose as realDiagnose, DiagnoseError } from './diagnose.js';
 import { validateDiff } from './safety.js';
 import { validateTomlPatch, tableSchemaFromToml } from './tomlValidate.js';
+import { expectedForkFingerprint, verifyPostApply } from './fingerprint.js';
 import { applyTomlDiff, type ApplyResult } from './applyDiff.js';
 import { forgeForkJwt } from './forgeJwt.js';
 import { replayBoth } from './replay.js';
@@ -153,6 +154,18 @@ export async function fixTrigger(runId: string, deps?: Partial<OrchestratorDeps>
         // Patch won't even lint on the branch — don't ship a diff we can't apply.
         return await dispatch(d, emit, runId, diagnosis, lintVerdict(applied.lintError), 'issue-from-lint');
       }
+      // Temporal anchor (0034) — confirm the fork actually holds the intended
+      // patch. A fingerprint mismatch means apply silently no-op'd → don't replay
+      // a fork that isn't really patched. (Skipped when the dep reports none.)
+      if (applied.schemaFingerprint) {
+        const anchor = verifyPostApply({
+          expected: expectedForkFingerprint(tomlContext, diagnosis.tomlDiff, table),
+          actual: applied.schemaFingerprint,
+        });
+        if (!anchor.match) {
+          return await dispatch(d, emit, runId, diagnosis, anchorVerdict(anchor.drift!), 'issue-from-apply-noop');
+        }
+      }
       // Forge from the already-claimed fork entry — no second pool read.
       const forkJwt = forgeForkJwt(fork.branchId, ctx.jwtClaims, { resolveEntry: () => fork });
       verdict = await d.replayFork(payload, fork, forkJwt);
@@ -259,6 +272,14 @@ function vetoVerdict(safety: SafetyResult): Verdict {
     prod: emptySide(), fork: emptySide(),
     bugConfirmed: false, fixVerified: false,
     rationale: `safety rail: diff widens access — ${safety.reasons.join('; ')}`,
+  };
+}
+
+function anchorVerdict(drift: string): Verdict {
+  return {
+    prod: emptySide(), fork: emptySide(),
+    bugConfirmed: false, fixVerified: false,
+    rationale: `state anchor failed: ${drift}`,
   };
 }
 

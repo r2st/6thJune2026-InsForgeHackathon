@@ -97,6 +97,7 @@ Happy path. Pre-loaded data. No login. Three beats.
 | "How does Hush handle false positives?" | The branch-project replay *is* the false-positive filter. If the fix doesn't make the session green on the fork, no PR. That's the whole point of the engine. |
 | "What's the business model?" | Per-confirmed-fix pricing — you pay when an open PR gets merged. Aligns incentives. We skipped pricing UI for the hackathon. |
 | "What about non-Postgres / non-RLS bugs?" | Out of scope today. The first wedge is multi-tenant SaaS on InsForge, where RLS misfires are the silent-bug category that lands in security postmortems. |
+| "What about PII / GDPR — and cost?" | rrweb masks every input by default (`maskAllInputs`), the capture edge fn strips `Authorization`/`Cookie`/`Set-Cookie` before anything is stored, and we only capture sessions that *frustrate* — a happy path never hits `/capture`, so there are no rows and no Storage writes for it. Masking and sampling are code, not a promise. |
 
 ## Cut list (if running long, drop top first)
 

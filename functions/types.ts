@@ -227,6 +227,32 @@ export interface TableSchema {
   columns: { name: string; type: string }[];
 }
 
+/**
+ * Pre-run state anchor (ticket 0034). The two-signal verdict assumes prod and
+ * fork observe the same world; they don't (fork is a snapshot, prod is live).
+ * We fingerprint prod at snapshot time and re-check at verdict time: schema
+ * drift is a hard "inconclusive"; row-count drift is a soft warning.
+ */
+export interface StateSnapshot {
+  tenantId: string;
+  table: string;
+  /** Tenant-scoped row count of the target table at snapshot time. */
+  prodRowCount: number;
+  /** sha256 over (sorted columns + rls) of the prod table. */
+  prodSchemaFingerprint: string;
+  /** Same, computed against the branch AFTER applyDiff — set post-apply. */
+  forkSchemaFingerprint?: string;
+  capturedAt: string;          // ISO8601
+}
+
+export interface AnchorResult {
+  match: boolean;
+  /** Set when match=false: what drifted. */
+  drift?: string;
+  /** 'hard' → run is inconclusive → issue; 'soft' → warn, LLM may still be right. */
+  severity?: 'soft' | 'hard';
+}
+
 /** Safety rail output — see ticket 0021. */
 export interface SafetyResult {
   widens: boolean;

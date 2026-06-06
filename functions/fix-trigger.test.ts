@@ -125,6 +125,15 @@ describe('fixTrigger orchestrator', () => {
     expect(r.tier).toBe('issue');
   });
 
+  it('drops to issue when the post-apply fingerprint mismatches (silent no-op, 0034)', async () => {
+    const { events, deps } = harness({
+      applyDiff: async () => ({ ok: true, version: 'v42', changed: true, schemaFingerprint: 'wrong-fingerprint' }),
+    });
+    const r = await fixTrigger('run_1', deps);
+    expect(r.tier).toBe('issue');
+    expect(events.find((e) => e.step === 'shipped')?.detail).toMatchObject({ reason: 'issue-from-apply-noop' });
+  });
+
   it('fails cleanly when correlate finds no anomaly', async () => {
     const { events, deps } = harness({
       loadContext: async () => ({ ...ctx(), requestLogWindow: [{ ...FAILING, returnedRows: 3 }] }),

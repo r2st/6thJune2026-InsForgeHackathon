@@ -10,6 +10,18 @@ import { record, type eventWithTime } from 'rrweb';
 
 const WINDOW_MS = 30_000;
 
+/**
+ * PII masking config (ticket 0017). `maskAllInputs` redacts every input value
+ * in the recording by default; `maskTextSelector` masks any element opted in
+ * with `data-hush="mask"`; `blockSelector` drops `data-hush="block"` subtrees
+ * entirely. Exported so the masking contract is unit-testable.
+ */
+export const MASK_CONFIG = {
+  maskAllInputs: true,
+  maskTextSelector: '[data-hush="mask"]',
+  blockSelector: '[data-hush="block"]',
+} as const;
+
 let events: eventWithTime[] = [];
 let stop: (() => void) | null = null;
 
@@ -28,9 +40,7 @@ export function start(): void {
       events.push(event);
       trim(event.timestamp);
     },
-    maskAllInputs: true,
-    maskTextSelector: '[data-hush="mask"]',
-    blockSelector: '[data-hush="block"]',
+    ...MASK_CONFIG,
   });
   stop = handle ?? null;
 }
