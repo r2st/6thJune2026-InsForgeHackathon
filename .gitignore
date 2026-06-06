@@ -28,3 +28,20 @@ hadolint-stderr.txt
 npm-audit.json
 npm-audit-stderr.txt
 package-leakage-report.json
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.agents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf
+.env.local
+AGENTS.md
