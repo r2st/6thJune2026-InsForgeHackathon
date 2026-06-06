@@ -3,9 +3,9 @@ id: 0008
 title: Parallel-replay the captured request against prod and fork, return verdict
 role: builder
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (impl session)
+started: 2026-06-06
+status: done
 depends_on: [0005, 0006, 0007]
 demo_path: yes — this IS slide 6's prod-red / branch-green output
 ---
@@ -60,3 +60,26 @@ For the demo, we know prod expects 3 orders. In the general case, the
 a TODO with a pointer to the diagnosis step.
 
 ## Outcome
+
+- **Shipped:** `functions/replay.ts` (`replayBoth`, `countRows`) + 16 tests in
+  `functions/replay.test.ts`. replay.ts typechecks clean; full functions suite
+  green (91/91).
+- Fires prod + fork in parallel (`Promise.all`) — original JWT to prod, forged
+  JWT (0007) to the fork. Cache-bypass headers on both. Two-signal verdict:
+  `bugConfirmed = prod < expected && fork >= expected`, `fixVerified = fork >=
+  expected`. A transport error on either side withholds the verdict
+  (bugConfirmed false, rationale names the failing side).
+- `countRows` handles the PostGREST/InsForge body shapes (bare array,
+  `{data}`, `{rows}`, count envelope); an unreadable body counts as 0 rows —
+  not evidence of rows.
+- **Testability:** `fetch`, both base URLs, and the clock are injected via an
+  optional `deps` arg (defaulted from env/global), so the load-bearing logic is
+  verified hermetically — no live branch needed. A parallelism test asserts both
+  requests are in flight at once.
+- **For [[0030-fix-trigger-orchestrator]]:** pass `forkBaseUrl` from the prewarm
+  pool ([[0004-prewarm-branch-pool]]) and `forkJwt` from [[0007-jwt-forge]]. The
+  verdict feeds [[0020-confidence-scorer-and-tier-routing]] directly.
+- `expectedRows` is read from the `ReplayPayload` (hard-coded to 3 for the demo
+  by capture/diagnose, per the ticket note). When [[0033-differential-replay-suite]]
+  lands it supersedes this single-probe verdict with a 4-probe suite; this stays
+  as the single-payload primitive it builds on.
