@@ -5,7 +5,7 @@ role: architect
 priority: P1
 owner: claude-opus (impl session)
 started: 2026-06-06
-status: in-progress
+status: done
 depends_on: [0020, 0033, 0034]
 demo_path: yes — closes the "could a 92% badge hide a 55% replay?"
 question
@@ -72,4 +72,34 @@ average; it's an average *clamped by the worst signal*.
   pattern.
 
 ## Outcome
-<!-- Fill in when moving to done/. -->
+
+- **Shipped:** per-signal floor + veto in `functions/score.ts`
+  (`ceilingFromSignals`, exported), `ConfidenceResult.ceiling`/`.veto` in
+  `functions/types.ts`, `apps/receipt/components/ConfidenceBadge.tsx`
+  (composite headline + veto chip). 8 new tests; full functions suite green
+  (54/54), typecheck clean; receipt app `tsc --noEmit` clean (compile-verified,
+  not render-verified — receipt page itself is still scaffold per 0015/0022).
+- **`tier = min(compositeTier, ceiling)`**; composite (the badge) unchanged per
+  the ticket. `veto` set only when the per-signal floor — not a hard cap — pulled
+  the dispatch down, so it attributes correctly.
+- **Reconciliation 1 (threshold contradiction):** the AC "ceiling" bullet
+  (≥85→pr / ≥60→draft_pr / <60→issue) contradicts the AC's own worked examples
+  (signal 55→draft_pr, 45→issue) and the Goal narrative (<50→issue, <70→draft).
+  The bullet is a copy-paste of the composite thresholds. I implemented the
+  **examples + Goal** (FLOOR_PR_MIN=70, FLOOR_DRAFT_MIN=50) — the concrete cases
+  are the contract. If the author meant the bullet literally, flag it.
+- **Reconciliation 2 (pgvector vs the demo):** including pgvector in the floor
+  would veto the demo (neutral default 50 = worst signal) down to `draft_pr`,
+  contradicting 0020's demo→`pr`. pgvector is a *prior over merge history*, not
+  evidence of *this* fix's correctness — a verified fix must not be floored for
+  the tool having no corpus yet. So the floor guards **evidence signals only**
+  (replay, diff, blast); pgvector still feeds the composite at weight 0.2 but
+  never sets the ceiling. This is the more correct design, not just a demo save:
+  a novel-but-correct fix shouldn't be vetoed for being novel.
+- **Side effect:** 0020's `>2 tables` case (composite 70) now dispatches `issue`
+  (diffSize=0 < 50 floors it) instead of `draft_pr`. That's 0035 working as
+  intended — a 3-table RLS change shouldn't auto-draft. Composite still 70.
+  Updated that test.
+- **Soft dep on [[0033-differential-replay-suite]] / [[0034-temporal-anchor-fingerprint]]:**
+  those raise the *quality* of the numbers feeding `replayVerdictScore` but
+  don't change the four-signal shape the floor reads — no rework when they land.
