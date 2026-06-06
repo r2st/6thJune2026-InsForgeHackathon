@@ -146,6 +146,13 @@ export interface Verdict {
    * masquerade as a real fork verdict.
    */
   mode?: 'fork' | 'trace';
+  /**
+   * Ticket 0033 — when derived from a differential replay suite, the suite's
+   * 100/60/30/0 replay score. score.ts prefers it over the single-probe 100/0,
+   * so a regression on a corroborating probe pulls the badge down. Absent for a
+   * bare replayBoth() verdict.
+   */
+  suiteScore?: number;
 }
 
 export interface ReplaySide {
@@ -153,6 +160,30 @@ export interface ReplaySide {
   rowsReturned: number;
   latencyMs: number;
   snippet: string;            // ≤200 chars
+}
+
+/**
+ * Differential replay suite (ticket 0033). A single payload row-count compare
+ * (replayBoth) catches the simple case but misses widening-through-indirection
+ * and regressions on other queries. The suite fires N probes against both prod
+ * and fork; every probe must agree before a run may reach tier 'pr'.
+ */
+export interface ProbeVerdict {
+  name: string;               // 'failing' | 'neighbor' | 'count' | 'join'
+  prod: ReplaySide;
+  fork: ReplaySide;
+  pass: boolean;              // probe-specific success condition
+  note: string;
+}
+
+export interface SuiteVerdict {
+  probes: ProbeVerdict[];
+  bugConfirmed: boolean;      // failing probe reproduces on prod
+  fixVerified: boolean;       // failing probe passes on fork
+  widensAccess: boolean;      // any probe shows extra rows on fork not on prod
+  rationale: string;
+  /** 100 / 60 / 30 / 0 — the replay signal score.ts consumes (see ticket 0033). */
+  suiteScore: number;
 }
 
 /** Confidence score + tier — see tickets 0020 (composite) and 0035 (floor/veto). */

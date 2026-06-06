@@ -197,6 +197,10 @@ function minTier(a: ConfidenceTier, b: ConfidenceTier): ConfidenceTier {
  * Anything else is 0 — there is no partial credit on the load-bearing signal.
  */
 function replayVerdictScore(verdict: Verdict): number {
+  // Ticket 0033: a suite-derived verdict carries a graded 100/60/30/0 score
+  // (a corroborating-probe regression scores 60, not 100). Prefer it. A bare
+  // single-probe verdict falls back to the binary reproduce-then-fix signal.
+  if (typeof verdict.suiteScore === 'number') return verdict.suiteScore;
   return verdict.bugConfirmed && verdict.fixVerified ? 100 : 0;
 }
 

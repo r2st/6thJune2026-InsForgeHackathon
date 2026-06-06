@@ -3,9 +3,9 @@ id: 0033
 title: Differential replay suite — cross-tenant + cross-query
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0008, 0010]
 demo_path: yes — slide 06 is "two backends." This is what makes the
 right column green AND the left column stay red across multiple checks.
@@ -87,3 +87,21 @@ falsifiable, judge-can-see.
 
 ## Outcome
 <!-- Fill in when moving to done/. -->
+
+## Outcome
+
+- `functions/replay.ts` gains `replaySuite(input, deps)` → `SuiteVerdict`: four
+  probes (failing / neighbor / count / join), all fired in parallel against
+  prod+fork via an injected `runProbe`. Verdict logic: bugConfirmed (failing
+  fails on prod), fixVerified (failing passes on fork), widensAccess (any probe
+  shows extra rows on fork). `scoreSuite` maps to 100/60/30/0 per the ticket.
+- `suiteToVerdict()` adapts a SuiteVerdict to the single Verdict shape (failing
+  probe = headline) carrying `suiteScore`; `score.ts` `replayVerdictScore` now
+  prefers `verdict.suiteScore` so a corroborating-probe regression (60) lowers
+  the badge and a widen (0) forces issue. `replayBoth` kept as the single-probe
+  wrapper (demo intro).
+- Integration: the orchestrator consumes the suite through its existing
+  `replayFork` seam (return `suiteToVerdict(await replaySuite(...))`); the
+  real probe runner (neighbor-tenant JWT minting + count/join query shapes) is
+  the wiring point left for the live-backend pass — verdict arithmetic + score
+  translation are fully unit-tested (8 suite + 2 score tests, no network).

@@ -80,6 +80,21 @@ describe('scoreConfidence — the demo bug (slide 07)', () => {
     expect(r.score).toBe(98);
     expect(r.tier).toBe('pr');
   });
+
+  it('honours a suite-derived replay score (0033) — a regression probe (60) lowers the badge', () => {
+    // suiteScore=60 (a corroborating probe disagreed) replaces the binary 100.
+    // 0.4*60 + 0.2*100 + 0.2*100 + 0.2*50 = 24 + 20 + 20 + 10 = 74 → draft_pr.
+    const r = scoreConfidence(input({ verdict: verdict({ suiteScore: 60 }) }));
+    expect(r.signals.replayVerdictScore).toBe(60);
+    expect(r.score).toBe(74);
+    expect(r.tier).toBe('draft_pr');
+  });
+
+  it('a suite widening (suiteScore 0) collapses the replay signal regardless of bug/fix flags', () => {
+    const r = scoreConfidence(input({ verdict: verdict({ suiteScore: 0 }) }));
+    expect(r.signals.replayVerdictScore).toBe(0);
+    expect(r.tier).toBe('issue');
+  });
 });
 
 // ── hard cap 1: replay is load-bearing ───────────────────────────────────────
