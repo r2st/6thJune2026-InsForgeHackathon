@@ -1,49 +1,53 @@
 ---
 id: 0044
-title: Create live pipeline visualization dashboard
+title: Create realistic demo environment with real apps
 role: builder
 priority: P1
 owner: devin
 started: 2026-06-06
 status: done
 depends_on: []
-demo_path: yes — alternative to slide-based demo, shows real-time data flow
+demo_path: yes — runs actual toy app with user interaction simulation
 ---
 
 ## Goal
 
-Create a separate live demo dashboard that visualizes the Hush pipeline in real-time, showing data flowing through each stage (Capture → Diagnose → Fork → Replay → PR) without touching the existing slide-based demo.
+Create a realistic demo environment that runs the actual toy app, simulates real user rage-clicks using browser automation, and shows real data flowing through the Hush pipeline.
 
 ## Why it matters for the demo
 
-More impressive than static slides. Judges can see actual data flowing through the pipeline, JSON payloads at each stage, and the automated end-to-end process in action. Complements the slide-based demo by providing a "under the hood" view.
+Much more impressive than animations - judges see the actual toy app running, real user rage-clicks being automated, real session data being captured, and real pipeline components in action. Provides "under the hood" visibility that judges trust.
 
 ## Acceptance criteria
 
 - [ ] Create demo-live/ directory separate from demo/
-- [ ] Build pipeline-dashboard.html with animated 5-stage visualization
-- [ ] Show real-time metrics (time, confidence, stages complete, issues found)
-- [ ] Display actual JSON data at each pipeline stage (mock data initially)
-- [ ] Add interactive controls (start demo, reset, simulate updates)
-- [ ] Include README with usage instructions and integration points
-- [ ] Create start-dashboard.sh script for easy launching
-- [ ] Document how to integrate with real WebSocket data
+- [ ] Build start-real-demo.sh script to run toy app + receipt page
+- [ ] Create automate-browser-demo.js using Puppeteer for real rage-click simulation
+- [ ] Create simulate-user-interaction.js for simulation mode without dependencies
+- [ ] Include README with multiple demo variants (automation, simulation, manual)
+- [ ] Document integration with real Hush system components
+- [ ] Package demo-live/ with Puppeteer dependency management
 
 ## Likely files / surfaces touched
 
-- `demo-live/pipeline-dashboard.html` (new)
+- `demo-live/start-real-demo.sh` (new)
+- `demo-live/automate-browser-demo.js` (new)
+- `demo-live/simulate-user-interaction.js` (new)
 - `demo-live/README.md` (new)
-- `demo-live/start-dashboard.sh` (new)
+- `demo-live/package.json` (new)
+- `apps/demo/` (existing toy app - started by script)
+- `apps/receipt/` (existing receipt page - started by script)
 
 ## Notes
 
-- Keep it completely separate from existing demo/ directory to preserve fallback
-- Use mock data initially, document integration points for real WebSocket connection
-- Single HTML file approach for portability and simplicity
-- Animated transitions for visual appeal but keep it performant
-- Browser-based, no backend dependencies
+- Runs the actual Next.js toy app with rrweb capture and frustration detection
+- Uses Puppeteer to automate real browser interactions (rage-clicks on Reload button)
+- Shows actual session data flowing through the pipeline stages
+- Provides fallback simulation mode for environments without Puppeteer
+- Separate from demo/ to preserve slide-based fallback
+- Creates logs/ directory for app logs
 
 ## Outcome
-- What shipped: demo-live/pipeline-dashboard.html with animated 5-stage visualization, real-time metrics, data preview panels, interactive controls; demo-live/README.md with usage instructions; demo-live/start-dashboard.sh launcher script
-- What was cut and why: Real WebSocket integration skipped to keep implementation simple - documented integration points for future
-- How to verify it: Run ./demo-live/start-dashboard.sh or open pipeline-dashboard.html in browser, click "Start Demo" to see animated pipeline sequence
+- What shipped: demo-live/start-real-demo.sh to run actual apps; demo-live/automate-browser-demo.js with Puppeteer automation; demo-live/simulate-user-interaction.js for simulation mode; demo-live/README.md with 3 demo variants; demo-live/package.json for dependency management
+- What was cut and why: Pipeline animation dashboard (pipeline-dashboard.html) kept as reference - realistic app approach chosen for more authentic demo
+- How to verify it: Run ./demo-live/start-real-demo.sh then either npm install puppeteer && node automate-browser-demo.js (most realistic) or node simulate-user-interaction.js (no dependencies)
