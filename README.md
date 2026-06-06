@@ -13,7 +13,8 @@ finishes writing the support ticket.
 | **Receipt page** (judge-facing live status) | https://w369egnp.insforge.site/ | ✅ deployed |
 | **Receipt — demo mode** (full arc, no backend needed) | https://w369egnp.insforge.site/r/demo?demo=1 | ✅ deployed · **start here** |
 | **Backend** (InsForge project `hush`, seeded demo bug) | https://w369egnp.us-east.insforge.app/api/health | ✅ live — API host; bare `/` returns `Cannot GET /` by design, check `/api/health` |
-| **Victim app** (`apps/demo` — "Acme Store / My Orders") | _not yet deployed_ — run locally: `pnpm --filter demo dev` → http://localhost:3000/orders | ⏳ builds clean; deploy with `cd apps/demo && vercel --prod` |
+| **Victim app** (`apps/demo` — "Acme Store / My Orders") | https://demo-seven-omega-26.vercel.app/orders | ✅ deployed (Vercel) · migrated user → empty page; legacy → 3 orders |
+| **PR target** (`hush-victim-acme` — where Hush opens the fix PR) | https://github.com/r2st/hush-victim-acme/pull/1 | ✅ live PR (4-line `insforge.toml` diff) |
 
 > The **demo-mode receipt** (`/r/demo?demo=1`) rehearses the whole five-step
 > arc — capture → correlate → diagnose → fork-test → ship — with no backend,
