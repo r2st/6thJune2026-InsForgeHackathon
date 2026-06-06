@@ -104,7 +104,13 @@ export async function fixTrigger(runId: string, deps?: Partial<OrchestratorDeps>
     const corr = correlate(ctx.requestLogWindow);
     if (!corr.ok) return await fail(d, emit, runId, 'correlate', corr.reason);
     const payload = toReplayPayload(corr.entry, corr.expectedRows, ctx.prodJwt);
-    const table = corr.entry.rlsDecisions?.[0]?.table ?? stripLeadingSlash(corr.entry.route);
+    // Derive the target table robustly: the rls_decision's table may be an
+    // empty string (the request_log JSON omits it), so `??` won't fall back —
+    // use `||`, then the policy prefix ("orders.orders_select" → "orders"),
+    // then the route as a last resort.
+    const rls0 = corr.entry.rlsDecisions?.[0];
+    const table =
+      (rls0?.table || rls0?.policy?.split('.')[0] || stripLeadingSlash(corr.entry.route));
     await emit('correlated', { route: corr.entry.route, expectedRows: corr.expectedRows });
 
     // 2. diagnose → structured Diagnosis with a TOML diff. A resilience failure
