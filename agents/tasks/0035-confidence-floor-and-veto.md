@@ -3,9 +3,9 @@ id: 0035
 title: Confidence per-signal floor — single weak signal vetoes its tier
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus (impl session)
+started: 2026-06-06
+status: in-progress
 depends_on: [0020, 0033, 0034]
 demo_path: yes — closes the "could a 92% badge hide a 55% replay?"
 question

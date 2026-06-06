@@ -122,16 +122,28 @@ export interface ReplaySide {
   snippet: string;            // ≤200 chars
 }
 
-/** Confidence score + tier — see ticket 0020. */
+/** Confidence score + tier — see tickets 0020 (composite) and 0035 (floor/veto). */
 export interface ConfidenceResult {
-  score: number;              // 0..100
-  tier: ConfidenceTier;
+  score: number;              // 0..100 — the badge number (composite, post hard-cap)
+  tier: ConfidenceTier;       // final dispatch tier = min(composite tier, ceiling)
   signals: {
     replayVerdictScore: number;
     diffSizeScore: number;
     policyBlastScore: number;
     pgvectorSimilarityScore: number;
   };
+  /**
+   * Ticket 0035 — the strictest tier the weakest single signal permits.
+   * The badge is an average; `ceiling` is that average clamped by the worst
+   * signal. `tier` never exceeds `ceiling`.
+   */
+  ceiling: ConfidenceTier;
+  /**
+   * Set when `ceiling` is stricter than the composite alone would allow —
+   * i.e. a single weak signal pulled the dispatch down. Names the signal and
+   * its value so the receipt page can render "tier limited by <signal>: <n>".
+   */
+  veto?: { signal: string; value: number };
   promptVersion: string;
 }
 

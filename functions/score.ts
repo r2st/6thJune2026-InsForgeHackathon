@@ -20,6 +20,42 @@ import type {
   ConfidenceTier,
 } from './types.js';
 
+// ── Per-signal floor (ticket 0035) ───────────────────────────────────────────
+// The composite is an average; an average can hide one weak signal. The floor
+// is a second layer on top of 0020's hard caps: the weakest single signal sets
+// a ceiling on the dispatch tier. The badge still shows the composite; the
+// floor only clamps where the run is allowed to go.
+//
+// Thresholds follow the ticket's Goal narrative and its worked test examples
+// (signal 55 → draft_pr, signal 45 → issue), NOT the ticket's "ceiling" bullet
+// (≥85→pr / ≥60→draft_pr / <60→issue), which contradicts those examples — it is
+// a copy-paste of the composite tier thresholds. The concrete examples are the
+// contract; see score.test.ts. Flagged in the ticket Outcome.
+const FLOOR_PR_MIN = 70;     // every signal ≥70 → ceiling allows pr
+const FLOOR_DRAFT_MIN = 50;  // every signal ≥50 → ceiling allows draft_pr; else issue
+
+/** Human-readable labels for veto attribution on the receipt page. */
+const SIGNAL_LABELS: Record<string, string> = {
+  replayVerdictScore: 'replay verdict',
+  diffSizeScore: 'diff size',
+  policyBlastScore: 'policy blast radius',
+  pgvectorSimilarityScore: 'pgvector similarity',
+};
+
+/**
+ * The floor guards *evidence* signals only. pgvector similarity is a prior over
+ * merge history, not evidence about this fix's correctness — and on hackathon
+ * day it is the neutral default 50 (no corpus). Including it would veto the
+ * demo (pgvector 50 = worst signal) down to draft_pr, contradicting ticket
+ * 0020's demo→pr. A verified fix must not be punished for the tool having no
+ * history yet. See the 0035 Outcome for this cross-ticket reconciliation.
+ */
+const FLOOR_SIGNALS = [
+  'replayVerdictScore',
+  'diffSizeScore',
+  'policyBlastScore',
+] as const;
+
 export interface ScoreInput {
   diagnosis: Diagnosis;
   verdict: Verdict;
@@ -81,19 +117,69 @@ export function scoreConfidence(input: ScoreInput): ConfidenceResult {
     score = Math.min(score, CAP_UNINTENDED_WIDEN);
   }
 
+  // Composite tier — what the (post-cap) score alone would dispatch to.
+  const compositeTier = tierFromScore(score);
+
+  // Per-signal floor (0035) — the weakest single signal sets a ceiling.
+  const ceiling = ceilingFromSignals(signals);
+
+  // Final tier is the stricter of the two. The badge (score) is unchanged.
+  const tier = minTier(compositeTier, ceiling);
+
+  // Attribute the veto only when the per-signal floor (not a hard cap) is what
+  // pulled the dispatch below the composite's tier.
+  const veto =
+    tierRank(ceiling) < tierRank(compositeTier) ? weakestSignal(signals) : undefined;
+
   return {
     score,
-    tier: tierFromScore(score),
+    tier,
     signals,
+    ceiling,
+    ...(veto ? { veto } : {}),
     promptVersion: diagnosis.promptVersion,
   };
 }
 
-/** Map a 0–100 score to a dispatch tier. Exported for ticket 0035's floor layer. */
+/** Map a 0–100 score to a dispatch tier. */
 export function tierFromScore(score: number): ConfidenceTier {
   if (score >= TIER_PR_MIN) return 'pr';
   if (score >= TIER_DRAFT_MIN) return 'draft_pr';
   return 'issue';
+}
+
+// ── per-signal floor helpers (ticket 0035) ───────────────────────────────────
+
+type SignalMap = ConfidenceResult['signals'];
+
+/** The strictest tier the weakest *evidence* signal permits (pgvector excluded). */
+export function ceilingFromSignals(signals: SignalMap): ConfidenceTier {
+  const worst = Math.min(...FLOOR_SIGNALS.map((k) => signals[k]));
+  if (worst >= FLOOR_PR_MIN) return 'pr';
+  if (worst >= FLOOR_DRAFT_MIN) return 'draft_pr';
+  return 'issue';
+}
+
+/** The evidence signal that set the ceiling — for veto attribution. */
+function weakestSignal(signals: SignalMap): { signal: string; value: number } {
+  let signal = '';
+  let value = Infinity;
+  for (const k of FLOOR_SIGNALS) {
+    if (signals[k] < value) {
+      value = signals[k];
+      signal = SIGNAL_LABELS[k] ?? k;
+    }
+  }
+  return { signal, value };
+}
+
+/** pr is the most permissive tier (highest rank); issue the strictest. */
+function tierRank(t: ConfidenceTier): number {
+  return t === 'pr' ? 2 : t === 'draft_pr' ? 1 : 0;
+}
+
+function minTier(a: ConfidenceTier, b: ConfidenceTier): ConfidenceTier {
+  return tierRank(a) <= tierRank(b) ? a : b;
 }
 
 // ── Per-signal scorers ──────────────────────────────────────────────────────

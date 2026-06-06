@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { Diagnosis, Verdict, SafetyResult, TomlPatch } from './types.js';
-import { scoreConfidence, tierFromScore, type ScoreInput } from './score.js';
+import { scoreConfidence, tierFromScore, ceilingFromSignals, type ScoreInput } from './score.js';
 
 // ── builders ─────────────────────────────────────────────────────────────────
 
@@ -69,6 +69,9 @@ describe('scoreConfidence — the demo bug (slide 07)', () => {
       pgvectorSimilarityScore: 50,
     });
     expect(r.promptVersion).toBe('diagnose-v1.0.0');
+    // 0035: neutral pgvector (50) must NOT veto — it's a prior, not evidence.
+    expect(r.ceiling).toBe('pr');
+    expect(r.veto).toBeUndefined();
   });
 
   it('with one merged neighbour at 90 similarity → crosses into the 90s', () => {
@@ -129,13 +132,17 @@ describe('scoreConfidence — safety rail overrides model optimism', () => {
 // ── diff-size signal ─────────────────────────────────────────────────────────
 
 describe('diffSizeScore via composite', () => {
-  it('>2 tables touched → diff signal 0', () => {
+  it('>2 tables touched → diff signal 0, composite 70 but floored to issue (0035)', () => {
     const r = scoreConfidence(
       input({ diagnosis: diagnosis({ confidenceInputs: { diffLoc: 4, tablesTouched: 3, policyBlast: 1 } }) }),
     );
     expect(r.signals.diffSizeScore).toBe(0);
-    // 40 + 0 + 20 + 10 = 70 → draft_pr
-    expect(r.tier).toBe('draft_pr');
+    // Composite = 40 + 0 + 20 + 10 = 70 (unchanged). But the per-signal floor
+    // (0035) sees diffSize=0 < 50 → ceiling issue → dispatch issue, veto names it.
+    expect(r.score).toBe(70);
+    expect(r.tier).toBe('issue');
+    expect(r.ceiling).toBe('issue');
+    expect(r.veto).toEqual({ signal: 'diff size', value: 0 });
   });
 
   it('a second table costs a flat 40', () => {
@@ -185,6 +192,98 @@ describe('tierFromScore — boundaries', () => {
   it('extremes', () => {
     expect(tierFromScore(100)).toBe('pr');
     expect(tierFromScore(0)).toBe('issue');
+  });
+});
+
+// ── per-signal floor + veto (ticket 0035) ────────────────────────────────────
+
+describe('scoreConfidence — per-signal floor vetoes its tier', () => {
+  it('all evidence signals strong → pr, no veto', () => {
+    const r = scoreConfidence(input({ pgvectorSimilarity: 100 }));
+    expect(r.tier).toBe('pr');
+    expect(r.ceiling).toBe('pr');
+    expect(r.veto).toBeUndefined();
+  });
+
+  it('one evidence signal 60 (diff), composite high → tier draft_pr, veto names it', () => {
+    const r = scoreConfidence(
+      input({
+        // diffLoc 11.625 isn't integer; use loc to hit diffSize 60, then assert veto on the lowest.
+        diagnosis: diagnosis({ confidenceInputs: { diffLoc: 11, tablesTouched: 1, policyBlast: 1 } }),
+        pgvectorSimilarity: 100,
+      }),
+    );
+    // signals: replay100, diff60, blast100, pg100. worst evidence = 60 → ceiling draft_pr.
+    // composite = 40 + 12 + 20 + 20 = 92 → composite tier pr. final = draft_pr, veto.
+    expect(r.signals.diffSizeScore).toBe(60);
+    expect(r.score).toBe(92);
+    expect(r.tier).toBe('draft_pr');
+    expect(r.ceiling).toBe('draft_pr');
+    expect(r.veto).toEqual({ signal: 'diff size', value: 60 });
+  });
+
+  it('one evidence signal 40 (blast), composite high → tier issue, veto names it', () => {
+    const r = scoreConfidence(
+      input({
+        diagnosis: diagnosis({ confidenceInputs: { diffLoc: 4, tablesTouched: 1, policyBlast: 4 } }),
+        pgvectorSimilarity: 100,
+      }),
+    );
+    // blast 4 → policyBlastScore = 100 - 3*20 = 40 → ceiling issue.
+    // composite = 40 + 20 + 8 + 20 = 88 → composite tier pr. final = issue, veto.
+    expect(r.signals.policyBlastScore).toBe(40);
+    expect(r.score).toBe(88);
+    expect(r.tier).toBe('issue');
+    expect(r.ceiling).toBe('issue');
+    expect(r.veto).toEqual({ signal: 'policy blast radius', value: 40 });
+  });
+
+  it('hard cap still wins: widening + all signals 100 → issue, and no per-signal veto', () => {
+    const r = scoreConfidence(
+      input({
+        diagnosis: diagnosis({
+          widensAccess: false,
+          confidenceInputs: { diffLoc: 4, tablesTouched: 1, policyBlast: 1 },
+        }),
+        safety: { widens: true, reasons: ['dropped AND conjunct'] },
+        pgvectorSimilarity: 100,
+      }),
+    );
+    // Hard cap 2 → score 59 → composite tier issue. Evidence signals all 100 →
+    // ceiling pr. The issue came from the hard cap, not the floor → no veto.
+    expect(r.score).toBe(59);
+    expect(r.tier).toBe('issue');
+    expect(r.ceiling).toBe('pr');
+    expect(r.veto).toBeUndefined();
+  });
+
+  it('pgvector is excluded from the floor — a low prior never vetoes on its own', () => {
+    const r = scoreConfidence(input({ pgvectorSimilarity: 0 }));
+    // Evidence signals all 100 → ceiling pr. composite = 40+20+20+0 = 80 → draft_pr.
+    // Tier is draft_pr from the *composite*, not a veto (ceiling is pr).
+    expect(r.score).toBe(80);
+    expect(r.tier).toBe('draft_pr');
+    expect(r.ceiling).toBe('pr');
+    expect(r.veto).toBeUndefined();
+  });
+});
+
+describe('ceilingFromSignals — boundaries (evidence signals only)', () => {
+  const sig = (replay: number, diff: number, blast: number, pg: number) => ({
+    replayVerdictScore: replay,
+    diffSizeScore: diff,
+    policyBlastScore: blast,
+    pgvectorSimilarityScore: pg,
+  });
+  it('worst evidence ≥70 → pr (even if pgvector is 0)', () => {
+    expect(ceilingFromSignals(sig(100, 70, 100, 0))).toBe('pr');
+  });
+  it('worst evidence in [50,70) → draft_pr', () => {
+    expect(ceilingFromSignals(sig(100, 50, 100, 100))).toBe('draft_pr');
+    expect(ceilingFromSignals(sig(100, 69, 100, 100))).toBe('draft_pr');
+  });
+  it('worst evidence <50 → issue', () => {
+    expect(ceilingFromSignals(sig(100, 49, 100, 100))).toBe('issue');
   });
 });
 
