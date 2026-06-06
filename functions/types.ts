@@ -82,6 +82,30 @@ export interface ReplayPayload {
   expectedRows: number;
 }
 
+/**
+ * Output of sanitiseCaptureContent() — ticket 0031. Walls user-controlled
+ * capture content off from the system prompt: server-controlled fields stay
+ * trusted; everything the user could influence is escaped, wrapped in a
+ * <user-data> block, and pre-filtered for known prompt-injection markers.
+ */
+export interface SanitisedContext {
+  /** Server-controlled, prompt-safe — never touches the untrusted path. */
+  safe: { tenantId: string; sessionId: string; frustrationAt: string | null };
+  /** User-controlled fields, escaped and <user-data>-wrapped, ready to embed. */
+  untrusted: UntrustedField[];
+  sanitisedFlags: { promptInjectionSuspected: boolean };
+  /** Names of the injection patterns that fired — evidence for the receipt page. */
+  markersHit: string[];
+}
+
+export interface UntrustedField {
+  field: string;
+  /** Verbatim value after markers were stripped (pre-escape). */
+  stripped: string;
+  /** `<user-data field="…">{{escaped}}</user-data>` — the only form the prompt sees. */
+  wrapped: string;
+}
+
 /** Diagnose output — see schemas/diagnosis.schema.json for the wire contract. */
 export interface Diagnosis {
   summary: string;            // ≤200 chars, plain English, user-facing

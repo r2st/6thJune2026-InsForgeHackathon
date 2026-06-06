@@ -3,9 +3,9 @@ id: 0031
 title: Sanitise capture content before it enters the diagnose prompt
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0018]
 demo_path: yes — Q&A defense ("what stops a malicious user from steering Hush?")
 ---
@@ -76,4 +76,14 @@ unstructured user input.
 - Background context: docs/the-hardest-part-deeper.md → Lie #08.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- `functions/sanitise.ts` — `sanitiseCaptureContent({session,request})` splits
+  server-controlled (safe) from user-controlled fields; escapes + wraps the
+  latter in `<user-data field=…>` blocks; strips injection markers
+  (ignore-instructions / act-as / you-are-now / role-system|assistant /
+  base64>256 / `<system>`|`<instructions>` openers) and raises
+  `promptInjectionSuspected` + `markersHit` (additive, never drops the run).
+- `functions/prompts/diagnose.v2.md` consumes it; `diagnose.ts` switches to v2
+  only when `input.sanitised` is present (v1 stays default — non-breaking).
+- 9 sanitise tests + 2 diagnose-v2 wiring tests, incl. the 'ignore this column'
+  false-positive guard.

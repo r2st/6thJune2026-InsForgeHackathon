@@ -22,8 +22,9 @@ import { fileURLToPath } from 'node:url';
 // actually needs it.
 import type Anthropic from '@anthropic-ai/sdk';
 
-import type { CapturedSession, RequestLogEntry, Diagnosis } from './types.js';
+import type { CapturedSession, RequestLogEntry, Diagnosis, SanitisedContext } from './types.js';
 import { validate, type JsonSchema } from './lib/validateSchema.js';
+import { renderUserDataBlock } from './sanitise.js';
 
 const MODEL = 'claude-opus-4-8';
 
@@ -39,6 +40,13 @@ export interface DiagnoseInput {
    * claim shape (hard rule 4 in the prompt).
    */
   jwtClaims?: Record<string, unknown>;
+  /**
+   * Ticket 0031. When present, diagnose() switches to the v2 prompt and embeds
+   * user-controlled content in a walled, pre-stripped <user-data> block. Built
+   * by sanitiseCaptureContent(). Absent → v1 (schema-grounded, no untrusted
+   * content) — the default for the demo.
+   */
+  sanitised?: SanitisedContext;
 }
 
 // ── Prompt + schema loading ──────────────────────────────────────────────────
@@ -47,6 +55,7 @@ export interface DiagnoseInput {
 // schema versions move together). Loaded once at module init.
 
 const PROMPT_PATH = fileURLToPath(new URL('./prompts/diagnose.v1.md', import.meta.url));
+const PROMPT_V2_PATH = fileURLToPath(new URL('./prompts/diagnose.v2.md', import.meta.url));
 const SCHEMA_PATH = fileURLToPath(new URL('./schemas/diagnosis.schema.json', import.meta.url));
 
 interface PromptParts {
@@ -81,6 +90,16 @@ function getPrompt(): PromptParts {
   return (_prompt ??= parsePrompt(readFileSync(PROMPT_PATH, 'utf8')));
 }
 
+let _promptV2: PromptParts | null = null;
+function getPromptV2(): PromptParts {
+  return (_promptV2 ??= parsePrompt(readFileSync(PROMPT_V2_PATH, 'utf8')));
+}
+
+/** Pick the prompt: v2 when sanitised untrusted content is present, else v1. */
+function promptFor(input: DiagnoseInput): PromptParts {
+  return input.sanitised ? getPromptV2() : getPrompt();
+}
+
 let _schema: JsonSchema | null = null;
 function getSchema(): JsonSchema {
   return (_schema ??= JSON.parse(readFileSync(SCHEMA_PATH, 'utf8')) as JsonSchema);
@@ -104,10 +123,9 @@ export function fillTemplate(template: string, vars: Record<string, string>): st
 
 /** Build the user message from a DiagnoseInput. Exported for tests. */
 export function buildUserMessage(input: DiagnoseInput): string {
-  const { session, failingRequest, expectedRows, tomlContext, jwtClaims } = input;
-  return fillTemplate(getPrompt().userTemplate, {
+  const { session, failingRequest, expectedRows, tomlContext, jwtClaims, sanitised } = input;
+  const common: Record<string, string> = {
     sessionId: session.sessionId,
-    userId: session.userId,
     tenantId: session.tenantId,
     frustrationAt: session.frustrationAt ?? '(none)',
     expectedRows: String(expectedRows),
@@ -117,7 +135,16 @@ export function buildUserMessage(input: DiagnoseInput): string {
     rlsDecisions: JSON.stringify(failingRequest.rlsDecisions ?? []),
     returnedRows: String(failingRequest.returnedRows ?? 0),
     tomlContext: tomlContext.trim() || '(empty)',
-  });
+  };
+  // v2 wires the walled user-data block + injection flag; v1 keeps userId.
+  if (sanitised) {
+    return fillTemplate(getPromptV2().userTemplate, {
+      ...common,
+      userData: renderUserDataBlock(sanitised),
+      promptInjectionSuspected: String(sanitised.sanitisedFlags.promptInjectionSuspected),
+    });
+  }
+  return fillTemplate(getPrompt().userTemplate, { ...common, userId: session.userId });
 }
 
 // ── Tool schema ────────────────────────────────────────────────────────────────
@@ -139,7 +166,8 @@ export function buildToolInputSchema(schema: JsonSchema): JsonSchema {
 // ── The call ────────────────────────────────────────────────────────────────────
 
 export async function diagnose(input: DiagnoseInput): Promise<Diagnosis> {
-  const { system } = getPrompt();
+  const prompt = promptFor(input);
+  const { system } = prompt;
   const schema = getSchema();
 
   // Load the SDK lazily; `new Anthropic()` resolves ANTHROPIC_API_KEY from the
@@ -181,7 +209,7 @@ export async function diagnose(input: DiagnoseInput): Promise<Diagnosis> {
   // the wire contract — throws on any mismatch.
   const diagnosis = {
     ...(toolUse.input as Record<string, unknown>),
-    promptVersion: getPrompt().promptVersion,
+    promptVersion: prompt.promptVersion,
   };
   validate(diagnosis, schema);
   return diagnosis as unknown as Diagnosis;
