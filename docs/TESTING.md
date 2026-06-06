@@ -94,21 +94,35 @@ Score 90 would be PR tier, but trace mode correctly caps it to `draft_pr` — th
 (e.g. CI without secrets) the test **skips** rather than fails, so it never blocks
 the unit suite.
 
-## Known limitation — no branch projects yet
+## Branching is available — the real fork path works
 
-Backend is **1.0.0**; InsForge branching needs **2.1.0+**. The fork-and-test
-moat (tickets 0004 / 0006 / 0033 / 0034) cannot run against this project until
-it's upgraded. Until then:
+Backend is **2.2.0** (per `/api/health`, verified 2026-06-06) and InsForge
+branching (needs ≥2.1.0) **is live**. A fork already exists:
 
-- Read-path tickets (0014 correlate, 0018/0019 diagnose, 0022 receipt card)
-  test against the seeded rows above.
-- Pure-logic tickets (0021 safety, 0020/0035 score, 0032 validate) test via
-  their vitest suites — no backend needed.
-- The replay/verdict tickets fall back to the trace-only path (ticket 0012):
-  evaluate the patched predicate against the captured request, exactly as the
-  reproduce-the-bug query above does.
+```bash
+npx @insforge/cli branch list
+# → hush-fix-sandbox · ready · full
+```
 
-Ask the InsForge team to bump this project to ≥2.1.0 to unlock real branching.
+So the fork-and-test moat (tickets 0004 / 0006 / 0033 / 0034) and the slide-06
+"prod red / fork green" money shot can run for **real**, not just in trace mode.
+
+> Historical note: an earlier read of `cli metadata` reported `version: 1.0.0`
+> (that field is the API-schema version, not the backend release) which led to a
+> now-corrected "no branching" assumption. `/api/health` is the authoritative
+> backend version.
+
+Each test path:
+
+- **Real fork** (preferred): apply the candidate patch to a branch project,
+  replay the captured request against prod + fork → the two-signal verdict
+  (tickets 0006 + 0008). This is the demo's strongest moment.
+- **Trace-only fallback** (ticket 0012): if a fork can't be acquired in budget,
+  evaluate the patched predicate against the captured request — proven green by
+  [`functions/e2e-trace.test.ts`](../functions/e2e-trace.test.ts) above. Caps at
+  `draft_pr`; never opens a PR.
+- **Read-path / pure-logic tickets** test against the seeded rows and via their
+  vitest suites as before.
 
 ## Reset / reseed
 
