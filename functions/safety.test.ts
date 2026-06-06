@@ -18,7 +18,7 @@ describe('validateDiff — the demo bug fix', () => {
     const result = validateDiff({
       patch: patch(
         "tenant_id = (auth.jwt() ->> 'tenant')::uuid",
-        "tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY((auth.jwt() -> 'tenant_ids')::uuid[])",
+        "tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY(array(select jsonb_array_elements_text(auth.jwt() -> 'tenant_ids'))::uuid[])",
       ),
       tableColumns: TENANT_COLS,
     });
@@ -115,7 +115,7 @@ describe('validateDiff — Rule 3 (binding loosened)', () => {
     const result = validateDiff({
       patch: patch(
         "tenant_id = (auth.jwt() ->> 'tenant')::uuid",
-        "tenant_id = ANY((auth.jwt() -> 'tenant_ids')::uuid[])",
+        "tenant_id = ANY(array(select jsonb_array_elements_text(auth.jwt() -> 'tenant_ids'))::uuid[])",
       ),
       tableColumns: TENANT_COLS,
     });

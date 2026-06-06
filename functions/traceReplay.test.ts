@@ -13,7 +13,7 @@ function jwt(body: object): string {
 const PATCH: TomlPatch = {
   path: 'tables.orders.rls',
   before: "tenant_id = (auth.jwt() ->> 'tenant')::uuid",
-  after: "tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY((auth.jwt() -> 'tenant_ids')::uuid[])",
+  after: "tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY(array(select jsonb_array_elements_text(auth.jwt() -> 'tenant_ids'))::uuid[])",
 };
 
 function payload(claims: object): ReplayPayload {

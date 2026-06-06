@@ -637,14 +637,15 @@
             <div class="badge">90% · open PR</div>
           </div>
           <div class="meta">
-            <span>#147</span><span>hush-bot wants to merge 1 commit</span><span>+2 −2</span>
+            <span>#147</span><span>hush-bot wants to merge 1 commit</span><span>+3 −1</span>
           </div>
           <div class="diff">
             <div class="file">infra/insforge.toml</div>
             <div>  [policy.orders_select]</div>
-            <div class="rm">- using = "tenant_id = auth.jwt() ->> 'tenant'"</div>
-            <div class="ad">+ using = "tenant_id = auth.jwt() ->> 'tenant'</div>
-            <div class="ad">+      OR tenant_id = ANY(auth.jwt() -> 'tenant_ids')"</div>
+            <div class="rm">- using = "tenant_id = (auth.jwt() ->> 'tenant')::uuid"</div>
+            <div class="ad">+ using = "tenant_id = (auth.jwt() ->> 'tenant')::uuid</div>
+            <div class="ad">+   OR tenant_id = ANY(array(select jsonb_array_elements_text(</div>
+            <div class="ad">+     auth.jwt() -> 'tenant_ids'))::uuid[])"</div>
           </div>
           <div class="checks">
             <span class="ok">✓ branch-project replay</span>

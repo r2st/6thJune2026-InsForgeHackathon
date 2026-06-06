@@ -22,8 +22,18 @@ export interface ValidateInput {
   tableSchema: TableSchema;
 }
 
-/** Functions the predicate may call. Anything else → reject. */
-const FN_WHITELIST = new Set(['auth.uid', 'auth.jwt', 'current_setting', 'coalesce', 'any']);
+/**
+ * Functions the predicate may call. Anything else → reject.
+ * `array` + `jsonb_array_elements_text` are the only valid-Postgres way to turn
+ * a jsonb claim array into a `uuid[]` for `= ANY(...)` membership — direct
+ * `(jsonb)::uuid[]` is not a legal cast (ticket 0045). They're bounded by the
+ * caller's own JWT (no table access), so they can't widen. The IN/EXISTS
+ * sub-select widening rule still guards real table reads.
+ */
+const FN_WHITELIST = new Set([
+  'auth.uid', 'auth.jwt', 'current_setting', 'coalesce', 'any',
+  'array', 'jsonb_array_elements_text',
+]);
 
 const KEYWORDS = new Set([
   'or', 'and', 'not', 'in', 'exists', 'select', 'from', 'where', 'any', 'is',

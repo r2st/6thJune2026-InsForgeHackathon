@@ -1,12 +1,13 @@
 ---
-id: 0044
+id: 0045
 title: Fix the patch shape — `::uuid[]` direct-cast on jsonb is invalid Postgres
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0018, 0006]
+note: renumbered 0044→0045 — 0044 was taken by 0044-live-pipeline-dashboard
 demo_path: yes — if Hush emits this on stage, applying it to the real fork dies
 ---
 
@@ -91,4 +92,32 @@ the correct form for consistency, and a couple are demo-facing:
 - Evidence + the live two-backends proof: docs/TESTING.md.
 
 ## Outcome
-<!-- Fill in when moving to done/. -->
+
+Fixed every occurrence. Canonical correct form (fork-verified, returns 3):
+`tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY(array(select jsonb_array_elements_text(auth.jwt() -> 'tenant_ids'))::uuid[])`.
+
+- **Runtime source** (opening pass): `prompts/diagnose.v1.md`, `diagnose.v2.md`,
+  `fixtures/diagnose-input-rls-empty.json`.
+- **10 test files**: bulk-replaced the broken `ANY((... )::uuid[])` substring
+  (covers both the full-OR and membership-only occurrences).
+- **Slide money shot** (`demo/slides/index.html`): the PR-diff panel showed an
+  invalid simplified `ANY(auth.jwt() -> 'tenant_ids')`; now shows the real
+  applied form with `::uuid` casts. Badge `+2 −2` → `+3 −1`.
+- **The enabling fix** — `functions/tomlValidate.ts`: the corrected form would
+  have been *rejected* by 0032's validator (the only valid SQL needs the
+  `array(select jsonb_array_elements_text(...))` wrapper, whose `array` +
+  `jsonb_array_elements_text` weren't whitelisted). Added both to `FN_WHITELIST`.
+  Safe: they're JWT-claim-bounded (no table access). The `subSelects()` rule
+  only matches `IN`/`EXISTS`, so this `ANY(array(select…))` was never flagged as
+  widening — no rule weakening. `IN (SELECT id FROM tenants)` still rejected.
+
+Full suite: 24 files, 238 tests green (incl. tomlValidate accepting the new
+form, safety widens=false, traceReplay parse, live E2E).
+
+**Not done** (the deferred deterministic guard from Notes): a `tomlValidate`
+rule rejecting `(jsonb)::<type>[]` direct casts outright. Whitelisting the safe
+functions is sufficient for now; the explicit reject-rule is a strictly-stronger
+follow-up if someone wants the class-of-bug killed pre-LLM.
+
+`docs/TESTING.md` left as-is — its broken-cast mentions are documentation of the
+bug, not live patches.

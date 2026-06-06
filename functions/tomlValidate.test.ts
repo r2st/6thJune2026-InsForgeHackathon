@@ -37,7 +37,7 @@ describe('tableSchemaFromToml', () => {
 describe('validateTomlPatch', () => {
   it('accepts the demo bug patch', () => {
     const r = validate(
-      "tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY((auth.jwt() -> 'tenant_ids')::uuid[])",
+      "tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY(array(select jsonb_array_elements_text(auth.jwt() -> 'tenant_ids'))::uuid[])",
     );
     expect(r.ok).toBe(true);
   });

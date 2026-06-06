@@ -7,9 +7,10 @@
 // pulled from the live `hush` InsForge project (docs/TESTING.md), not the
 // hardcoded DEMO_SEED.
 //
-// Why trace mode: the test backend is InsForge v1.0.0 (no branch projects), so
-// the real fork replay (0008) can't run here yet. Trace-only is the path that
-// works today — and proving it end-to-end de-risks everything downstream.
+// Why trace mode here: this harness exercises the no-fork path (ticket 0012)
+// purely in-process — no branch project needed — so it runs anywhere the CLI
+// is linked. The real fork path IS available (backend 2.2.0; see docs/TESTING.md
+// "Real fork verdict") and is proven separately; this proves the fallback.
 //
 // Integration test: it shells out to `npx @insforge/cli db query`. If the CLI
 // isn't authed / linked (e.g. CI without secrets), every case SKIPS with a
@@ -37,7 +38,7 @@ const PATCH: TomlPatch = {
   path: 'tables.orders.rls',
   before: "tenant_id = (auth.jwt() ->> 'tenant')::uuid",
   after:
-    "tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY((auth.jwt() -> 'tenant_ids')::uuid[])",
+    "tenant_id = (auth.jwt() ->> 'tenant')::uuid OR tenant_id = ANY(array(select jsonb_array_elements_text(auth.jwt() -> 'tenant_ids'))::uuid[])",
 };
 
 /** A decodable (unsigned) JWT carrying the migrated claim shape. */
