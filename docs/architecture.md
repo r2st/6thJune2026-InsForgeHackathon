@@ -186,6 +186,33 @@ Full mechanics in [ADR 0001](decisions/0001-test-on-a-fork.md). In short:
   the confidence breakdown. CI checks: branch-replay, existing tests,
   no policy blast.
 
+## Defense in depth (two-signal per stage)
+
+The principle in [`docs/the-hardest-part.html`](the-hardest-part.html)
+says *every load-bearing claim is backed by two independent signals.*
+That principle applies **within** each stage, not just across the
+pipeline. The brainstorm in
+[`docs/the-hardest-part-deeper.md`](the-hardest-part-deeper.md) maps
+each stage to its primary signal AND its verification signal:
+
+| Stage | Primary signal | Verification signal | Owner ticket |
+|---|---|---|---|
+| Capture | rrweb frustration event | matching backend log slot exists in `request_log` | 0024 + 0014 |
+| Correlate | one candidate request matches the heuristic | tenant_id at frustration matches tenant_id on candidate | extension inside 0014 |
+| Sanitise | prompt template uses `<user-data>` blocks | deterministic injection pre-filter passes | **0031** |
+| Diagnose | LLM emits a valid `Diagnosis` against the schema | post-LLM AST + identifier + path validation passes | **0032** |
+| Apply | `insforge config apply` returns ok | post-apply fingerprint matches intended patch | **0034** (extends 0006) |
+| Replay | failing payload passes on fork, fails on prod | neighboring tenant + count + join probes all pass | **0033** |
+| Verdict | suite's bug-confirmed + fix-verified flags both green | pre-run prod fingerprint matches re-fingerprint at verdict time | **0034** |
+| Score | composite ≥ tier threshold | every signal ≥ tier floor (no veto fired) | **0035** |
+| Ship | confidence tier dispatches | safety rail did not flag widening | 0021 |
+
+The five new tickets (0031–0035) implement the verification signals the
+earlier design didn't have. The receipt page renders the full stack as
+each row clears — the "honesty stack" pattern. Each row a judge sees
+turn green is a deterministic check the system passed, not a model's
+self-report.
+
 ## Components
 
 | # | Component | Owner role | Tech | Tickets |
