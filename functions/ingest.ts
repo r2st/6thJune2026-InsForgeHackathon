@@ -105,7 +105,31 @@ export async function ingest(
     console.warn('[hush] correlate failed', err);
   }
 
+  // 7. Kick the diagnose → test → ship loop off the captured run. Fire-and-
+  //    forget: a slow or failed orchestrator must never delay or fail the
+  //    capture response. This is the connection from capture (this fn) to the
+  //    fix-trigger edge function (0030) — without it the loop never starts.
+  triggerFix(runId);
+
   return { runId, clipUrl };
+}
+
+/**
+ * Asynchronously invoke the fix-trigger edge function for a captured run.
+ * Best-effort and env-guarded: with no INSFORGE_URL/SERVICE_KEY it no-ops (a
+ * platform row-insert trigger or a manual call drives the loop instead), and
+ * any error is swallowed so capture is never affected.
+ */
+export function triggerFix(runId: string): void {
+  const base = process.env.INSFORGE_URL;
+  const key = process.env.INSFORGE_SERVICE_KEY;
+  if (!base || !key) return;
+  void fetch(`${base}/functions/v1/fix-trigger`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ runId }),
+    // eslint-disable-next-line no-console
+  }).catch((err) => console.warn('[hush] triggerFix failed', err));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
