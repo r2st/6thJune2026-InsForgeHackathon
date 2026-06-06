@@ -38,6 +38,7 @@ import { traceReplay } from './traceReplay.js';
 import { scoreConfidence } from './score.js';
 import { firstFree, type PoolEntry } from './lib/pool.js';
 import { getClient } from './lib/insforgeClient.js';
+import { defaultShip } from './ship.js';
 
 const CHANNEL = 'receipt';
 /** No corpus on hackathon day — neutral pgvector signal. */
@@ -333,7 +334,7 @@ function withDefaults(deps?: Partial<OrchestratorDeps>): OrchestratorDeps {
     replayFork: deps?.replayFork ?? ((payload, fork, forkJwt) =>
       replayBoth({ payload, branchId: fork.branchId, forkJwt }, { forkBaseUrl: fork.baseUrl })),
     traceReplay: deps?.traceReplay ?? ((payload, patch) => traceReplay({ payload, patch })),
-    ship: deps?.ship ?? (async () => ({ prUrl: null })), // 0011 plugs in here
+    ship: deps?.ship ?? ((decision) => defaultShip(decision)), // 0011 → openPr via ship.ts
     now: deps?.now ?? (() => new Date().toISOString()),
   };
 }
