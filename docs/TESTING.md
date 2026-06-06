@@ -70,6 +70,29 @@ Expected — and confirmed on 2026-06-06:
 `buggy_new_jwt = 0` and `patched_new_jwt = 3` is the prod-fails / fork-passes
 verdict, the load-bearing signal the whole pipeline is built to produce.
 
+## Headless end-to-end harness
+
+[`functions/e2e-trace.test.ts`](../functions/e2e-trace.test.ts) drives the whole
+pipeline against this live backend — no UI, no fork needed. It pulls the real
+`orders` rows, builds the captured request (JWT migrated to `tenant_ids[]`), and
+runs traceReplay (0012) → safety (0021) → score (0020) → trace tier-cap, asserting
+the verdict end to end.
+
+```bash
+cd functions && npx vitest run e2e-trace.test.ts
+```
+
+Confirmed 2026-06-06 against the live backend:
+
+```
+[e2e] live rows=3 · prod=0 fork=3 · bug=true fix=true · widens=false · score=90 · tier=draft_pr (trace)
+```
+
+Score 90 would be PR tier, but trace mode correctly caps it to `draft_pr` — the
+"a trace never opens a PR" honesty rule, enforced. If the CLI isn't linked/authed
+(e.g. CI without secrets) the test **skips** rather than fails, so it never blocks
+the unit suite.
+
 ## Known limitation — no branch projects yet
 
 Backend is **1.0.0**; InsForge branching needs **2.1.0+**. The fork-and-test
