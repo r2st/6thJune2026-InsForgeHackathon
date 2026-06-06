@@ -76,6 +76,11 @@ does 92% come from?" — we need an answer that isn't hand-wave.
   read 92, seed **one** prior merged neighbour at similarity 60
   (40+20+20+12=92) — a legitimate demo-seed choice, not a formula fudge. Flagged
   for the deck/demo-seed owner; did not unilaterally edit the deck.
+  **Resolved → [[0040-confidence-number-deck-code-mismatch]]:** the seed route is
+  unbuilt (no pgvector kNN call site, no `bug_runs` history rows in
+  `infra/seed/`), so 0040 takes the honest copy fix — change the deck/docs to
+  90% — and records the seed-a-neighbour route as a future enhancement once
+  [[0010-demo-fixture-seed]] + a kNN call site land. score.ts weights unchanged.
 - **Left for [[0035-confidence-floor-and-veto]]:** the per-signal floor/veto
   layer. `tierFromScore` is exported and the composite is isolated so 0035 can
   clamp the dispatch tier without touching the formula.

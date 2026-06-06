@@ -103,3 +103,11 @@ average; it's an average *clamped by the worst signal*.
 - **Soft dep on [[0033-differential-replay-suite]] / [[0034-temporal-anchor-fingerprint]]:**
   those raise the *quality* of the numbers feeding `replayVerdictScore` but
   don't change the four-signal shape the floor reads — no rework when they land.
+- **Superseded after landing by [[0037-diagnose-self-escalation-routing]]:** my
+  original cap 2 (`safety.widens && !diagnosis.widensAccess` → 59) deliberately
+  left `widensAccess === true` *uncapped*, treating it as a declared/intentional
+  widen. 0037 reversed that — it reads `widensAccess: true` as the model
+  *self-escalating* ("can't fix safely"), so `score.ts` now hard-caps it to
+  `issue` (cap 3) and `fix-trigger.ts` short-circuits before spending a fork.
+  The 0035 test that asserted "intentional widen → pr" was replaced. 0037 did
+  not back-reference 0035; noting the link here so the record is coherent.
