@@ -7,11 +7,15 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "echo 'no linter yet'",
-    "test": "echo 'no tests yet'",
+    "test": "vitest run",
     "deploy": "insforge functions deploy ingest && insforge functions deploy fix-trigger"
+  },
+  "dependencies": {
+    "@insforge/sdk": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
   }
 }

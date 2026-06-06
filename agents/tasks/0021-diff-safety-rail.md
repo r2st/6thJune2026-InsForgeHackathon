@@ -3,9 +3,9 @@ id: 0021
 title: Diff safety rail — block access-widening patches
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-7
+started: 2026-06-06
+status: in-progress
 depends_on: [0018, 0019]
 demo_path: yes — Q&A defense ("won't this ship a bad patch?")
 ---

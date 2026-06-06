@@ -12,6 +12,36 @@ export interface CapturedSession {
   clipUrl: string;            // signed URL into storage.buckets.clips
 }
 
+/**
+ * Raw payload posted from the toy-app SDK to /capture.
+ * `tenantId` and `userId` are NOT in the body — the edge function resolves
+ * them from the caller's JWT. Don't trust client-supplied identity.
+ *
+ * Ticket: 0013.
+ */
+export interface IngestPayload {
+  sessionId: string;
+  signal: {
+    kind: 'rage_click' | 'dead_click' | 'abandoned_form';
+    target?: string;
+    at: number;     // ms since epoch
+    url: string;
+  };
+  events: unknown[]; // rrweb events; opaque to the server
+  ctx: {
+    url: string;
+    route?: string;
+    viewport?: { w: number; h: number };
+    buildSha?: string;
+  };
+}
+
+/** What /capture returns to the client. */
+export interface IngestResponse {
+  runId: string;
+  clipUrl: string;     // signed, short TTL
+}
+
 /** One backend request, as captured in the request_log table. */
 export interface RequestLogEntry {
   id: number;
