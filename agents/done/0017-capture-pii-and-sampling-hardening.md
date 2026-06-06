@@ -3,9 +3,9 @@ id: 0017
 title: PII masking + sampling hardening for capture
 role: builder
 priority: P2
-owner:
+owner: claude-app-layer
 started:
-status: inbox
+status: done
 depends_on: [0023, 0013]
 demo_path: no — covers the obvious judge Q&A objection
 ---
@@ -43,3 +43,6 @@ any session-replay product. We need a one-sentence answer backed by code.
 
 Don't gold-plate masking. The goal is "we have an answer," not "we have
 a SOC2-compliant capture pipeline."
+
+## Outcome
+Masking (maskAllInputs + data-hush selectors) and edge-fn header strip (scrubPii) were already wired by 0023/0013; sampling is gated by 0024 (capture only fires inside onSignal). Added: exported MASK_CONFIG (testable), a demonstrably-masked card field on /orders, pii.test.ts (5 tests: mask config + happy-path/idle produce no signal), and a PII/GDPR+cost Q&A bullet in pitch-script.md.
