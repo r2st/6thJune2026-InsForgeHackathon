@@ -10,17 +10,19 @@
 // InsForge request, so the backend can correlate symptom → cause.
 
 import { useEffect } from 'react';
-import { start as startCapture, flush, peek, size } from './capture';
+import { peek, size } from './capture';
 import { start as startSignals, type Signal } from './signals';
 import { sendCapture, sessionId } from './insforge-client';
+import { resolveCaptureSource } from './capture/index';
 
 declare global {
   interface Window {
     Hush?: {
-      flush: typeof flush;
+      flush: () => unknown[];
       peek: typeof peek;
       size: typeof size;
       sessionId: typeof sessionId;
+      source?: 'replicas' | 'rrweb';
       lastSignal?: Signal | null;
     };
   }
@@ -28,16 +30,24 @@ declare global {
 
 export function CaptureProvider(): null {
   useEffect(() => {
-    startCapture();
+    // Replicas when its key + SDK are present and ready; rrweb otherwise (0041).
+    const capture = resolveCaptureSource({
+      replicasApiKey: process.env.NEXT_PUBLIC_REPLICAS_API_KEY,
+      // replicasSdk: <inject the real Replicas SDK adapter here once wired>
+    });
+    capture.start();
+
     const stopSignals = startSignals({
       onSignal(s) {
-        const events = flush();
+        const bundle = capture.flush();
         if (window.Hush) window.Hush.lastSignal = s;
         // Fire and forget — capture must never block the app.
         void sendCapture({
           sessionId: sessionId(),
           signal: { kind: s.kind, target: s.target, at: s.at, url: s.url },
-          events,
+          events: bundle.events,
+          captureSource: bundle.source,
+          clipUrl: bundle.clipUrl,
           ctx: {
             url: s.url,
             route: typeof location !== 'undefined' ? location.pathname : undefined,
@@ -50,8 +60,18 @@ export function CaptureProvider(): null {
         });
       },
     });
-    window.Hush = { flush, peek, size, sessionId, lastSignal: null };
-    return stopSignals;
+    window.Hush = {
+      flush: () => capture.flush().events,
+      peek,
+      size,
+      sessionId,
+      source: capture.source,
+      lastSignal: null,
+    };
+    return () => {
+      stopSignals();
+      capture.stop();
+    };
   }, []);
   return null;
 }

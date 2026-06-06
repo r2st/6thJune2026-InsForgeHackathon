@@ -38,6 +38,7 @@ columns = [
   "tenant_id uuid not null references tenants(id)",
   "captured_at timestamptz not null default now()",
   "session_clip_url text",
+  "capture_source text default 'rrweb'",  # ticket 0041 — 'replicas' | 'rrweb' provenance
   "request_log_window jsonb",     # ticket 0014 — correlated backend log slice
   "session_id text",              # x-hush-session-id that produced this run
   "diagnosis jsonb",
@@ -96,7 +97,7 @@ events = ["captured", "correlated", "diagnosed", "testing", "shipped", "failed"]
 
 [functions.ingest]
 entry  = "functions/ingest.ts"
-secret = ["INSFORGE_URL", "INSFORGE_SERVICE_KEY", "OPENROUTER_API_KEY"]
+secret = ["INSFORGE_URL", "INSFORGE_SERVICE_KEY", "OPENROUTER_API_KEY", "REPLICAS_API_KEY"]
 
 [functions.fix-trigger]
 entry  = "functions/fix-trigger.ts"

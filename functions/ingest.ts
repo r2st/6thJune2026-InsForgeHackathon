@@ -12,7 +12,7 @@
 // Ticket: agents/done/0013-capture-edge-function.md
 
 import type { IngestPayload, IngestResponse } from './types.js';
-import { getClient } from './lib/insforgeClient.js';
+import { getClient, publishReceipt } from './lib/insforgeClient.js';
 import { gzipJson } from './lib/gzip.js';
 import { scrubPii } from './lib/scrubPii.js';
 import { decodeJwtBody, tenantFromClaims } from './lib/jwt.js';
@@ -50,7 +50,11 @@ export async function ingest(
   // 3. Resolve the playback URL. For a `visibility = "signed"` bucket
   //    (see infra/insforge.toml) the runtime returns a signed URL with
   //    the bucket's configured TTL. For a public bucket, a direct URL.
-  const clipUrl = client.storage.from(CLIPS_BUCKET).getPublicUrl(objectPath);
+  //    Provenance (0041): a provider-hosted clip (Replicas) is preferred for
+  //    the PR embed; otherwise use our Storage upload. Default source is rrweb.
+  const storageClipUrl = client.storage.from(CLIPS_BUCKET).getPublicUrl(objectPath);
+  const captureSource = payload.captureSource ?? 'rrweb';
+  const clipUrl = payload.clipUrl ?? storageClipUrl;
 
   // 4. Insert the bug_runs row. status='captured' is the trigger 0030
   //    will pick up to start the diagnose → test → ship loop.
@@ -61,6 +65,7 @@ export async function ingest(
       tenant_id: authedUser.tenantId,
       session_id: sessionId,
       session_clip_url: clipUrl,
+      capture_source: captureSource,
       status: 'captured',
     })
     .select('id')
@@ -71,7 +76,8 @@ export async function ingest(
   const runId = (insertRes.data as { id: string }).id;
 
   // 5. Broadcast 'captured' so the receipt page wakes up immediately.
-  await client.realtime.publish(REALTIME_CHANNEL, 'captured', {
+  //    Non-fatal: a realtime hiccup must never abort capture before correlate.
+  await publishReceipt(REALTIME_CHANNEL, 'captured', {
     runId,
     tenantId: authedUser.tenantId,
     signal: signal.kind,
@@ -93,7 +99,7 @@ export async function ingest(
         status: result.ok ? 'correlated' : 'captured_no_logs',
       })
       .eq('id', runId);
-    await client.realtime.publish(REALTIME_CHANNEL, 'correlated', {
+    await publishReceipt(REALTIME_CHANNEL, 'correlated', {
       runId,
       ok: result.ok,
       route: result.ok ? result.entry.route : null,

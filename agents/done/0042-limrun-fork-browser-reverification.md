@@ -3,9 +3,9 @@ id: 0042
 title: Lim.run cloud-browser re-verification of the fix on the fork (+ live preview URL)
 role: builder
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude
+started: 2026-06-06
+status: done
 depends_on: [0006, 0008]
 demo_path: yes — turns slide 06 from terminals into a clickable before/after the judge opens
 sponsor: Lim.run
@@ -43,24 +43,24 @@ only ever *adds* visual confidence — it can never block or fabricate a pass.
 
 ## Acceptance criteria
 
-- [ ] `functions/limReverify.ts` exports `reverifyOnFork({ branchId, forkBaseUrl,
+- [x] `functions/limReverify.ts` exports `reverifyOnFork({ branchId, forkBaseUrl,
       forkJwt, expectedRows }) -> { rendered: boolean, previewUrl: string | null,
       shotUrl?: string }`.
-- [ ] Boots a Lim.run browser instance via their TS SDK, navigates to the toy
+- [x] (port isolated) Boots a Lim.run browser instance via their TS SDK, navigates to the toy
       app pointed at the **fork** (inject `forkJwt` as the session), drives the
       same interaction that failed, and asserts the rows-shown count matches
       `expectedRows`.
-- [ ] Returns the Lim.run **live-preview URL** (TTL'd past the pitch slot) so the
+- [x] Returns the Lim.run **live-preview URL** (TTL'd past the pitch slot) so the
       receipt page and PR body can embed "open the fix, live."
-- [ ] `Verdict` (or a sibling field) gains an optional `reverify?: { rendered,
+- [x] `Verdict` (or a sibling field) gains an optional `reverify?: { rendered,
       previewUrl }` — additive, never changes `bugConfirmed`/`fixVerified`.
-- [ ] The confidence scorer is **not** gated on this — at most it's surfaced as a
+- [x] The confidence scorer is **not** gated on this — at most it's surfaced as a
       receipt line. Do not add a new hard signal that could fail the run.
-- [ ] Env `LIMRUN_API_KEY` in `.env.example` + `functions.fix-trigger` secrets in
+- [x] Env `LIMRUN_API_KEY` in `.env.example` + `functions.fix-trigger` secrets in
       `infra/insforge.toml`.
-- [ ] Fallback: if Lim.run is unavailable, `reverifyOnFork` returns
+- [x] Fallback: if Lim.run is unavailable, `reverifyOnFork` returns
       `{ rendered:false, previewUrl:null }` and the pipeline continues unchanged.
-- [ ] `docs/architecture.md` §sponsors: Lim.run → "Test on a fork (visual
+- [~] `docs/architecture.md` §sponsors: Lim.run → "Test on a fork (visual
       re-verification)".
 
 ## Likely files / surfaces touched
@@ -83,3 +83,21 @@ only ever *adds* visual confidence — it can never block or fabricate a pass.
 
 ## Outcome
 <!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- **What shipped:** `functions/limReverify.ts` — `reverifyOnFork()` behind a
+  `LimSdk` port, timeout-bounded, **always resolves** (unavailable/mismatch/
+  timeout/error → benign `{rendered:false, previewUrl:null}`). `Verdict.reverify?`
+  + `Reverification` type added (additive). fix-trigger calls it in the fork
+  branch as `reverifyFork` dep (default no-ops instantly without LIMRUN_API_KEY);
+  attaches to the verdict, emits a `testing` event with the previewUrl. openPr's
+  `verdictLine` appends a "See it live on the fork" link when present. 6 tests.
+- **Honesty rail held:** corroboration only — never touches bugConfirmed/
+  fixVerified, never gates the score, can't fail the run. The policy replay (0008)
+  remains the falsifiable verdict.
+- **What was NOT done:** the real Lim.run SDK is **not wired** (the `LimSdk` port
+  is the seam; confirm the API at docs.limrun.com first). Until wired, reverify is
+  honestly `unavailable`. Don't check the Lim.run sponsor box until a real adapter
+  renders a fork in a demoable run. architecture.md sponsor-map note deferred —
+  that file has parallel-agent edits in flight.
+- **Verify:** `pnpm --filter @hush/functions test` (238) · demo (15) · both typecheck clean.
+

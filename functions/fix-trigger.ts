@@ -22,7 +22,7 @@
 
 import type {
   BugRun, ConfidenceResult, Diagnosis, ReceiptEvent, ReplayPayload,
-  RequestLogEntry, SafetyResult, Verdict,
+  RequestLogEntry, Reverification, SafetyResult, Verdict,
 } from './types.js';
 import { correlate } from './correlate.js';
 import { toReplayPayload } from './capture.js';
@@ -35,10 +35,11 @@ import { applyTomlDiff, type ApplyResult } from './applyDiff.js';
 import { forgeForkJwt } from './forgeJwt.js';
 import { replayBoth } from './replay.js';
 import { traceReplay } from './traceReplay.js';
+import { reverifyOnFork, type ReverifyInput } from './limReverify.js';
 import { scoreConfidence } from './score.js';
 import { createMemoirClient, recallSimilarity, type RecallQuery } from './memory.js';
 import { firstFree, type PoolEntry } from './lib/pool.js';
-import { getClient } from './lib/insforgeClient.js';
+import { getClient, publishReceipt } from './lib/insforgeClient.js';
 import { defaultShip } from './ship.js';
 
 const CHANNEL = 'receipt';
@@ -71,6 +72,9 @@ export interface OrchestratorDeps {
   applyDiff: (branchId: string, patch: Diagnosis['tomlDiff']) => Promise<ApplyResult>;
   replayFork: (payload: ReplayPayload, fork: PoolEntry, forkJwt: string) => Promise<Verdict>;
   traceReplay: (payload: ReplayPayload, patch: Diagnosis['tomlDiff']) => Verdict | Promise<Verdict>;
+  /** Lim.run visual re-verify on the fork (0042). Corroboration only — never
+   *  gates. Default no-ops to { rendered:false } instantly without a key. */
+  reverifyFork: (input: ReverifyInput) => Promise<Reverification>;
   ship: (decision: ShipDecision) => Promise<{ prUrl: string | null }>;
   /** Memoir recall → scorer's 0–100 pgvector signal (0043). Neutral 50 with no corpus. */
   recallSimilarity: (query: RecallQuery) => Promise<number>;
@@ -171,6 +175,21 @@ export async function fixTrigger(runId: string, deps?: Partial<OrchestratorDeps>
       // Forge from the already-claimed fork entry — no second pool read.
       const forkJwt = forgeForkJwt(fork.branchId, ctx.jwtClaims, { resolveEntry: () => fork });
       verdict = await d.replayFork(payload, fork, forkJwt);
+
+      // Lim.run visual re-verify on the fork (0042) — CORROBORATION ONLY.
+      // Attaches a clickable before/after to the verdict; never changes
+      // bugConfirmed/fixVerified and never gates the score. No key ⇒ instant
+      // { rendered:false } no-op, so this can't stall or break the run.
+      const reverify = await d.reverifyFork({
+        branchId: fork.branchId,
+        forkBaseUrl: fork.baseUrl,
+        forkJwt,
+        expectedRows: corr.expectedRows,
+      });
+      verdict = { ...verdict, reverify };
+      if (reverify.previewUrl) {
+        await emit('testing', { mode: 'fork', reverified: reverify.rendered, previewUrl: reverify.previewUrl });
+      }
     }
 
     // 5. score → tier. Memoir (0043) recalls a real similarity neighbour from
@@ -332,7 +351,7 @@ function stripLeadingSlash(route: string): string {
 function withDefaults(deps?: Partial<OrchestratorDeps>): OrchestratorDeps {
   return {
     loadContext: deps?.loadContext ?? defaultLoadContext,
-    publish: deps?.publish ?? (async (e) => { await getClient().realtime.publish(CHANNEL, e.step, e); }),
+    publish: deps?.publish ?? (async (e) => { await publishReceipt(CHANNEL, e.step, e); }),
     updateRun: deps?.updateRun ?? (async (id, patch) => { await getClient().database.from('bug_runs').update(patch).eq('id', id); }),
     tableColumns: deps?.tableColumns ?? defaultTableColumns,
     diagnose: deps?.diagnose ?? realDiagnose,
@@ -341,6 +360,8 @@ function withDefaults(deps?: Partial<OrchestratorDeps>): OrchestratorDeps {
     replayFork: deps?.replayFork ?? ((payload, fork, forkJwt) =>
       replayBoth({ payload, branchId: fork.branchId, forkJwt }, { forkBaseUrl: fork.baseUrl })),
     traceReplay: deps?.traceReplay ?? ((payload, patch) => traceReplay({ payload, patch })),
+    reverifyFork: deps?.reverifyFork ?? ((input) =>
+      reverifyOnFork(input, { apiKey: process.env.LIMRUN_API_KEY })), // 0042 — no key ⇒ unavailable no-op
     ship: deps?.ship ?? ((decision) => defaultShip(decision)), // 0011 → openPr via ship.ts
     recallSimilarity: deps?.recallSimilarity ?? ((q) => recallSimilarity(createMemoirClient(), q)),
     now: deps?.now ?? (() => new Date().toISOString()),

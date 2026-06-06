@@ -28,6 +28,10 @@ export interface IngestPayload {
     url: string;
   };
   events: unknown[]; // rrweb events; opaque to the server
+  /** Capture provenance (ticket 0041). Defaults to 'rrweb' when absent. */
+  captureSource?: 'replicas' | 'rrweb';
+  /** Provider-hosted clip URL when the source hosts its own replay (Replicas). */
+  clipUrl?: string;
   ctx: {
     url: string;
     route?: string;
@@ -147,6 +151,13 @@ export interface Verdict {
    */
   mode?: 'fork' | 'trace';
   /**
+   * Ticket 0042 — optional Lim.run visual re-verification on the fork.
+   * CORROBORATION ONLY: additive, never changes bugConfirmed/fixVerified and
+   * never gates the score. A clickable before/after the judge can open. Absent
+   * when Lim.run is unavailable; the run proceeds unchanged.
+   */
+  reverify?: Reverification;
+  /**
    * Ticket 0033 — when derived from a differential replay suite, the suite's
    * 100/60/30/0 replay score. score.ts prefers it over the single-probe 100/0,
    * so a regression on a corroborating probe pulls the badge down. Absent for a
@@ -160,6 +171,22 @@ export interface ReplaySide {
   rowsReturned: number;
   latencyMs: number;
   snippet: string;            // ≤200 chars
+}
+
+/**
+ * Lim.run cloud-browser re-verification on the fork (ticket 0042). The fork's
+ * data + JWT + policy are ours, so the page render is reproducible (unlike a
+ * prod session). Corroboration only — see Verdict.reverify.
+ */
+export interface Reverification {
+  /** Did the orders page render `expectedRows` on the forked backend? */
+  rendered: boolean;
+  /** Shareable Lim.run live-preview URL, TTL'd past the pitch. Null if unavailable. */
+  previewUrl: string | null;
+  /** Optional still screenshot URL for the PR body. */
+  shotUrl?: string;
+  /** Why, when rendered=false — 'unavailable' | 'mismatch' | 'timeout' | 'error'. */
+  reason?: 'unavailable' | 'mismatch' | 'timeout' | 'error';
 }
 
 /**

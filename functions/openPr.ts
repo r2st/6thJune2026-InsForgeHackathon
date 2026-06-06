@@ -163,7 +163,12 @@ function rlsTrace(diagnosis: Diagnosis, verdict: Verdict): string {
 function verdictLine(verdict: Verdict): string {
   const tag = verdict.mode === 'trace' ? ' _(trace-only — branch project unavailable)_' : '';
   const mark = verdict.bugConfirmed && verdict.fixVerified ? '✓' : '⚠';
-  return `${mark} ${verdict.rationale}${tag}`;
+  // Lim.run visual re-verify (0042) — corroboration only; appended when present.
+  const rv = verdict.reverify?.previewUrl
+    ? `\n\n🖥️ **See it live on the fork:** [open the fixed orders page](${verdict.reverify.previewUrl})` +
+      (verdict.reverify.rendered ? ' — rows render ✓' : ' _(visual check inconclusive; policy replay is the verdict)_')
+    : '';
+  return `${mark} ${verdict.rationale}${tag}${rv}`;
 }
 
 let _template: string | null = null;

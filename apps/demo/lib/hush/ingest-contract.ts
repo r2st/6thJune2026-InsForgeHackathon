@@ -15,6 +15,10 @@ export interface IngestPayload {
     url: string;
   };
   events: unknown[];
+  /** Which provider produced this capture — shown on the receipt for honesty. */
+  captureSource?: 'replicas' | 'rrweb';
+  /** Provider-hosted clip URL, when the source hosts its own replay (Replicas). */
+  clipUrl?: string;
   ctx: {
     url: string;
     route?: string;
