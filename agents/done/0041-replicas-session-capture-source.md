@@ -11,6 +11,15 @@ demo_path: yes — Replicas is the "Watch" step; it feeds every downstream beat
 sponsor: Replicas
 ---
 
+## ⚠️ CORRECTED BY 0044
+
+The premise here was **wrong**: Replicas is a background coding-agent
+platform (a Fix-step peer to Devin), **not** a session-capture source. The
+`ReplicasCapture` built here was removed; capture is rrweb-only. Replicas is
+now wired correctly at the ship step — see
+[[0044-replicas-is-a-fix-agent-not-capture]]. The `CaptureSource` interface +
+`RrwebCapture` from this ticket remain valid.
+
 ## Goal
 
 Make **Replicas** the production session-capture provider that feeds Hush's

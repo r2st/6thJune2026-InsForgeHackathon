@@ -1,30 +1,24 @@
-// Capture-source factory. Picks Replicas when it's genuinely ready, else falls
-// back to rrweb. The pipeline calls resolveCaptureSource() once and depends on
-// the returned CaptureSource — never on which vendor won.
+// Capture-source factory. The pipeline calls resolveCaptureSource() once and
+// depends on the returned CaptureSource — never on a concrete vendor.
 //
-// Ticket: agents/tasks/0041-replicas-session-capture-source.md
+// NOTE (ticket 0044): Replicas was originally slated as a second capture source
+// (ticket 0041), but Replicas is a background CODING-AGENT platform, not a
+// session-capture tool — it belongs at the Fix step (see
+// functions/lib/replicasAgent.ts), not here. So capture is rrweb-only. The
+// interface stays so a real future capture vendor can drop in.
+//
+// Ticket: agents/tasks/0044-replicas-is-a-fix-agent-not-capture.md
 
 import type { CaptureSource } from './types';
 import { RrwebCapture } from './RrwebCapture';
-import { ReplicasCapture, type ReplicasSdk } from './ReplicasCapture';
 
 export type { CaptureSource, CaptureBundle, CaptureProvenance, FrustrationSignal } from './types';
 export { RrwebCapture } from './RrwebCapture';
-export { ReplicasCapture, type ReplicasSdk } from './ReplicasCapture';
 
-export interface ResolveOptions {
-  replicasApiKey?: string | undefined;
-  /** Real Replicas SDK adapter, injected at app bootstrap once wired. */
-  replicasSdk?: ReplicasSdk;
-}
+// reserved for a future real capture vendor; rrweb is the only source today.
+export type ResolveOptions = Record<string, never>;
 
-/**
- * Return the best available capture source. Replicas if its key + SDK are
- * present and it reports ready; rrweb otherwise. Pure decision — no side
- * effects until the caller calls .start().
- */
-export function resolveCaptureSource(opts: ResolveOptions = {}): CaptureSource {
-  const replicas = new ReplicasCapture({ apiKey: opts.replicasApiKey, sdk: opts.replicasSdk });
-  if (replicas.isReady()) return replicas;
+/** Return the capture source. rrweb today (always ready, no network). */
+export function resolveCaptureSource(_opts: ResolveOptions = {}): CaptureSource {
   return new RrwebCapture();
 }

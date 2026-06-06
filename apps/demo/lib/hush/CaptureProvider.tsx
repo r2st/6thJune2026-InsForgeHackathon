@@ -30,11 +30,8 @@ declare global {
 
 export function CaptureProvider(): null {
   useEffect(() => {
-    // Replicas when its key + SDK are present and ready; rrweb otherwise (0041).
-    const capture = resolveCaptureSource({
-      replicasApiKey: process.env.NEXT_PUBLIC_REPLICAS_API_KEY,
-      // replicasSdk: <inject the real Replicas SDK adapter here once wired>
-    });
+    // Capture is rrweb (0044: Replicas is a fix-agent, not a capture source).
+    const capture = resolveCaptureSource();
     capture.start();
 
     const stopSignals = startSignals({

@@ -97,7 +97,7 @@ events = ["captured", "correlated", "diagnosed", "testing", "shipped", "failed"]
 
 [functions.ingest]
 entry  = "functions/ingest.ts"
-secret = ["INSFORGE_URL", "INSFORGE_SERVICE_KEY", "OPENROUTER_API_KEY", "REPLICAS_API_KEY"]
+secret = ["INSFORGE_URL", "INSFORGE_SERVICE_KEY", "OPENROUTER_API_KEY"]
 
 [functions.fix-trigger]
 entry  = "functions/fix-trigger.ts"
@@ -109,4 +109,7 @@ secret = [
   "DEVIN_API_KEY",
   "GITHUB_REPO",
   "GITHUB_TOKEN",
+  "LIMRUN_API_KEY",          # 0042 — fork visual re-verify (corroboration only)
+  "REPLICAS_API_KEY",        # 0044 — optional fix-agent dispatch
+  "REPLICAS_ENVIRONMENT_ID",
 ]
