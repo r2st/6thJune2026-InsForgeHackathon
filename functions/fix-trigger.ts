@@ -221,7 +221,7 @@ export async function fixTrigger(runId: string, deps?: Partial<OrchestratorDeps>
     console.error('[hush] fixTrigger failed', { runId, message, stack: err instanceof Error ? err.stack : undefined });
     await emit('failed', { error: message });
     await d.updateRun(runId, { status: 'failed' });
-    return { runId, tier: null, prUrl: null, status: 'failed' };
+    return { runId, tier: null, prUrl: null, status: 'failed', reason: message } as FixResult & { reason: string };
   }
 }
 
@@ -269,7 +269,7 @@ async function fail(
 ): Promise<FixResult> {
   await emit('failed', { stage, reason });
   await d.updateRun(runId, { status: 'failed' });
-  return { runId, tier: null, prUrl: null, status: 'failed' };
+  return { runId, tier: null, prUrl: null, status: 'failed', reason: `${stage}: ${reason}` } as FixResult & { reason: string };
 }
 
 // ── small pure helpers ─────────────────────────────────────────────────────────
