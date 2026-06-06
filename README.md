@@ -6,6 +6,12 @@ frustration with the matching request log, patches `insforge.toml` on
 a forked InsForge branch project, and ships the PR before the user
 finishes writing the support ticket.
 
+> **👩‍⚖️ Judges:** see [SUBMISSION.md](SUBMISSION.md) for the full write-up and live links.
+> **Try it now:** [▶ Demo](https://w369egnp.insforge.site/r/demo?demo=1) ·
+> [🖥 Deck](https://w369egnp.insforge.site/pitch.html) ·
+> [🐛 The bug](https://hush-acme-store.vercel.app/orders?user=migrated) ·
+> [✅ The fix PR](https://github.com/r2st/hush-victim-acme/pull/1)
+
 ## What problem does it solve?
 
 **Most bugs don't crash — and the silent ones are the ones that lose customers.**
