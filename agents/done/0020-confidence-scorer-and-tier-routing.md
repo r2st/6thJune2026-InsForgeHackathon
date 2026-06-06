@@ -3,9 +3,9 @@ id: 0020
 title: Confidence scorer + tier routing
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus (impl session)
+started: 2026-06-06
+status: done
 depends_on: [0018, 0008]
 demo_path: yes — drives slide 08 (tiers) and the "92%" badge on slide 07
 ---
@@ -64,4 +64,20 @@ does 92% come from?" — we need an answer that isn't hand-wave.
   the talking points for the "where does 92% come from" Q&A answer.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- **Shipped:** `functions/score.ts` (`scoreConfidence`, `tierFromScore`) + 15
+  tests in `functions/score.test.ts`. Full suite green (46/46), typecheck clean.
+- **Two hard caps wired** as designed: replay not reproduced-then-verified →
+  cap 30 (→ issue); unintended widening (`safety.widens && !widensAccess`) →
+  cap 59 (→ issue). Composite is reported verbatim; caps lower it, never fake it.
+- **Demo bug honestly scores 90**, not the 92 on slide 07 (replay 100, diff 100,
+  blast 100, pgvector 50-neutral → 0.4·100+0.2·100+0.2·100+0.2·50=90). 90 ≥85 so
+  the **tier is still `pr`** — the pitch line holds. To make the badge literally
+  read 92, seed **one** prior merged neighbour at similarity 60
+  (40+20+20+12=92) — a legitimate demo-seed choice, not a formula fudge. Flagged
+  for the deck/demo-seed owner; did not unilaterally edit the deck.
+- **Left for [[0035-confidence-floor-and-veto]]:** the per-signal floor/veto
+  layer. `tierFromScore` is exported and the composite is isolated so 0035 can
+  clamp the dispatch tier without touching the formula.
+- **Call-site** (`fix-trigger.ts`) intentionally untouched — owned by
+  [[0030-fix-trigger-orchestrator]]; export shape matches its TODO.
