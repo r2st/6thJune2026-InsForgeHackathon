@@ -30,4 +30,4 @@ What this makes easy. What this makes hard. What we'll regret if it's wrong.
 
 *(append one line per ADR as they're added)*
 
-- *(none yet)*
+- [0001 — Test on a fork](0001-test-on-a-fork.md) — fork-and-replay mechanics for the money-shot demo beat
