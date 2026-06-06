@@ -65,8 +65,9 @@ export function validate(value: unknown, schema: JsonSchema, path = ''): void {
     }
     const props = schema.properties ?? {};
     for (const key of Object.keys(obj)) {
-      if (key in props) {
-        validate(obj[key], props[key], path ? `${path}.${key}` : key);
+      const propSchema = props[key];
+      if (propSchema !== undefined) {
+        validate(obj[key], propSchema, path ? `${path}.${key}` : key);
       } else if (schema.additionalProperties === false) {
         throw new SchemaValidationError(`unexpected field "${key}"`, path);
       }

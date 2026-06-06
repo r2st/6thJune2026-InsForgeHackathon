@@ -78,6 +78,40 @@ Collect these *before* you start coding. A single shared 1Password / vault note 
 | `GITHUB_TOKEN` | `gh auth token` (a fine-grained PAT scoped to the victim repo) | edge fns |
 | `VERCEL_TOKEN` | Vercel → account → tokens | CI only |
 
+### GitHub Actions deploy secrets
+
+The repo has a manual deploy workflow at `.github/workflows/ci.yml`. It always
+runs lint/typecheck/test/build on PRs and pushes to `main`; it deploys only when
+started with `workflow_dispatch` and `deploy=true`.
+
+Set these repository **secrets** before using the deploy job:
+
+| GitHub secret | Notes |
+|---|---|
+| `INSFORGE_ACCESS_TOKEN` | InsForge CLI auth token for CI. |
+| `INSFORGE_PROJECT_ID` | Linked prod project ID. |
+| `INSFORGE_URL` | `https://w369egnp.us-east.insforge.app`. |
+| `INSFORGE_ANON_KEY` | Used as `NEXT_PUBLIC_INSFORGE_ANON_KEY` during validation/deploy. |
+| `INSFORGE_SERVICE_KEY` | Server-only; syncs to InsForge function secrets and Vercel demo runtime env. |
+| `INSFORGE_BRANCH_PROJECT_ID` | Fork used by `fix-trigger`. |
+| `ANTHROPIC_API_KEY` | Diagnosis model call. |
+| `OPENROUTER_API_KEY` | Ingest embeddings. |
+| `DEVIN_API_KEY` | PR/fix agent. |
+| `HUSH_GITHUB_TOKEN` | Fine-grained PAT for the victim repo. Do **not** name this `GITHUB_TOKEN`; Actions reserves that name. The workflow syncs it into InsForge as runtime secret `GITHUB_TOKEN`. |
+| `VERCEL_TOKEN` | Vercel deploy token. |
+| `VERCEL_ORG_ID` | Vercel team/user ID. |
+| `VERCEL_DEMO_PROJECT_ID` | Vercel project ID for `apps/demo`. |
+| `VERCEL_RECEIPT_PROJECT_ID` | Vercel project ID for `apps/receipt`. |
+
+Set these repository **variables** unless you prefer to store them as secrets:
+
+| GitHub variable | Notes |
+|---|---|
+| `NEXT_PUBLIC_INSFORGE_URL` | Public base URL. Defaults to the current Hush InsForge URL if omitted. |
+| `NEXT_PUBLIC_INGEST_URL` | Public ingest function URL. Defaults to `/functions/ingest` on the current Hush InsForge URL. |
+| `NEXT_PUBLIC_RECEIPT_URL` | Deployed receipt app URL once known. |
+| `DEVIN_TARGET_REPO` | Victim repo in `owner/repo` form. Can be a secret instead. |
+
 ## 3. InsForge backend (T+0h to T+1h)
 
 ### Declarative config

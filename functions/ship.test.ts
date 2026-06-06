@@ -95,12 +95,18 @@ describe('defaultShip', () => {
   });
 
   it('degrades to null when GitHub is not configured (no client, no env)', async () => {
-    const prev = { repo: process.env.GITHUB_REPO, token: process.env.GITHUB_TOKEN };
+    const prev = {
+      repo: process.env.GITHUB_REPO,
+      devinRepo: process.env.DEVIN_TARGET_REPO,
+      token: process.env.GITHUB_TOKEN,
+    };
     delete process.env.GITHUB_REPO;
+    delete process.env.DEVIN_TARGET_REPO;
     delete process.env.GITHUB_TOKEN;
     const res = await defaultShip(decision('pr'));
     expect(res.prUrl).toBeNull();
     if (prev.repo) process.env.GITHUB_REPO = prev.repo;
+    if (prev.devinRepo) process.env.DEVIN_TARGET_REPO = prev.devinRepo;
     if (prev.token) process.env.GITHUB_TOKEN = prev.token;
   });
 

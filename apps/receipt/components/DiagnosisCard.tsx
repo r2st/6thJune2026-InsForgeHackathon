@@ -26,7 +26,7 @@ export function DiagnosisCard(props: DiagnosisCardProps) {
 
   return (
     <div style={styles.card}>
-      <div style={styles.eyebrow}>// DIAGNOSIS</div>
+      <div style={styles.eyebrow}>{'// DIAGNOSIS'}</div>
 
       {summary ? <p style={styles.summary}>{summary}</p> : null}
 

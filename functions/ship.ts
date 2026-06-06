@@ -109,7 +109,9 @@ export interface ShipResult { prUrl: string | null }
 export async function defaultShip(decision: ShipDecision, client?: GitHubClient): Promise<ShipResult> {
   if (decision.tier === 'issue') return { prUrl: null }; // no PR for issue tier
 
-  const repo = process.env.GITHUB_REPO;
+  // DEVIN_TARGET_REPO is the already-documented "repo we open PRs against"
+  // (see .env.example); GITHUB_REPO overrides it if set.
+  const repo = process.env.GITHUB_REPO ?? process.env.DEVIN_TARGET_REPO;
   const token = process.env.GITHUB_TOKEN;
   const gh = client ?? (repo && token ? createGitHubClient(repo, token) : null);
   if (!gh) return { prUrl: null }; // GitHub not configured — degrade cleanly

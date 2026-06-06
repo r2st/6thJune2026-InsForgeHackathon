@@ -121,14 +121,16 @@ export default function ReceiptPage({
 
       {verdict ? (
         <section style={styles.block}>
-          <div style={styles.blockLabel}>// REPLAY VERDICT{testingDetail?.mode === 'trace' ? ' · trace fallback' : ''}</div>
+          <div style={styles.blockLabel}>
+            {`// REPLAY VERDICT${testingDetail?.mode === 'trace' ? ' · trace fallback' : ''}`}
+          </div>
           <VerdictPair prodRows={verdict.prodRows} forkRows={verdict.forkRows} />
         </section>
       ) : null}
 
       {shipped?.tier ? (
         <section style={styles.block}>
-          <div style={styles.blockLabel}>// SHIPPED</div>
+          <div style={styles.blockLabel}>{'// SHIPPED'}</div>
           <ConfidenceBadge score={shipped.confidence ?? 0} tier={shipped.tier} />
           {shipped.prUrl ? (
             <p style={styles.prLine}>
@@ -142,7 +144,7 @@ export default function ReceiptPage({
 
       {failed ? (
         <section style={{ ...styles.block, borderColor: 'var(--accent)' }}>
-          <div style={{ ...styles.blockLabel, color: 'var(--accent)' }}>// STOPPED</div>
+          <div style={{ ...styles.blockLabel, color: 'var(--accent)' }}>{'// STOPPED'}</div>
           <p style={styles.lede}>{failed.error ?? failed.reason ?? 'Run stopped.'}</p>
         </section>
       ) : null}

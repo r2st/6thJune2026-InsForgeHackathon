@@ -19,6 +19,8 @@
     "preflight": "bash scripts/preflight.sh"
   },
   "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^15.0.0",
     "typescript": "^5.5.0"
   }
 }
