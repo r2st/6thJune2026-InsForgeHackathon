@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Witness · architecture</title>
+<link rel="icon" type="image/svg+xml" href="../assets/brand/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg-elev: #131418;
+    --bg-elev2: #181a20;
+    --ink: #ecedef;
+    --ink-dim: #9097a3;
+    --line: #25272e;
+    --accent: #ff6b35;
+    --good: #6ee7b7;
+    --cool: #a78bfa;
+    --warn: #fde68a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; background: rgba(255,107,53,0.1); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+  a { color: var(--good); text-decoration: none; border-bottom: 1px dotted rgba(110,231,183,0.4); }
+
+  .wrap { max-width: 960px; margin: 0 auto; padding: 64px 32px 96px; }
+
+  /* HERO */
+  header.hero { border-bottom: 1px solid var(--line); padding-bottom: 40px; margin-bottom: 56px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent);
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: clamp(48px, 7vw, 92px);
+    line-height: 0.95;
+    margin: 0 0 16px;
+    letter-spacing: -0.03em;
+  }
+  h1 .dot {
+    display: inline-block; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 24px var(--accent);
+    margin-left: 4px; transform: translateY(-4px);
+  }
+  .one-line {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(20px, 2.4vw, 26px);
+    line-height: 1.4; color: var(--ink-dim);
+    max-width: 50ch; margin: 0;
+  }
+  .one-line em { color: var(--good); font-style: italic; }
+
+  /* SECTIONS */
+  section { margin-bottom: 72px; }
+  .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 12px;
+  }
+  h2 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(32px, 4.5vw, 44px); line-height: 1.05;
+    margin: 0 0 20px; letter-spacing: -0.02em;
+  }
+  p { font-size: 16px; line-height: 1.65; color: var(--ink); max-width: 62ch; margin: 0 0 16px; }
+  p.muted { color: var(--ink-dim); }
+  p b { color: var(--ink); font-weight: 600; }
+  p em { color: var(--accent); font-style: italic; font-weight: 500; }
+
+  /* LOOP */
+  .loop { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 28px 0 12px; }
+  .step {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 10px; padding: 18px 16px;
+  }
+  .step .n { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.12em; }
+  .step .v { font-family: 'Instrument Serif', serif; font-size: 22px; margin-top: 4px; }
+  .step .s { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); margin-top: 4px; }
+  .step .d { font-size: 13px; line-height: 1.5; color: var(--ink); margin-top: 12px; }
+
+  /* SYSTEM MAP */
+  .map { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 14px; padding: 28px; margin: 24px 0; }
+  .map svg { width: 100%; height: auto; display: block; }
+
+  /* PRIMITIVES grid */
+  .prims { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 24px 0; }
+  .prim {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 24px;
+    border-left: 3px solid var(--good);
+  }
+  .prim .tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: var(--good); text-transform: uppercase; }
+  .prim h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 22px; margin: 6px 0 8px; }
+  .prim p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-dim); max-width: none; }
+  .prim p b { color: var(--ink); }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  table th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); font-weight: 500; }
+  table td { padding: 14px; border-bottom: 1px solid var(--line); line-height: 1.55; vertical-align: top; }
+  table td code { font-size: 12px; }
+  table tr:last-child td { border-bottom: none; }
+
+  /* CODE BLOCKS */
+  pre.toml {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 24px; overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.7;
+    color: var(--ink-dim); margin: 16px 0;
+  }
+  pre.toml .key { color: var(--good); }
+  pre.toml .str { color: var(--warn); }
+  pre.toml .com { color: var(--ink-dim); font-style: italic; opacity: 0.6; }
+  pre.toml .num { color: var(--cool); }
+
+  /* LISTS */
+  ul.dense { padding-left: 0; list-style: none; margin: 16px 0; }
+  ul.dense li {
+    padding: 12px 0 12px 22px; border-bottom: 1px dashed var(--line);
+    position: relative; font-size: 15px; line-height: 1.55; color: var(--ink);
+  }
+  ul.dense li:last-child { border-bottom: none; }
+  ul.dense li::before { content: "—"; position: absolute; left: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+  ul.dense li b { color: var(--ink); font-weight: 600; }
+  ul.dense li small { display: block; color: var(--ink-dim); font-size: 13px; margin-top: 2px; }
+
+  footer {
+    margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    color: var(--ink-dim); font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+  }
+
+  @media (max-width: 780px) {
+    .loop, .prims { grid-template-columns: 1fr; }
+    table { font-size: 13px; }
+    table th, table td { padding: 10px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="eyebrow">Witness · architecture · v1 · 6 June 2026</div>
+    <h1>The map.<span class="dot"></span></h1>
+    <p class="one-line">Six surfaces. One loop. Every box exists because <em>the loop doesn't close without it.</em></p>
+  </header>
+
+  <!-- 01 — THE LOOP -->
+  <section>
+    <div class="label">01 · The loop</div>
+    <h2>Capture → Diagnose → Test → Ship.</h2>
+    <p>Witness is a closed-loop agent. A user gets stuck on the demo storefront. Sixty seconds later, a PR with a four-line <code>insforge.toml</code> diff is open on the victim repo. The session clip is embedded; the failing branch-project trace is attached.</p>
+
+    <div class="loop">
+      <div class="step">
+        <div class="n">01</div>
+        <div class="v">Capture</div>
+        <div class="s">rrweb · edge fn</div>
+        <div class="d">User rage-clicks. rrweb fires. <code>ingest</code> edge function pulls the matching backend request-log window.</div>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <div class="v">Diagnose</div>
+        <div class="s">InsForge AI · pgvector</div>
+        <div class="d">Embed (session shape + request log + RLS verdict). Dedup against prior runs. Generate the candidate TOML diff in plain English.</div>
+      </div>
+      <div class="step">
+        <div class="n">03</div>
+        <div class="v">Test on a fork</div>
+        <div class="s">Branch project · Limrun</div>
+        <div class="d">Apply the TOML diff to a branch project. Replay the interaction. Old fails. Patched passes. Proof.</div>
+      </div>
+      <div class="step">
+        <div class="n">04</div>
+        <div class="v">Ship</div>
+        <div class="s">Devin · GitHub</div>
+        <div class="d">Score confidence. High → PR with the diff. Medium → draft PR with the failing trace. Low → issue with the clip.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 — THE MAP -->
+  <section>
+    <div class="label">02 · The map</div>
+    <h2>Six surfaces. Six wires.</h2>
+    <p>Three Vercel-hosted surfaces (demo store, receipt page, GitHub PR). Three InsForge primitives (prod backend, branch project, edge functions). One external agent (Devin). Nothing else.</p>
+
+    <div class="map">
+      <svg viewBox="0 0 880 480" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="dotHalo" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ff6b35" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/>
+          </radialGradient>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#9097a3"/>
+          </marker>
+          <marker id="arrowAccent" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#ff6b35"/>
+          </marker>
+          <marker id="arrowGood" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#6ee7b7"/>
+          </marker>
+          <style>
+            .box { fill: #131418; stroke: #25272e; stroke-width: 1.5; }
+            .box-accent { fill: #131418; stroke: #ff6b35; stroke-width: 1.5; }
+            .box-good { fill: #131418; stroke: #6ee7b7; stroke-width: 1.5; }
+            .box-cool { fill: #131418; stroke: #a78bfa; stroke-width: 1.5; }
+            .ti { font-family: 'Instrument Serif', serif; font-size: 18px; fill: #ecedef; }
+            .lb { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; }
+            .lb-d { fill: #9097a3; }
+            .lb-a { fill: #ff6b35; }
+            .lb-g { fill: #6ee7b7; }
+            .lb-c { fill: #a78bfa; }
+            .arrow-line { fill: none; stroke: #9097a3; stroke-width: 1.5; }
+            .arrow-accent { fill: none; stroke: #ff6b35; stroke-width: 1.5; }
+            .arrow-good { fill: none; stroke: #6ee7b7; stroke-width: 1.5; }
+            .edge-l { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #9097a3; }
+          </style>
+        </defs>
+
+        <!-- Demo store (top-left) -->
+        <rect x="30" y="40" width="180" height="80" rx="10" class="box-accent"/>
+        <text x="44" y="64" class="lb lb-a">VERCEL · DEMO</text>
+        <text x="44" y="88" class="ti">Storefront</text>
+        <text x="44" y="106" class="lb lb-d">rrweb · victim app</text>
+
+        <!-- User -->
+        <circle cx="120" cy="170" r="6" fill="#ff6b35"/>
+        <circle cx="120" cy="170" r="14" fill="url(#dotHalo)"/>
+        <text x="140" y="174" class="edge-l">rage-click · stuck user</text>
+
+        <!-- Ingest edge fn (middle-top) -->
+        <rect x="350" y="40" width="200" height="80" rx="10" class="box-good"/>
+        <text x="364" y="64" class="lb lb-g">INSFORGE · EDGE FN</text>
+        <text x="364" y="88" class="ti">ingest()</text>
+        <text x="364" y="106" class="lb lb-d">embed · dedup · broadcast</text>
+
+        <!-- Prod backend (right-top) -->
+        <rect x="670" y="40" width="180" height="80" rx="10" class="box-good"/>
+        <text x="684" y="64" class="lb lb-g">INSFORGE · PROD</text>
+        <text x="684" y="88" class="ti">backend</text>
+        <text x="684" y="106" class="lb lb-d">pgvector · RLS · logs</text>
+
+        <!-- Receipt page (middle-bottom-left) -->
+        <rect x="30" y="220" width="200" height="80" rx="10" class="box-accent"/>
+        <text x="44" y="244" class="lb lb-a">VERCEL · RECEIPT</text>
+        <text x="44" y="268" class="ti">Live status</text>
+        <text x="44" y="286" class="lb lb-d">realtime channel sub</text>
+
+        <!-- fix-trigger fn (middle) -->
+        <rect x="350" y="220" width="200" height="80" rx="10" class="box-good"/>
+        <text x="364" y="244" class="lb lb-g">INSFORGE · EDGE FN</text>
+        <text x="364" y="268" class="ti">fix-trigger()</text>
+        <text x="364" y="286" class="lb lb-d">diff · branch · score</text>
+
+        <!-- Branch project (right-middle) -->
+        <rect x="670" y="220" width="180" height="80" rx="10" class="box-good"/>
+        <text x="684" y="244" class="lb lb-g">INSFORGE · BRANCH</text>
+        <text x="684" y="268" class="ti">fix sandbox</text>
+        <text x="684" y="286" class="lb lb-d">forked schema · RLS</text>
+
+        <!-- Devin (middle-bottom) -->
+        <rect x="350" y="380" width="200" height="80" rx="10" class="box-cool"/>
+        <text x="364" y="404" class="lb lb-c">EXTERNAL AGENT</text>
+        <text x="364" y="428" class="ti">Devin</text>
+        <text x="364" y="446" class="lb lb-d">opens · drafts · files</text>
+
+        <!-- GitHub (right-bottom) -->
+        <rect x="670" y="380" width="180" height="80" rx="10" class="box"/>
+        <text x="684" y="404" class="lb lb-d">GITHUB</text>
+        <text x="684" y="428" class="ti">victim repo</text>
+        <text x="684" y="446" class="lb lb-d">PR · clip · trace</text>
+
+        <!-- Arrows -->
+        <!-- Demo → Ingest -->
+        <path d="M 210 80 C 280 80, 280 80, 350 80" class="arrow-accent" marker-end="url(#arrowAccent)"/>
+        <text x="240" y="72" class="edge-l">session</text>
+
+        <!-- Ingest → Prod (read logs) -->
+        <path d="M 550 80 L 670 80" class="arrow-line" marker-end="url(#arrow)"/>
+        <text x="572" y="72" class="edge-l">read logs · embed</text>
+
+        <!-- Ingest → Receipt (realtime) -->
+        <path d="M 450 120 C 450 170, 130 170, 130 220" class="arrow-good" marker-end="url(#arrowGood)"/>
+        <text x="220" y="186" class="edge-l">realtime status</text>
+
+        <!-- Ingest → fix-trigger -->
+        <path d="M 450 120 L 450 220" class="arrow-line" marker-end="url(#arrow)"/>
+        <text x="460" y="172" class="edge-l">handoff</text>
+
+        <!-- fix-trigger → Branch -->
+        <path d="M 550 260 L 670 260" class="arrow-line" marker-end="url(#arrow)"/>
+        <text x="566" y="252" class="edge-l">apply diff · replay</text>
+
+        <!-- Branch → fix-trigger (verdict) -->
+        <path d="M 670 280 L 550 280" class="arrow-good" marker-end="url(#arrowGood)"/>
+        <text x="566" y="296" class="edge-l">pass / fail</text>
+
+        <!-- fix-trigger → Devin -->
+        <path d="M 450 300 L 450 380" class="arrow-line" marker-end="url(#arrow)"/>
+        <text x="460" y="346" class="edge-l">diff · clip url · confidence</text>
+
+        <!-- Devin → GitHub -->
+        <path d="M 550 420 L 670 420" class="arrow-line" marker-end="url(#arrow)"/>
+        <text x="572" y="412" class="edge-l">open PR / issue</text>
+
+        <!-- fix-trigger → Receipt (final status) -->
+        <path d="M 350 260 C 280 260, 280 260, 230 260" class="arrow-good" marker-end="url(#arrowGood)"/>
+        <text x="248" y="252" class="edge-l">shipped</text>
+      </svg>
+    </div>
+    <p class="muted">Orange edges are the user's path. Mint edges are Witness telling the story back. Grey edges are internal handoffs the user never sees.</p>
+  </section>
+
+  <!-- 03 — COMPONENTS -->
+  <section>
+    <div class="label">03 · Components</div>
+    <h2>What each box does.</h2>
+    <table>
+      <tr>
+        <th style="width: 200px;">Component</th>
+        <th>Stack</th>
+        <th>Owner</th>
+      </tr>
+      <tr>
+        <td><b>Demo storefront</b><br/><small style="color:var(--ink-dim)">apps/demo</small></td>
+        <td>Next.js on Vercel · rrweb embedded · InsForge anon key</td>
+        <td>Frontend</td>
+      </tr>
+      <tr>
+        <td><b>Receipt page</b><br/><small style="color:var(--ink-dim)">apps/receipt</small></td>
+        <td>Next.js on Vercel · InsForge Realtime sub · URL: <code>/r/&lt;run_id&gt;</code></td>
+        <td>Frontend</td>
+      </tr>
+      <tr>
+        <td><b><code>ingest()</code></b><br/><small style="color:var(--ink-dim)">functions/ingest.ts</small></td>
+        <td>InsForge edge fn · embeds via AI gateway · pgvector dedup · Realtime broadcast</td>
+        <td>Backend</td>
+      </tr>
+      <tr>
+        <td><b><code>fix-trigger()</code></b><br/><small style="color:var(--ink-dim)">functions/fix-trigger.ts</small></td>
+        <td>InsForge edge fn · generates TOML diff · applies on branch · scores confidence · calls Devin</td>
+        <td>Backend</td>
+      </tr>
+      <tr>
+        <td><b>Prod backend</b></td>
+        <td>InsForge prod project · <code>orders</code>, <code>bug_runs</code>, <code>bug_decisions</code>, <code>tenants</code> · RLS on everything · Storage bucket <code>clips</code></td>
+        <td>Backend</td>
+      </tr>
+      <tr>
+        <td><b>Fix sandbox</b></td>
+        <td>InsForge branch project forked from prod · seeded with two demo tenants · TTL-bounded</td>
+        <td>Backend</td>
+      </tr>
+      <tr>
+        <td><b>Devin</b></td>
+        <td>External agent · receives diff + repo + clip URL · opens PR / draft PR / issue</td>
+        <td>Integration</td>
+      </tr>
+      <tr>
+        <td><b>Victim repo</b></td>
+        <td>GitHub · separate from this hackathon repo · branch protection disabled for demo</td>
+        <td>Integration</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- 04 — WHY INSFORGE -->
+  <section>
+    <div class="label">04 · Why InsForge is structurally load-bearing</div>
+    <h2>Four primitives. Each one the loop dies without.</h2>
+    <p>Witness could not be built on Supabase, Convex, or Neon — not without re-implementing pieces InsForge gives us declaratively. These four primitives are why this product lives on this platform.</p>
+    <div class="prims">
+      <div class="prim">
+        <div class="tag">PRIMITIVE 01</div>
+        <h3>Branch projects</h3>
+        <p>Forks of the entire backend — schema, RLS, auth, data — in <b>seconds</b>. Lets Witness test a candidate <code>insforge.toml</code> patch against real production shape without risking prod. <b>No other platform has this at this fidelity.</b></p>
+      </div>
+      <div class="prim">
+        <div class="tag">PRIMITIVE 02</div>
+        <h3>Declarative <code>insforge.toml</code></h3>
+        <p>Schema, auth policies, RLS, edge functions — all one file. <b>The fix becomes a 4-line diff Devin can confidently one-shot.</b> If the backend lived in a dashboard, the fix would be untraceable.</p>
+      </div>
+      <div class="prim">
+        <div class="tag">PRIMITIVE 03</div>
+        <h3>pgvector + RLS in one engine</h3>
+        <p>The embedding lives in the same row as the bug. Confidence tiers, dedup, "learn from rejection" — all <b>same-query joins</b>, no second store, no embedding sync drift.</p>
+      </div>
+      <div class="prim">
+        <div class="tag">PRIMITIVE 04</div>
+        <h3>Realtime + Storage + Edge fns, unified</h3>
+        <p>One <code>insforge.toml</code> stands up the bus, the bucket, and the functions. The 60-second receipt-page demo is <b>impossible</b> if any of these three live elsewhere.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — DATA MODEL -->
+  <section>
+    <div class="label">05 · Data model</div>
+    <h2>Four tables. RLS on every one.</h2>
+    <p>Minimal model — every column earns its row. The schema lives in <code>insforge.toml</code>; the demo bug lives in the <code>orders</code> RLS policy.</p>
+    <pre class="toml"><span class="com"># insforge.toml — schema slice</span>
+
+<span class="key">[tables.tenants]</span>
+<span class="key">columns</span> = [<span class="str">"id uuid pk"</span>, <span class="str">"name text"</span>, <span class="str">"jwt_claim text"</span>]
+
+<span class="key">[tables.orders]</span>
+<span class="key">columns</span> = [<span class="str">"id uuid pk"</span>, <span class="str">"tenant_id uuid fk tenants.id"</span>, <span class="str">"user_id uuid"</span>, <span class="str">"total numeric"</span>, <span class="str">"created_at timestamptz"</span>]
+<span class="key">rls</span>     = <span class="str">"tenant_id = auth.jwt() -&gt; 'tenant'"</span>   <span class="com"># &lt;— the demo bug lives here</span>
+
+<span class="key">[tables.bug_runs]</span>
+<span class="key">columns</span>   = [<span class="str">"id uuid pk"</span>, <span class="str">"captured_at timestamptz"</span>, <span class="str">"session_clip_url text"</span>, <span class="str">"diagnosis text"</span>, <span class="str">"toml_diff text"</span>, <span class="str">"confidence numeric"</span>, <span class="str">"status text"</span>, <span class="str">"pr_url text"</span>]
+<span class="key">embedding</span> = <span class="str">"vector(1536)"</span>
+<span class="key">rls</span>       = <span class="str">"tenant_id = auth.jwt() -&gt; 'tenant'"</span>
+
+<span class="key">[tables.bug_decisions]</span>
+<span class="key">columns</span> = [<span class="str">"run_id uuid fk bug_runs.id"</span>, <span class="str">"verdict text"</span>, <span class="str">"closed_at timestamptz"</span>, <span class="str">"closed_by text"</span>]
+<span class="com"># verdict ∈ {merged, rejected, dismissed, duplicate}</span>
+
+<span class="key">[storage.buckets.clips]</span>
+<span class="key">visibility</span> = <span class="str">"signed"</span>
+<span class="key">ttl_seconds</span> = <span class="num">3600</span>
+
+<span class="key">[realtime.channels.receipt]</span>
+<span class="key">events</span> = [<span class="str">"captured"</span>, <span class="str">"diagnosing"</span>, <span class="str">"testing"</span>, <span class="str">"shipped"</span>, <span class="str">"failed"</span>]</pre>
+    <p class="muted">Confidence tiers live in <code>bug_runs.confidence</code>. The learning loop reads <code>bug_decisions.verdict</code> and writes the result back into the next dedup query as a similarity penalty.</p>
+  </section>
+
+  <!-- 06 — SPONSORS -->
+  <section>
+    <div class="label">06 · External dependencies</div>
+    <h2>What we depend on. What we do if it dies.</h2>
+    <table>
+      <tr>
+        <th>Provider</th>
+        <th>Used for</th>
+        <th>Auth</th>
+        <th>Fallback if it dies</th>
+      </tr>
+      <tr>
+        <td><b>InsForge</b></td>
+        <td>Backend, branch project, edge fns, Realtime, Storage, AI gateway</td>
+        <td>Project + service key</td>
+        <td>No fallback. The pitch is wrong without it.</td>
+      </tr>
+      <tr>
+        <td><b>Vercel</b></td>
+        <td>Hosts demo storefront and receipt page</td>
+        <td>OIDC token (CI) / interactive (local)</td>
+        <td>Cloudflare Pages preview, or <code>vercel dev</code> on hotspot</td>
+      </tr>
+      <tr>
+        <td><b>Devin</b></td>
+        <td>Opens PRs from the TOML diff</td>
+        <td>API key</td>
+        <td>Pre-staged PR on the victim repo, served by <code>fix-trigger</code></td>
+      </tr>
+      <tr>
+        <td><b>Limrun</b></td>
+        <td>Browser sandbox for branch-project replay</td>
+        <td>API key</td>
+        <td>Local Playwright on the demo laptop</td>
+      </tr>
+      <tr>
+        <td><b>GitHub</b></td>
+        <td>Hosts the victim repo where PRs land</td>
+        <td>Fine-grained PAT</td>
+        <td>Show the diff in the receipt page; skip the PR step on stage</td>
+      </tr>
+      <tr>
+        <td><b>OpenRouter</b></td>
+        <td>Embeddings + diagnosis completions (via InsForge AI gateway)</td>
+        <td>API key</td>
+        <td>Cache last-known diagnosis for the demo bug; fall back to canned response</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- 07 — NON-GOALS -->
+  <section>
+    <div class="label">07 · What we are NOT building</div>
+    <h2>Owning the non-goals.</h2>
+    <p>Q&amp;A defense — every one of these is intentional, not missing. If a judge asks "why didn't you do X," the answer is in this list.</p>
+    <ul class="dense">
+      <li><b>A real session-replay capture pipeline.</b><small>rrweb is shipped in the toy app. Productionizing capture across SDK quirks, ad-blockers, and CSP is out of scope. The capture is a stub the right shape; the rest of the loop is the real product.</small></li>
+      <li><b>A general-purpose code-fix agent.</b><small>Witness only patches <code>insforge.toml</code>. We deliberately do not pretend Devin can one-shot arbitrary React or backend code. The narrow scope is the point.</small></li>
+      <li><b>Multi-tenant billing, admin UI, login.</b><small>Anon-key auth on the demo storefront, hardcoded tenant IDs in the seed. The deck never claims otherwise.</small></li>
+      <li><b>A real customer onboarding flow.</b><small>This is a pitch-day product. Buying the install path is for week two.</small></li>
+      <li><b>Production-grade RLS coverage.</b><small>One policy is wrong, one policy is patched. Generalising the diagnosis to N policies is the second commit, not the demo.</small></li>
+      <li><b>Long-running runs.</b><small>If a fix takes &gt;90 s, we drop to draft-PR mode and let the dev finish. The agent's job is to start the conversation, not own it.</small></li>
+    </ul>
+  </section>
+
+  <!-- 08 — OPEN QUESTIONS -->
+  <section>
+    <div class="label">08 · Open questions</div>
+    <h2>What's still TBD.</h2>
+    <ul class="dense">
+      <li><b>Sponsor confirmation on session capture.</b><small>If Replicas is the official sponsor, we wire it in alongside rrweb. If not, rrweb-only ships.</small></li>
+      <li><b>Branch-project warm-boot time.</b><small>Needs measuring at T+1h. If &gt;15 s, the 60-second demo budget gets tight and we need to pre-warm the fork during the receipt-page intro.</small></li>
+      <li><b>AI gateway latency.</b><small>InsForge AI vs direct OpenRouter — measure both. The embedding step is on the critical path.</small></li>
+      <li><b>Devin failure mode.</b><small>If Devin can't open a PR (rate limit, auth failure), does the receipt page show "shipped" with a fallback link, or surface the failure honestly? Lean: surface honestly.</small></li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>// architecture · v1 · 2026-06-06</span>
+    <span>see also: <a href="brief.md">brief.md</a> · <a href="deployment.md">deployment.md</a> · <a href="../ideas/FINAL.html">FINAL.html</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
