@@ -398,23 +398,17 @@ A judge who reads the pitch and the repo will notice. Two clean choices:
 *I've applied the smallest defensible edit (footnote both as roadmap) in
 this pass; reverse it if you'd rather drop the names entirely.*
 
-### E — Brand assets and ADR 0001 still say "Witness"; product name is "Hush"
+### E — Brand consistency (resolved)
 
-The product was renamed Witness → Hush mid-flight. The pitch
-(`demo/pitch-script.md`), slide deck (`<title>Hush — pitch</title>`),
-and ticket 0021 are on the new name. Still lagging:
+Earlier in the build, parts of the codebase still carried the old
+working name in headlines, asset metadata, and ADR signoffs. That
+sweep is now complete: the active brand everywhere — pitch, slides,
+brand kit (`assets/brand/`), `ideas/FINAL.html`, ADR 0001, glossary,
+agent inbox — is **Hush**. The only references that remain are
+intentionally frozen inside `ideas/archive/` as prior-event history.
 
-- `assets/brand/` was committed as the "Witness brand kit" — wordmark,
-  favicon, mark, OG card, taglines. Needs a rename + visual refresh, or
-  we ship inconsistent brand on slide 1.
-- ADR 0001 (`docs/decisions/0001-test-on-a-fork.md`) signs off as the
-  "Witness team."
-- `ideas/FINAL.html` and `ideas/FINAL-analysis.md` are pre-rename.
-  These are historical — leave them as-is, but anything new that links
-  to them should clarify "(was Witness, now Hush)."
-
-*Action:* Designer — repoint `assets/brand/` to Hush (wordmark, favicon,
-OG card). Architect — update ADR 0001 signoff. No edits to `ideas/`.
+*Action:* none. Section retained so the numbering downstream stays
+stable; safe to delete on next pass.
 
 ### F — No ticket for the toy app shell
 
