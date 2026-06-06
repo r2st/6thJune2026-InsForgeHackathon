@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hush Live Pipeline Dashboard</title>
+    <style>
+        :root {
+            --bg: #0b0c0f;
+            --bg-elev: #131418;
+            --bg-elev2: #181a20;
+            --ink: #ecedef;
+            --ink-dim: #9097a3;
+            --line: #25272e;
+            --accent: #ff6b35;
+            --good: #6ee7b7;
+            --cool: #a78bfa;
+            --warn: #fde68a;
+            --bad: #ff6b6b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Inter', system-ui, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--ink);
+        }
+        .subtitle {
+            color: var(--ink-dim);
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .pipeline-stage {
+            background: var(--bg-elev);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            min-height: 200px;
+            transition: all 0.3s ease;
+        }
+        .pipeline-stage.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+        }
+        .pipeline-stage.success {
+            border-color: var(--good);
+            box-shadow: 0 0 20px rgba(110, 231, 183, 0.3);
+        }
+        .stage-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .stage-icon {
+            font-size: 1.5rem;
+        }
+        .stage-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .stage-status {
+            margin-left: auto;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background: var(--bg-elev2);
+            color: var(--ink-dim);
+        }
+        .status-active {
+            background: var(--warn);
+            color: #000;
+        }
+        .status-success {
+            background: var(--good);
+            color: #000;
+        }
+        .status-error {
+            background: var(--bad);
+            color: #fff;
+        }
+        .stage-content {
+            font-size: 0.9rem;
+            color: var(--ink-dim);
+            line-height: 1.6;
+        }
+        .data-preview {
+            background: var(--bg-elev2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--cool);
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .timeline {
+            background: var(--bg-elev);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .timeline-header {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--ink);
+        }
+        .timeline-bar {
+            height: 8px;
+            background: var(--bg-elev2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--good));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .timeline-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        .timeline-step {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--ink-dim);
+        }
+        .timeline-step::before {
+            content: '';
+            display: block;
+            width: 12px;
+            height: 12px;
+            background: var(--bg-elev2);
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            border: 2px solid var(--line);
+            transition: all 0.3s ease;
+        }
+        .timeline-step.active::before {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .timeline-step.success::before {
+            background: var(--good);
+            border-color: var(--good);
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #ff8545;
+        }
+        .btn-secondary {
+            background: var(--bg-elev);
+            color: var(--ink);
+            border: 1px solid var(--line);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-elev2);
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .metric {
+            background: var(--bg-elev);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--ink-dim);
+            margin-top: 5px;
+        }
+        .arrow {
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: var(--line);
+            z-index: 1;
+        }
+        .arrow.animate {
+            animation: moveArrow 1s ease-in-out infinite;
+        }
+        @keyframes moveArrow {
+            0%, 100% { transform: translateY(-50%); }
+            50% { transform: translateY(-60%); }
+        }
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Hush Live Pipeline Dashboard</h1>
+        <p class="subtitle">Real-time visualization of the Hush bug-fixing pipeline</p>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="startDemo()">▶ Start Demo</button>
+            <button class="btn btn-secondary" onclick="resetDemo()">↺ Reset</button>
+            <button class="btn btn-secondary" onclick="simulateRealtime()">⚡ Simulate Real-time Updates</button>
+        </div>
+
+        <div class="metrics">
+            <div class="metric">
+                <div class="metric-value" id="totalTime">0s</div>
+                <div class="metric-label">Total Time</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="confidence">0%</div>
+                <div class="metric-label">Confidence</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="stagesComplete">0/5</div>
+                <div class="metric-label">Stages Complete</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="issuesFound">0</div>
+                <div class="metric-label">Issues Found</div>
+            </div>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-header">Pipeline Progress</div>
+            <div class="timeline-bar">
+                <div class="timeline-progress" id="timelineProgress"></div>
+            </div>
+            <div class="timeline-steps">
+                <div class="timeline-step" id="step-capture">Capture</div>
+                <div class="timeline-step" id="step-diagnose">Diagnose</div>
+                <div class="timeline-step" id="step-fork">Fork</div>
+                <div class="timeline-step" id="step-replay">Replay</div>
+                <div class="timeline-step" id="step-pr">PR</div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="pipeline-stage" id="stage-capture">
+                <div class="stage-header">
+                    <span class="stage-icon">📡</span>
+                    <span class="stage-name">Capture</span>
+                    <span class="stage-status status-pending" id="status-capture">Pending</span>
+                </div>
+                <div class="stage-content">
+                    <p>User rage-click detected</p>
+                    <p>Session captured with 30s buffer</p>
+                    <div class="data-preview" id="data-capture"></div>
+                </div>
+                <div class="arrow" id="arrow-capture">→</div>
+            </div>
+
+            <div class="pipeline-stage" id="stage-diagnose">
+                <div class="stage-header">
+                    <span class="stage-icon">🤖</span>
+                    <span class="stage-name">Diagnose</span>
+                    <span class="stage-status status-pending" id="status-diagnose">Pending</span>
+                </div>
+                <div class="stage-content">
+                    <p>AI analyzes session + logs</p>
+                    <p>Identifies root cause</p>
+                    <div class="data-preview" id="data-diagnose"></div>
+                </div>
+                <div class="arrow" id="arrow-diagnose">→</div>
+            </div>
+
+            <div class="pipeline-stage" id="stage-fork">
+                <div class="stage-header">
+                    <span class="stage-icon">🔀</span>
+                    <span class="stage-name">Fork</span>
+                    <span class="stage-status status-pending" id="status-fork">Pending</span>
+                </div>
+                <div class="stage-content">
+                    <p>Spins up branch project</p>
+                    <p>Applies TOML diff</p>
+                    <div class="data-preview" id="data-fork"></div>
+                </div>
+                <div class="arrow" id="arrow-fork">→</div>
+            </div>
+
+            <div class="pipeline-stage" id="stage-replay">
+                <div class="stage-header">
+                    <span class="stage-icon">🔁</span>
+                    <span class="stage-name">Replay</span>
+                    <span class="stage-status status-pending" id="status-replay">Pending</span>
+                </div>
+                <div class="stage-content">
+                    <p>Parallel replay: prod vs fork</p>
+                    <p>Verifies fix effectiveness</p>
+                    <div class="data-preview" id="data-replay"></div>
+                </div>
+                <div class="arrow" id="arrow-replay">→</div>
+            </div>
+
+            <div class="pipeline-stage" id="stage-pr">
+                <div class="stage-header">
+                    <span class="stage-icon">📦</span>
+                    <span class="stage-name">PR</span>
+                    <span class="stage-status status-pending" id="status-pr">Pending</span>
+                </div>
+                <div class="stage-content">
+                    <p>Opens GitHub PR</p>
+                    <p>Attaches proof artifacts</p>
+                    <div class="data-preview" id="data-pr"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let demoRunning = false;
+        let currentStage = 0;
+        const stages = ['capture', 'diagnose', 'fork', 'replay', 'pr'];
+        
+        const stageData = {
+            capture: {
+                status: 'active',
+                content: `Session ID: abc-123
+Frustration: rage-click
+Timestamp: 2026-06-06T13:37:42Z
+Page: /orders
+Expected rows: 3
+Actual rows: 0`
+            },
+            diagnose: {
+                status: 'active',
+                content: `Root cause: RLS misfire
+Policy: orders_select
+Issue: Hardcoded tenant_id
+Location: infra/insforge.toml:42
+Confidence: 87%`
+            },
+            fork: {
+                status: 'active',
+                content: `Branch: hush-fork-abc123
+Config version: v2.3.1
+TOML diff: 4 lines
+Changes: tenant_id -> current_user_tenant_id()`
+            },
+            replay: {
+                status: 'active',
+                content: `Prod result: 0 rows ❌
+Fork result: 3 rows ✅
+Match: false
+Verdict: Fix verified
+Duration: 2.3s`
+            },
+            pr: {
+                status: 'success',
+                content: `PR #42 opened
+Title: Fix RLS misfire on orders
+Diff: 4 lines
+Confidence: 92%
+Artifacts: clip + trace`
+            }
+        };
+
+        function updateStage(stage, status) {
+            const stageEl = document.getElementById(`stage-${stage}`);
+            const statusEl = document.getElementById(`status-${stage}`);
+            const dataEl = document.getElementById(`data-${stage}`);
+            const arrowEl = document.getElementById(`arrow-${stage}`);
+            const stepEl = document.getElementById(`step-${stage}`);
+
+            // Update stage styling
+            stageEl.className = 'pipeline-stage';
+            if (status === 'active') {
+                stageEl.classList.add('active');
+                statusEl.className = 'stage-status status-active';
+                statusEl.textContent = 'Processing...';
+            } else if (status === 'success') {
+                stageEl.classList.add('success');
+                statusEl.className = 'stage-status status-success';
+                statusEl.textContent = 'Complete';
+            } else if (status === 'pending') {
+                statusEl.className = 'stage-status status-pending';
+                statusEl.textContent = 'Pending';
+            }
+
+            // Update data preview
+            if (stageData[stage]) {
+                dataEl.textContent = stageData[stage].content;
+            }
+
+            // Update arrow animation
+            if (arrowEl && status === 'active') {
+                arrowEl.classList.add('animate');
+            } else if (arrowEl) {
+                arrowEl.classList.remove('animate');
+            }
+
+            // Update timeline step
+            stepEl.className = 'timeline-step';
+            if (status === 'active') {
+                stepEl.classList.add('active', 'pulse');
+            } else if (status === 'success') {
+                stepEl.classList.add('success');
+            }
+
+            // Update metrics
+            const completed = stages.indexOf(stage) + 1;
+            if (status === 'success') {
+                document.getElementById('stagesComplete').textContent = `${completed}/5`;
+                document.getElementById('timelineProgress').style.width = `${(completed / 5) * 100}%`;
+            }
+        }
+
+        function runStage(stage, delay) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    updateStage(stage, 'active');
+                    
+                    setTimeout(() => {
+                        updateStage(stage, 'success');
+                        
+                        // Update specific metrics
+                        if (stage === 'diagnose') {
+                            document.getElementById('confidence').textContent = '87%';
+                            document.getElementById('issuesFound').textContent = '1';
+                        }
+                        if (stage === 'pr') {
+                            document.getElementById('confidence').textContent = '92%';
+                        }
+                        
+                        resolve();
+                    }, 1500);
+                }, delay);
+            });
+        }
+
+        async function startDemo() {
+            if (demoRunning) return;
+            demoRunning = true;
+            currentStage = 0;
+
+            // Reset all stages
+            stages.forEach(stage => updateStage(stage, 'pending'));
+            document.getElementById('timelineProgress').style.width = '0%';
+            document.getElementById('totalTime').textContent = '0s';
+            document.getElementById('confidence').textContent = '0%';
+            document.getElementById('stagesComplete').textContent = '0/5';
+            document.getElementById('issuesFound').textContent = '0';
+
+            const startTime = Date.now();
+            const timeDisplay = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('totalTime').textContent = `${elapsed}s`;
+            }, 100);
+
+            // Run through stages
+            for (let i = 0; i < stages.length; i++) {
+                await runStage(stages[i], 500);
+            }
+
+            clearInterval(timeDisplay);
+            demoRunning = false;
+        }
+
+        function resetDemo() {
+            stages.forEach(stage => updateStage(stage, 'pending'));
+            document.getElementById('timelineProgress').style.width = '0%';
+            document.getElementById('totalTime').textContent = '0s';
+            document.getElementById('confidence').textContent = '0%';
+            document.getElementById('stagesComplete').textContent = '0/5';
+            document.getElementById('issuesFound').textContent = '0';
+            
+            Object.keys(stageData).forEach(stage => {
+                document.getElementById(`data-${stage}`).textContent = '';
+            });
+
+            currentStage = 0;
+            demoRunning = false;
+        }
+
+        function simulateRealtime() {
+            // Simulate WebSocket updates
+            const stages = ['capture', 'diagnose', 'fork', 'replay', 'pr'];
+            let i = 0;
+            
+            const interval = setInterval(() => {
+                if (i >= stages.length) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                const stage = stages[i];
+                const dataEl = document.getElementById(`data-${stage}`);
+                
+                // Add "real-time" updates
+                const updates = [
+                    '🔄 Processing...',
+                    '⏳ Analyzing...',
+                    '✓ Step complete',
+                ];
+                
+                let updateIndex = 0;
+                const updateInterval = setInterval(() => {
+                    if (updateIndex < updates.length) {
+                        dataEl.textContent = updates[updateIndex];
+                        updateIndex++;
+                    } else {
+                        clearInterval(updateInterval);
+                    }
+                }, 500);
+                
+                i++;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
