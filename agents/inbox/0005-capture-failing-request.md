@@ -25,7 +25,7 @@ request, no money shot.
 
 ## Acceptance criteria
 
-- [ ] `witness/capture.ts` exports `captureFailingRequest(sessionId,
+- [ ] `hush/capture.ts` exports `captureFailingRequest(sessionId,
       windowSec) -> ReplayPayload | null`
 - [ ] Filters edge-fn logs to requests where (a) the user matches the
       session's user id, (b) the response shape suggests an empty result
@@ -39,9 +39,9 @@ request, no money shot.
 
 ## Likely files / surfaces touched
 
-- `witness/capture.ts`
+- `hush/capture.ts`
 - `assets/data/edge-fn-log.sample.json`
-- `witness/types.ts` (`ReplayPayload`)
+- `hush/types.ts` (`ReplayPayload`)
 
 ## Notes
 

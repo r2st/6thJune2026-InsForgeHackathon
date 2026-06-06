@@ -1,4 +1,4 @@
-# Witness — brand assets
+# Hush — brand assets
 
 Lean kit. Everything derives from the visual language already shipping in [ideas/FINAL.html](../../ideas/FINAL.html).
 
@@ -19,6 +19,6 @@ Lean kit. Everything derives from the visual language already shipping in [ideas
 
 The product *watches*. The pitch's eyebrow already uses a small glowing orange dot to mean "live presence." We promoted that dot to the brand mark and replaced the period in the wordmark with it.
 
-> **Witness•**  → the period is the watcher.
+> **Hush•**  → the period is the watcher.
 
 Renders well at favicon size, works monochrome, doesn't lean on a cliché eye.

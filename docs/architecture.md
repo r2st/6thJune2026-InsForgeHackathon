@@ -24,7 +24,7 @@
                                                   [ receipt page lights up ]
                                                        (downstream: Correlate
                                                         → Diagnose → Branch test
-                                                        → PR — see Witness pivot)
+                                                        → PR — see Hush pivot)
 ```
 
 ## The Capture subsystem (brainstorm — 6 Jun)
@@ -42,7 +42,7 @@ shippable in a 9-hour hackathon and demo-honest.
 | Frustration signal | Client detector (see below) | The thing that decides we ship a bundle at all. |
 | Backend request log slice | InsForge edge-fn logs, queried by `session_id + ±10s window` | This is the pivot's payoff — links the symptom to the policy that fired. |
 | Auth context | `auth.uid()` + `tenant_id` claim, attached server-side | Required for RLS-aware correlation. |
-| App context | URL, route, viewport, build SHA, feature flags from `window.__WITNESS__` | The minimum context the diagnoser needs. |
+| App context | URL, route, viewport, build SHA, feature flags from `window.__HUSH__` | The minimum context the diagnoser needs. |
 
 ### Frustration signals (in priority order)
 
@@ -71,7 +71,7 @@ shippable in a 9-hour hackathon and demo-honest.
 
 ### Backend correlation tap
 
-Every edge-fn request from the toy app carries an `x-witness-session-id`
+Every edge-fn request from the toy app carries an `x-hush-session-id`
 header. The `/capture` edge fn, on receiving a bundle, range-queries the
 edge-fn log table for `session_id = ? AND ts BETWEEN captured_at - 10s
 AND captured_at`. The result lands in `sessions.request_log_window` as
@@ -81,7 +81,7 @@ on `orders` returned 0 rows for this user."*
 ### Privacy
 
 - rrweb `maskAllInputs: true` by default.
-- Any element with `data-witness="mask"` is hard-masked.
+- Any element with `data-hush="mask"` is hard-masked.
 - Cookies, `Authorization` headers, and `Set-Cookie` stripped at the edge fn
   before write.
 - Storage objects are tenant-scoped; RLS on `sessions` table mirrors

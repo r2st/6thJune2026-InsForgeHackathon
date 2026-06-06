@@ -12,7 +12,7 @@ demo_path: yes — slide 6 requires the fork to actually have the new policy
 
 ## Goal
 
-`witness/applyDiff.ts` exports `applyTomlDiff(branchId, diff: TomlPatch)
+`hush/applyDiff.ts` exports `applyTomlDiff(branchId, diff: TomlPatch)
 -> {ok: true, version} | {ok: false, lintError}`. Internally runs
 `insforge config apply --env <branchId>` against the patched config,
 returns the new config version or a structured lint error.
@@ -36,8 +36,8 @@ verdict line lies.
 
 ## Likely files / surfaces touched
 
-- `witness/applyDiff.ts`
-- `witness/tomlPatch.ts` (parse/serialize)
+- `hush/applyDiff.ts`
+- `hush/tomlPatch.ts` (parse/serialize)
 - `infra/insforge.toml` (the file we patch — committed in buggy state)
 
 ## Notes

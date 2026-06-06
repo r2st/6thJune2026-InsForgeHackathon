@@ -12,10 +12,10 @@ demo_path: yes — defensive; runs if the primary fork path fails
 
 ## Goal
 
-`witness/traceReplay.ts` evaluates the candidate `insforge.toml` policy
+`hush/traceReplay.ts` evaluates the candidate `insforge.toml` policy
 against the captured request *in-process* — no fork, just a Postgres
 RLS-evaluation library against a local replica of the seeded data. If
-branch-project spin-up errors or exceeds the 5s budget, the Witness
+branch-project spin-up errors or exceeds the 5s budget, the Hush
 loop falls back to this path and the receipt page shows
 "trace-only mode" instead of stalling.
 
@@ -38,8 +38,8 @@ project unavailable" with a `--cool` badge instead of a green one.
 
 ## Likely files / surfaces touched
 
-- `witness/traceReplay.ts`
-- `witness/runtime.ts` (the fallback wiring)
+- `hush/traceReplay.ts`
+- `hush/runtime.ts` (the fallback wiring)
 - `app/receipt/` (badge variant)
 
 ## Notes

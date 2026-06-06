@@ -22,7 +22,7 @@ any session-replay product. We need a one-sentence answer backed by code.
 
 ## Acceptance criteria
 
-- [ ] rrweb config: `maskAllInputs: true`, `maskTextSelector: '[data-witness="mask"]'`
+- [ ] rrweb config: `maskAllInputs: true`, `maskTextSelector: '[data-hush="mask"]'`
 - [ ] One toy-app field demonstrably masked in the recorded clip (e.g.
       the credit-card input on checkout)
 - [ ] Edge fn strips `Authorization`, `Cookie`, `Set-Cookie` from anything
@@ -34,10 +34,10 @@ any session-replay product. We need a one-sentence answer backed by code.
 
 ## Likely files / surfaces touched
 
-- `src/witness/capture.ts`
+- `src/hush/capture.ts`
 - `edge-functions/capture.ts`
 - `demo/pitch-script.md` (Q&A section)
-- `tests/witness/pii.test.ts`
+- `tests/hush/pii.test.ts`
 
 ## Notes
 

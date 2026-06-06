@@ -34,7 +34,7 @@ moment.
 ## Likely files / surfaces touched
 
 - toy app or separate receipt app: `src/receipt/Page.tsx`
-- `src/witness/realtime-client.ts`
+- `src/hush/realtime-client.ts`
 
 ## Notes
 

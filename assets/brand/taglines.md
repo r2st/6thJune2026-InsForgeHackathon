@@ -1,4 +1,4 @@
-# Witness — copy variants
+# Hush — copy variants
 
 A short, decided menu. Use these verbatim unless the surface demands different.
 
@@ -6,12 +6,12 @@ A short, decided menu. Use these verbatim unless the surface demands different.
 
 ## Hero (deck, landing)
 
-> **Witness.**
+> **Hush.**
 > The bug-fixer for the bugs that don't crash.
 
 ## Sub-hero (one extra line)
 
-> Sentry catches the bugs that throw. Witness catches the ones that just frustrate.
+> Sentry catches the bugs that throw. Hush catches the ones that just frustrate.
 
 ## Punchline (slide tail / closing)
 
@@ -19,11 +19,11 @@ A short, decided menu. Use these verbatim unless the surface demands different.
 
 ## 30-word elevator
 
-> Witness watches user sessions for silent bugs — rage-clicks, abandoned forms, frozen carts — replays them on a forked InsForge backend, patches `insforge.toml`, and ships the PR before support sees the ticket.
+> Hush watches user sessions for silent bugs — rage-clicks, abandoned forms, frozen carts — replays them on a forked InsForge backend, patches `insforge.toml`, and ships the PR before support sees the ticket.
 
 ## One-tweet version (≤240 chars)
 
-> Sentry needs a stack trace. Witness doesn't. It watches the session, replays it on a forked backend, patches your RLS, and opens the PR — in under a minute. Built on InsForge.
+> Sentry needs a stack trace. Hush doesn't. It watches the session, replays it on a forked backend, patches your RLS, and opens the PR — in under a minute. Built on InsForge.
 
 ## GitHub repo description (≤120 chars)
 
@@ -31,7 +31,7 @@ A short, decided menu. Use these verbatim unless the surface demands different.
 
 ## Footer signature
 
-> Witness · built on InsForge · 6 June hackathon
+> Hush · built on InsForge · 6 June hackathon
 
 ---
 
@@ -39,15 +39,15 @@ A short, decided menu. Use these verbatim unless the surface demands different.
 
 ### For an engineering lead
 
-> Most user-reported bugs never throw. Witness finds them by watching the session, proves them by replaying on a forked backend, and patches `insforge.toml` — with confidence-tiered output so it doesn't spam your PR queue.
+> Most user-reported bugs never throw. Hush finds them by watching the session, proves them by replaying on a forked backend, and patches `insforge.toml` — with confidence-tiered output so it doesn't spam your PR queue.
 
 ### For a founder
 
-> Your support inbox is full of "the button doesn't work" tickets. Sentry can't see them. Witness can — and fixes them before the customer hits send.
+> Your support inbox is full of "the button doesn't work" tickets. Sentry can't see them. Hush can — and fixes them before the customer hits send.
 
 ### For an InsForge judge
 
-> Witness only works because InsForge gives it a forkable backend. Branch projects + declarative `insforge.toml` are how the fix gets tested safely. Every other database is a substrate. InsForge is the engine.
+> Hush only works because InsForge gives it a forkable backend. Branch projects + declarative `insforge.toml` are how the fix gets tested safely. Every other database is a substrate. InsForge is the engine.
 
 ---
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Witness · architecture</title>
+<title>Hush · architecture</title>
 <link rel="icon" type="image/svg+xml" href="../assets/brand/favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -153,7 +153,7 @@
 
   <!-- HERO -->
   <header class="hero">
-    <div class="eyebrow">Witness · architecture · v1 · 6 June 2026</div>
+    <div class="eyebrow">Hush · architecture · v1 · 6 June 2026</div>
     <h1>The map.<span class="dot"></span></h1>
     <p class="one-line">Six surfaces. One loop. Every box exists because <em>the loop doesn't close without it.</em></p>
   </header>
@@ -162,7 +162,7 @@
   <section>
     <div class="label">01 · The loop</div>
     <h2>Capture → Diagnose → Test → Ship.</h2>
-    <p>Witness is a closed-loop agent. A user gets stuck on the demo storefront. Sixty seconds later, a PR with a four-line <code>insforge.toml</code> diff is open on the victim repo. The session clip is embedded; the failing branch-project trace is attached.</p>
+    <p>Hush is a closed-loop agent. A user gets stuck on the demo storefront. Sixty seconds later, a PR with a four-line <code>insforge.toml</code> diff is open on the victim repo. The session clip is embedded; the failing branch-project trace is attached.</p>
 
     <div class="loop">
       <div class="step">
@@ -323,7 +323,7 @@
         <text x="248" y="252" class="edge-l">shipped</text>
       </svg>
     </div>
-    <p class="muted">Orange edges are the user's path. Mint edges are Witness telling the story back. Grey edges are internal handoffs the user never sees.</p>
+    <p class="muted">Orange edges are the user's path. Mint edges are Hush telling the story back. Grey edges are internal handoffs the user never sees.</p>
   </section>
 
   <!-- 03 — COMPONENTS -->
@@ -383,12 +383,12 @@
   <section>
     <div class="label">04 · Why InsForge is structurally load-bearing</div>
     <h2>Four primitives. Each one the loop dies without.</h2>
-    <p>Witness could not be built on Supabase, Convex, or Neon — not without re-implementing pieces InsForge gives us declaratively. These four primitives are why this product lives on this platform.</p>
+    <p>Hush could not be built on Supabase, Convex, or Neon — not without re-implementing pieces InsForge gives us declaratively. These four primitives are why this product lives on this platform.</p>
     <div class="prims">
       <div class="prim">
         <div class="tag">PRIMITIVE 01</div>
         <h3>Branch projects</h3>
-        <p>Forks of the entire backend — schema, RLS, auth, data — in <b>seconds</b>. Lets Witness test a candidate <code>insforge.toml</code> patch against real production shape without risking prod. <b>No other platform has this at this fidelity.</b></p>
+        <p>Forks of the entire backend — schema, RLS, auth, data — in <b>seconds</b>. Lets Hush test a candidate <code>insforge.toml</code> patch against real production shape without risking prod. <b>No other platform has this at this fidelity.</b></p>
       </div>
       <div class="prim">
         <div class="tag">PRIMITIVE 02</div>
@@ -497,7 +497,7 @@
     <p>Q&amp;A defense — every one of these is intentional, not missing. If a judge asks "why didn't you do X," the answer is in this list.</p>
     <ul class="dense">
       <li><b>A real session-replay capture pipeline.</b><small>rrweb is shipped in the toy app. Productionizing capture across SDK quirks, ad-blockers, and CSP is out of scope. The capture is a stub the right shape; the rest of the loop is the real product.</small></li>
-      <li><b>A general-purpose code-fix agent.</b><small>Witness only patches <code>insforge.toml</code>. We deliberately do not pretend Devin can one-shot arbitrary React or backend code. The narrow scope is the point.</small></li>
+      <li><b>A general-purpose code-fix agent.</b><small>Hush only patches <code>insforge.toml</code>. We deliberately do not pretend Devin can one-shot arbitrary React or backend code. The narrow scope is the point.</small></li>
       <li><b>Multi-tenant billing, admin UI, login.</b><small>Anon-key auth on the demo storefront, hardcoded tenant IDs in the seed. The deck never claims otherwise.</small></li>
       <li><b>A real customer onboarding flow.</b><small>This is a pitch-day product. Buying the install path is for week two.</small></li>
       <li><b>Production-grade RLS coverage.</b><small>One policy is wrong, one policy is patched. Generalising the diagnosis to N policies is the second commit, not the demo.</small></li>

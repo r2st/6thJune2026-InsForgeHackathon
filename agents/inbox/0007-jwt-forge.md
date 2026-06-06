@@ -12,7 +12,7 @@ demo_path: yes — without a valid JWT, the replay 401s and the verdict is wrong
 
 ## Goal
 
-`witness/forgeJwt.ts` exports `forgeForkJwt(branchId, originalClaims)
+`hush/forgeJwt.ts` exports `forgeForkJwt(branchId, originalClaims)
 -> string`. Reads the fork's signing secret (we control it, since we
 provisioned the branch), re-signs the captured claims for the fork's
 audience, and returns a Bearer-ready token.
@@ -35,8 +35,8 @@ intact and the signature valid for the fork.
 
 ## Likely files / surfaces touched
 
-- `witness/forgeJwt.ts`
-- `.witness/pool.json` (reads per-fork signing secret)
+- `hush/forgeJwt.ts`
+- `.hush/pool.json` (reads per-fork signing secret)
 
 ## Notes
 

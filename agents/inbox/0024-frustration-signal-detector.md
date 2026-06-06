@@ -13,7 +13,7 @@ demo_path: yes — this is what fires capture on stage
 ## Goal
 
 A small in-app detector that watches user interactions and decides when
-to ship a bundle via `Witness.flush()`. Must reliably fire on stage from
+to ship a bundle via `Hush.flush()`. Must reliably fire on stage from
 a scripted rage-click sequence.
 
 ## Why it matters for the demo
@@ -30,15 +30,15 @@ up." Detector reliability *is* the demo.
 - [ ] **Abandoned-form:** any `input` events on a form, then `beforeunload`
       or route change without `submit`, fires `signal: 'abandoned_form'`
 - [ ] Detector is debounced — at most one signal per 5s window
-- [ ] On signal, calls `Capture.send({ signal, events: Witness.flush(),
+- [ ] On signal, calls `Capture.send({ signal, events: Hush.flush(),
       ctx })` (ticket 0006 implements `Capture.send`)
 - [ ] Unit-tested with at least the rage-click case (jsdom or vitest)
 
 ## Likely files / surfaces touched
 
-- toy app: `src/witness/signals.ts` (new)
-- toy app: `src/witness/index.ts` (wire-up)
-- tests: `src/witness/signals.test.ts`
+- toy app: `src/hush/signals.ts` (new)
+- toy app: `src/hush/index.ts` (wire-up)
+- tests: `src/hush/signals.test.ts`
 
 ## Notes
 

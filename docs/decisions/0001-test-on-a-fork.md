@@ -2,11 +2,11 @@
 
 - **Date:** 2026-06-06
 - **Status:** proposed
-- **Decider(s):** Witness team
+- **Decider(s):** Hush team
 
 ## Context
 
-Step 04 of the Witness loop — *Test on a fork* — is the technical claim the
+Step 04 of the Hush loop — *Test on a fork* — is the technical claim the
 whole pitch rests on. The slide-6 money shot is two terminals side by side:
 **prod (red)** still reproduces the bug, **branch (green)** is fixed. If
 that visual doesn't land, the deck collapses to "we open speculative PRs."
@@ -60,7 +60,7 @@ A *fork test* is the sequence:
   fork *schema and policy*, seed only the rows the failing request
   touches.
 - **One persistent test backend, no per-bug fork.** Race conditions
-  between concurrent Witness loops, no parallel confidence checks,
+  between concurrent Hush loops, no parallel confidence checks,
   no PR-to-branch traceability. Pass.
 
 ## Consequences

@@ -1,4 +1,4 @@
-# Witness — critical analysis & proposed pivot
+# Hush — critical analysis & proposed pivot
 
 **Subject:** `ideas/FINAL.html` (v5, 6 June)
 **Verdict:** Strong narrative, weak technical foundation, weakly InsForge-native. The pitch is winnable on stage but would not be defensible to a technical judge or a real buyer. There is one pivot that fixes all three problems at once and makes InsForge structurally load-bearing instead of cosmetically so.
@@ -74,7 +74,7 @@ Sentry already has session replay. Sentry already has Seer. Sentry can add "fix 
 
 ## 3. The diagnostic — one sentence
 
-**Witness pitches a horizontal AI bug-fixer that *uses* InsForge as its database, when it should pitch a product that *only exists because* InsForge exposes a forkable, declarative backend with introspectable auth and RLS.**
+**Hush pitches a horizontal AI bug-fixer that *uses* InsForge as its database, when it should pitch a product that *only exists because* InsForge exposes a forkable, declarative backend with introspectable auth and RLS.**
 
 That re-framing is the difference between a polished hackathon entry and one InsForge would actually want to ship as a reference product.
 
@@ -83,13 +83,13 @@ That re-framing is the difference between a polished hackathon entry and one Ins
 ## 4. Proposed pivot — keep the wrapper, replace the engine
 
 Keep the entire narrative shell:
-- Name: **Witness**
+- Name: **Hush**
 - Tagline: "The bug-fixer for the bugs that don't crash"
 - 60-second receipt-page demo
 - Confidence tiers (PR / draft PR / issue)
 - pgvector "learns from rejections" loop
 
-Change what the agent actually does. **The frontend rage-click is the symptom. The backend RLS / auth / policy bug is the cause.** Witness traces frontend symptoms to backend causes using InsForge's edge-function and request logs, then patches `insforge.toml` (schema / RLS / policy), tests on a branch project, and PRs the config diff.
+Change what the agent actually does. **The frontend rage-click is the symptom. The backend RLS / auth / policy bug is the cause.** Hush traces frontend symptoms to backend causes using InsForge's edge-function and request logs, then patches `insforge.toml` (schema / RLS / policy), tests on a branch project, and PRs the config diff.
 
 ### Why this is dramatically stronger
 
@@ -131,7 +131,7 @@ This now maps onto a *real* product an InsForge customer would install on day on
 - The backup ladder (DepWatch / Migration Pilot / SOC2 Pilot). Note that the Migration Pilot backup is actually *closer* to the proposed pivot — they could be merged.
 
 ### Change
-- Replace the "Add to Cart CSS regression" demo bug with a **silent RLS bug**: an order that should be visible to the user is filtered by a too-restrictive policy. Rage-clicks → empty page → Witness traces it → TOML patch → branch project replay → PR.
+- Replace the "Add to Cart CSS regression" demo bug with a **silent RLS bug**: an order that should be visible to the user is filtered by a too-restrictive policy. Rage-clicks → empty page → Hush traces it → TOML patch → branch project replay → PR.
 - Rewrite the "why InsForge" section. Lead with **branch projects + declarative `insforge.toml`**. Demote pgvector, Realtime, Storage to supporting roles.
 - Replace the 70% stat with one of: (a) a real published number, (b) a directional claim ("most user-reported bugs never reach your error tracker"), or (c) a concrete in-room example. The number-without-citation is the weakest sentence in the deck.
 - Confidence tier examples: rewrite around policy diffs, not CSS diffs.
@@ -152,7 +152,7 @@ This now maps onto a *real* product an InsForge customer would install on day on
 | 0:20 | **Diagnosis:** the RLS policy on `orders` reads `tenant_id` from `auth.jwt() ->> 'tenant'`, but this user's JWT migrated to `tenant_ids[]` last week. | One sentence, plain English, on screen. |
 | 0:35 | **Branch project spawned.** The TOML diff applies. The same session replays. Orders appear. Old policy still fails. | Two side-by-side terminals: prod (red) and branch (green). |
 | 0:50 | PR opens. The diff is 4 lines of `insforge.toml`. The clip and the before/after RLS trace are embedded. Confidence: 92% → PR. | GitHub PR view. CI green. |
-| 0:58 | Close on the InsForge dashboard showing the audit row. | One sentence: "Sentry is silent on auth bugs. Witness shipped the policy fix in under a minute." |
+| 0:58 | Close on the InsForge dashboard showing the audit row. | One sentence: "Sentry is silent on auth bugs. Hush shipped the policy fix in under a minute." |
 
 This demo is honest. Every step is something you can actually build in 9 hours on InsForge primitives.
 
@@ -172,7 +172,7 @@ This demo is honest. Every step is something you can actually build in 9 hours o
 
 ## 8. One-line pitch you can use on stage
 
-> *"Sentry catches the bugs that crash your server. Witness catches the bugs that quietly break your customers — silent RLS misfires, leaked tenants, vanished records — by replaying them on a forked InsForge backend, patching `insforge.toml`, and shipping the PR before the user has finished writing the support ticket."*
+> *"Sentry catches the bugs that crash your server. Hush catches the bugs that quietly break your customers — silent RLS misfires, leaked tenants, vanished records — by replaying them on a forked InsForge backend, patching `insforge.toml`, and shipping the PR before the user has finished writing the support ticket."*
 
 That sentence is one a technical judge can't poke a hole in. The current v5 hero sentence is.
 

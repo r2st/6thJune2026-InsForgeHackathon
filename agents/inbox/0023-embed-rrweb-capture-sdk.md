@@ -23,18 +23,18 @@ recording, no replay, no demo.
 
 ## Acceptance criteria
 
-- [ ] rrweb records `{ type, data, timestamp }` events into a `Witness.buffer`
+- [ ] rrweb records `{ type, data, timestamp }` events into a `Hush.buffer`
 - [ ] Buffer drops events older than 30s as new ones arrive (ring behavior,
       not unbounded)
-- [ ] `Witness.flush()` returns the current buffer and clears it
-- [ ] `maskAllInputs: true` is set; elements with `data-witness="mask"`
+- [ ] `Hush.flush()` returns the current buffer and clears it
+- [ ] `maskAllInputs: true` is set; elements with `data-hush="mask"`
       are hard-masked
 - [ ] Verified by triggering a flush from the browser console — the
       returned array replays cleanly in rrweb's player
 
 ## Likely files / surfaces touched
 
-- toy app: `src/witness/capture.ts` (new)
+- toy app: `src/hush/capture.ts` (new)
 - toy app entry: `src/main.tsx`
 - HTML: one new `<script type="module">` tag
 

@@ -1,10 +1,10 @@
-# Witness — deployment
+# Hush — deployment
 
 > Living doc. Update as services come up. Order matters; sections are in deploy order, not in "tour" order.
 
 ## 0. Scope
 
-This doc covers what it takes to stand up Witness end-to-end for the demo: backend on InsForge, two Vercel apps (demo store + receipt page), the GitHub PR loop, and the demo-day fallback. It does **not** cover ongoing ops, scaling, or customer onboarding — out of scope for the 9-hour build.
+This doc covers what it takes to stand up Hush end-to-end for the demo: backend on InsForge, two Vercel apps (demo store + receipt page), the GitHub PR loop, and the demo-day fallback. It does **not** cover ongoing ops, scaling, or customer onboarding — out of scope for the 9-hour build.
 
 ## 1. Service map
 
@@ -44,10 +44,10 @@ Six surfaces. Bring them up in this order: **InsForge → branch project → edg
 ### Accounts (sign in before the clock starts)
 
 - [ ] InsForge (prod project + a branch project under it)
-- [ ] Vercel (one team, two projects: `witness-demo`, `witness-receipt`)
+- [ ] Vercel (one team, two projects: `hush-demo`, `hush-receipt`)
 - [ ] GitHub (the [target repo](https://github.com/r2st/6thJune2026-InsForgeHackathon); a separate "victim app" repo for the demo PR to land in)
 - [ ] Devin (workspace pointed at the victim repo)
-- [ ] Domain (optional — `witness.<sponsor>.dev` if event has subdomains)
+- [ ] Domain (optional — `hush.<sponsor>.dev` if event has subdomains)
 
 ### CLIs
 
@@ -81,12 +81,12 @@ Collect these *before* you start coding. A single shared 1Password / vault note 
 
 ### Declarative config
 
-Witness leans on `insforge.toml` as the single source of truth. The skill bundled in this session — `insforge-cli` — applies it.
+Hush leans on `insforge.toml` as the single source of truth. The skill bundled in this session — `insforge-cli` — applies it.
 
 Minimum surface for the demo:
 
 - `tables.orders` (with RLS) — the table whose policy we'll patch in the demo
-- `tables.bug_runs` — every Witness run; embeddings live here
+- `tables.bug_runs` — every Hush run; embeddings live here
 - `tables.bug_decisions` — close-PR feedback for the learning loop
 - `tables.tenants` — for RLS scoping
 - `storage.buckets.clips` — session video clips with signed URLs
@@ -119,7 +119,7 @@ If any of those fail, **stop and fix.** Everything else assumes this is green.
 The branch project is what makes the fix safe. We replay the patched RLS against a forked backend; if it goes wrong, only the fork burns.
 
 ```bash
-insforge branch create witness-fix-sandbox --from prod
+insforge branch create hush-fix-sandbox --from prod
 insforge branch list                       # capture the branch project ID
 # export the branch ID for the edge fns
 export INSFORGE_BRANCH_PROJECT_ID=<id>
@@ -128,7 +128,7 @@ export INSFORGE_BRANCH_PROJECT_ID=<id>
 Seed two demo tenants in the branch project so the policy-leak case is visible:
 
 ```bash
-insforge db seed --branch witness-fix-sandbox \
+insforge db seed --branch hush-fix-sandbox \
   --file demo/seed/two-tenants.sql
 ```
 
@@ -189,7 +189,7 @@ The "victim app." Toy e-commerce, broken RLS policy on `orders`, rrweb embedded.
 
 ```bash
 cd apps/demo
-vercel link                            # project: witness-demo
+vercel link                            # project: hush-demo
 vercel env add INSFORGE_PROJECT_ID
 vercel env add INSFORGE_ANON_KEY
 vercel env add NEXT_PUBLIC_INGEST_URL  # the ingest fn URL from §5
@@ -204,7 +204,7 @@ The judge-facing live status page. Subscribes to the Realtime channel.
 
 ```bash
 cd apps/receipt
-vercel link                            # project: witness-receipt
+vercel link                            # project: hush-receipt
 vercel env add INSFORGE_PROJECT_ID
 vercel env add INSFORGE_ANON_KEY
 vercel --prod
@@ -214,7 +214,7 @@ Verify: open `/receipt/<run-id>` after triggering an ingest call from §5's smok
 
 ## 8. GitHub PR loop (T+6h)
 
-The "victim app" repo (separate from this one) is where Witness will land PRs.
+The "victim app" repo (separate from this one) is where Hush will land PRs.
 
 ```bash
 gh repo create <victim-repo> --private --clone
@@ -260,9 +260,9 @@ If the full path runs in <90 s on your machine, you're demo-ready.
 
 - [ ] Both Vercel projects on a green prod deploy
 - [ ] `insforge config status` clean (no drift between toml and prod)
-- [ ] Branch project healthy: `insforge branch status witness-fix-sandbox`
+- [ ] Branch project healthy: `insforge branch status hush-fix-sandbox`
 - [ ] Pre-recorded demo video on the laptop **and** uploaded to YouTube unlisted (one is the fallback for the other)
-- [ ] `demo/recordings/witness-final-v?.mp4` open in QuickTime, ready to fullscreen
+- [ ] `demo/recordings/hush-final-v?.mp4` open in QuickTime, ready to fullscreen
 - [ ] Wifi tethered to phone hotspot as a second network
 - [ ] Browser cache cleared, demo-user-a logged in fresh
 - [ ] Receipt page on a second tab, font scaled up for the projector
@@ -313,7 +313,7 @@ If we blow the free tiers it's because the demo got way more traffic than expect
 Not for demo day. The day after, before any of this stays running:
 
 - [ ] Revoke the demo `GITHUB_TOKEN`
-- [ ] Delete the `witness-fix-sandbox` branch project
+- [ ] Delete the `hush-fix-sandbox` branch project
 - [ ] Rotate `INSFORGE_SERVICE_KEY` if it ever appeared in a Vercel build log
 - [ ] Archive both Vercel projects (don't delete — judges may revisit)
 

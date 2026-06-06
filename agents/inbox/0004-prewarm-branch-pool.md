@@ -13,9 +13,9 @@ demo_path: yes — without this, slide 6 stalls and the pitch dies
 ## Goal
 
 A `scripts/prewarm.sh` (or equivalent) that, at demo start, spins up
-**two** named branch projects (`witness-fork-1`, `witness-fork-2`) seeded
+**two** named branch projects (`hush-fork-1`, `hush-fork-2`) seeded
 with the demo fixture, with `insforge.toml` set to the *known-buggy*
-state. Witness pulls a fork off the pool in <2s instead of waiting 8–15s
+state. Hush pulls a fork off the pool in <2s instead of waiting 8–15s
 for a cold spin-up.
 
 ## Why it matters for the demo
@@ -28,7 +28,7 @@ and the side-by-side terminals on slide 6 don't appear in budget. The
 ## Acceptance criteria
 
 - [ ] `scripts/prewarm.sh --count 2` spins up and seeds both forks
-- [ ] Pool state is persisted to `.witness/pool.json` so the Witness
+- [ ] Pool state is persisted to `.hush/pool.json` so the Hush
       runtime can claim a fork synchronously
 - [ ] After a fork is consumed, the script auto-tops-up to keep N=2
 - [ ] Idempotent — re-running with N forks already up is a no-op
@@ -37,7 +37,7 @@ and the side-by-side terminals on slide 6 don't appear in budget. The
 ## Likely files / surfaces touched
 
 - `scripts/prewarm.sh`
-- `.witness/pool.json` (gitignored)
+- `.hush/pool.json` (gitignored)
 - `docs/architecture.md` (note the pool in the system diagram)
 
 ## Notes
@@ -48,7 +48,7 @@ re: whether `insforge.toml` is inherited — verify with the InsForge skill
 first. If not inherited, this script also pushes the buggy toml.
 
 If branch-project spin-up itself proves >10s consistently, fall back to
-keeping a single long-lived `witness-fork` and resetting it between
+keeping a single long-lived `hush-fork` and resetting it between
 demos via `insforge branch reset`.
 
 ## Outcome

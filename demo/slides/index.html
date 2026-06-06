@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Witness — pitch</title>
+<title>Hush — pitch</title>
 <link rel="icon" type="image/svg+xml" href="../../assets/brand/favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -468,11 +468,11 @@
         built on <span class="key">InsForge</span><br/>
         06 June hackathon
       </div>
-      <h1 class="display">Witness<span class="dot">.</span></h1>
+      <h1 class="display">Hush<span class="dot">.</span></h1>
       <p class="one-line">
         The bug-fixer for the <span class="hi">bugs that don't crash.</span>
       </p>
-      <div class="deckmark">witness · live</div>
+      <div class="deckmark">hush · live</div>
       <div class="pagenum">01 / 10</div>
     </section>
 
@@ -500,7 +500,7 @@
           <div class="row live"><span class="name">User</span><span class="sig">leaves</span></div>
         </div>
       </div>
-      <div class="deckmark">witness · live</div>
+      <div class="deckmark">hush · live</div>
       <div class="pagenum">02 / 10</div>
     </section>
 
@@ -509,21 +509,21 @@
       <span class="eyebrow">The silent gap</span>
       <p class="big-num">70%</p>
       <p class="caption">of user-reported bugs <span class="hi">never throw an error</span>. Your monitoring sees nothing. The customer just leaves.</p>
-      <div class="deckmark">witness · live</div>
+      <div class="deckmark">hush · live</div>
       <div class="pagenum">03 / 10</div>
     </section>
 
     <!-- ============ 4 · SOLUTION ONE-LINER ============ -->
     <section class="slide" id="s-one">
-      <span class="eyebrow">What Witness does</span>
+      <span class="eyebrow">What Hush does</span>
       <p class="quote">
-        Witness <span class="a">watches</span> the session,<br/>
+        Hush <span class="a">watches</span> the session,<br/>
         <span class="a">replays</span> it on a forked backend,<br/>
         <span class="g">patches</span> <code>insforge.toml</code>,<br/>
         and ships the PR — in under a minute.
       </p>
       <div class="attrib">watch · correlate · diagnose · test on a fork · ship</div>
-      <div class="deckmark">witness · live</div>
+      <div class="deckmark">hush · live</div>
       <div class="pagenum">04 / 10</div>
     </section>
 
@@ -533,7 +533,7 @@
         <div class="side">
           <div class="beat-num">DEMO · 0:00 – 0:20</div>
           <h2>The receipt page<br/>lights up.</h2>
-          <p>Witness sees the rage-click, captures the session, and taps the matching backend request log.</p>
+          <p>Hush sees the rage-click, captures the session, and taps the matching backend request log.</p>
         </div>
         <div class="receipt">
           <div class="head">
@@ -572,7 +572,7 @@
           </div>
         </div>
       </div>
-      <div class="deckmark">witness · live</div>
+      <div class="deckmark">hush · live</div>
       <div class="pagenum">05 / 10</div>
     </section>
 
@@ -582,7 +582,7 @@
         <div class="side">
           <div class="beat-num">DEMO · 0:20 – 0:50 · money shot</div>
           <h2>Same session.<br/>Two backends.</h2>
-          <p>Witness forks the backend, applies the TOML diff, replays the session. Prod still leaks. Branch is green.</p>
+          <p>Hush forks the backend, applies the TOML diff, replays the session. Prod still leaks. Branch is green.</p>
         </div>
         <div class="branchwrap">
           <div class="receipt" style="padding: 22px 30px;">
@@ -597,7 +597,7 @@
           <div class="twocols">
             <div class="term prod">
               <div class="head"><span>prod</span><span class="tag">red</span></div>
-              <div class="ln"><span class="k">$</span> witness replay --env prod</div>
+              <div class="ln"><span class="k">$</span> hush replay --env prod</div>
               <div class="ln">policy <span class="k">orders_select</span> · fired</div>
               <div class="ln">rows returned: <span class="bad">0</span></div>
               <div class="ln">user sees: <span class="bad">empty page</span></div>
@@ -605,7 +605,7 @@
             </div>
             <div class="term branch">
               <div class="head"><span>branch · pr-7f3a91</span><span class="tag">green</span></div>
-              <div class="ln"><span class="k">$</span> witness replay --env branch</div>
+              <div class="ln"><span class="k">$</span> hush replay --env branch</div>
               <div class="ln">policy <span class="k">orders_select</span> · patched</div>
               <div class="ln">rows returned: <span class="ok">3</span></div>
               <div class="ln">user sees: <span class="ok">3 orders</span></div>
@@ -618,7 +618,7 @@
           </div>
         </div>
       </div>
-      <div class="deckmark">witness · live</div>
+      <div class="deckmark">hush · live</div>
       <div class="pagenum">06 / 10</div>
     </section>
 
@@ -636,7 +636,7 @@
             <div class="badge">92% · open PR</div>
           </div>
           <div class="meta">
-            <span>#147</span><span>witness-bot wants to merge 1 commit</span><span>+2 −2</span>
+            <span>#147</span><span>hush-bot wants to merge 1 commit</span><span>+2 −2</span>
           </div>
           <div class="diff">
             <div class="file">infra/insforge.toml</div>
@@ -653,14 +653,14 @@
           </div>
         </div>
       </div>
-      <div class="deckmark">witness · live</div>
+      <div class="deckmark">hush · live</div>
       <div class="pagenum">07 / 10</div>
     </section>
 
     <!-- ============ 8 · CONFIDENCE TIERS ============ -->
     <section class="slide" id="s-tiers">
       <span class="eyebrow">Confidence tiers</span>
-      <h2 class="tight">Witness doesn't<br/>spam your PR queue.</h2>
+      <h2 class="tight">Hush doesn't<br/>spam your PR queue.</h2>
       <p class="muted">Each finding is scored by diff size, policy blast radius, and similarity to past merged fixes. The action scales to the score.</p>
       <div class="tiers">
         <div class="tier hi">
@@ -679,7 +679,7 @@
           <p><b>Anomaly is real.</b> Replay didn't reproduce cleanly. Files an issue with clip + log diff.</p>
         </div>
       </div>
-      <div class="deckmark">witness · live</div>
+      <div class="deckmark">hush · live</div>
       <div class="pagenum">08 / 10</div>
     </section>
 
@@ -699,7 +699,7 @@
           <h3>Engine — only InsForge has this</h3>
           <div class="item">
             <span class="k">Branch projects</span>
-            Forkable backends. Witness <em>tests its fix on a fork of your real schema</em> before opening the PR.
+            Forkable backends. Hush <em>tests its fix on a fork of your real schema</em> before opening the PR.
           </div>
           <div class="item">
             <span class="k">insforge.toml</span>
@@ -707,16 +707,16 @@
           </div>
         </div>
       </div>
-      <div class="deckmark">witness · live</div>
+      <div class="deckmark">hush · live</div>
       <div class="pagenum">09 / 10</div>
     </section>
 
     <!-- ============ 10 · CLOSE ============ -->
     <section class="slide" id="s-close">
-      <span class="eyebrow">Witness · 06 June</span>
+      <span class="eyebrow">Hush · 06 June</span>
       <p class="close-line">
         Sentry catches the bugs that <span class="a">crash your server</span>.<br/>
-        Witness catches the bugs that <span class="g">quietly break your customers</span>.
+        Hush catches the bugs that <span class="g">quietly break your customers</span>.
       </p>
       <div class="stack-row">
         <div class="item"><span class="k">InsForge</span> · branch projects · RLS · realtime · pgvector · AI</div>
@@ -727,7 +727,7 @@
         Next up: <span class="q">learn-from-rejections</span><br/>
         loop · closed PRs become<br/>negative training shapes.
       </div>
-      <div class="deckmark">witness · live</div>
+      <div class="deckmark">hush · live</div>
       <div class="pagenum">10 / 10</div>
     </section>
 

@@ -12,7 +12,7 @@ demo_path: yes — slide 7 is this PR
 
 ## Goal
 
-`witness/openPr.ts` takes the patch, verdict, session id, and a
+`hush/openPr.ts` takes the patch, verdict, session id, and a
 confidence score, and opens a GitHub PR via the GitHub App with a
 templated body. The body embeds:
 
@@ -43,8 +43,8 @@ breath after each section.
 
 ## Likely files / surfaces touched
 
-- `witness/openPr.ts`
-- `witness/prTemplate.md` (the body template)
+- `hush/openPr.ts`
+- `hush/prTemplate.md` (the body template)
 - `infra/github-app/` (auth)
 
 ## Notes

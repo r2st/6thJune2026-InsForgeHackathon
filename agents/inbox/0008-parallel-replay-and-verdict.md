@@ -12,7 +12,7 @@ demo_path: yes — this IS slide 6's prod-red / branch-green output
 
 ## Goal
 
-`witness/replay.ts` exports `replayBoth(payload, branchId) ->
+`hush/replay.ts` exports `replayBoth(payload, branchId) ->
 Verdict`, where `Verdict` is:
 
 ```ts
@@ -49,8 +49,8 @@ delta is the only "is this real" signal we have.
 
 ## Likely files / surfaces touched
 
-- `witness/replay.ts`
-- `witness/types.ts` (`Verdict`)
+- `hush/replay.ts`
+- `hush/types.ts` (`Verdict`)
 
 ## Notes
 

@@ -1,4 +1,4 @@
-# Witness — brand guide
+# Hush — brand guide
 
 For a 9-hour hackathon, not a 90-page guideline. Six pages, decided.
 
@@ -6,15 +6,15 @@ For a 9-hour hackathon, not a 90-page guideline. Six pages, decided.
 
 ## 1. Name & punctuation
 
-The product is **Witness.** — with the period. The period is the mark; it's not optional. In running prose you may write *Witness* without it if the punctuation gets awkward. The wordmark always includes it.
+The product is **Hush.** — with the period. The period is the mark; it's not optional. In running prose you may write *Hush* without it if the punctuation gets awkward. The wordmark always includes it.
 
-Never *the Witness*, never *Witness AI*, never *WitnessIO*.
+Never *the Hush*, never *Hush AI*, never *HushIO*.
 
 ---
 
 ## 2. One-line positioning
 
-> Witness is the bug-fixer for the bugs that don't crash.
+> Hush is the bug-fixer for the bugs that don't crash.
 
 That sentence is the contract. Every piece of copy should be defensible against it.
 
@@ -48,7 +48,7 @@ Direct lift from `ideas/FINAL.html` — already in use in the pitch.
 
 - Don't introduce new accents. The 4-accent palette is the brand.
 - Don't use pure black (`#000`) or pure white (`#fff`) for surfaces.
-- Don't use red for errors. Use `--accent` (orange) — Witness uses orange where most tools use red.
+- Don't use red for errors. Use `--accent` (orange) — Hush uses orange where most tools use red.
 
 ---
 
@@ -85,23 +85,23 @@ Three families, no exceptions.
 
 ## 5. Voice & tone
 
-### How Witness sounds
+### How Hush sounds
 
 - **Plain English.** "It just frustrates." not "It causes a degraded UX."
 - **Specific over abstract.** "A button that does nothing when you click it." not "User interaction failures."
-- **Confident, not breathless.** Witness states what it observed. It doesn't promise miracles.
+- **Confident, not breathless.** Hush states what it observed. It doesn't promise miracles.
 - **No exclamation points.** Anywhere.
 - **No emoji** in product copy. The pitch uses a few status checkmarks; that's the limit.
 
-### How Witness does not sound
+### How Hush does not sound
 
 - Marketing-speak: "leverage," "AI-powered," "next-generation."
 - VC-deck noise: "10x faster," "revolutionizing."
-- Cute personification: "I noticed a bug for you!" Witness is a system, not a buddy.
+- Cute personification: "I noticed a bug for you!" Hush is a system, not a buddy.
 
 ### The signature move
 
-Witness names what's *silent*. "Sentry sees nothing. The dev sees nothing. The user just leaves." Whenever you write product copy, find the silence and name it.
+Hush names what's *silent*. "Sentry sees nothing. The dev sees nothing. The user just leaves." Whenever you write product copy, find the silence and name it.
 
 ---
 
@@ -117,7 +117,7 @@ A single filled circle, orange, with a soft outer halo. The halo is part of the 
 
 ### What the mark means
 
-It's a witnessing point. A live tracer. The thing that's quietly watching when nothing seems to be happening. That is the whole product, compressed.
+It's a quiet pulse. A live tracer. The thing that's listening when nothing seems to be happening. That is the whole product, compressed.
 
 ---
 

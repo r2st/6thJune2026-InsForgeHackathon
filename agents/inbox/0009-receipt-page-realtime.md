@@ -12,8 +12,8 @@ demo_path: yes — slide 5 → 6 transition is driven by these events
 
 ## Goal
 
-A `witness/events.ts` publisher that emits one event per fork-test stage
-to an InsForge Realtime channel (`witness:session:<id>`). The receipt UI
+A `hush/events.ts` publisher that emits one event per fork-test stage
+to an InsForge Realtime channel (`hush:session:<id>`). The receipt UI
 subscribes and updates the step rows in real time — the visible "live"
 behavior on slides 5–7.
 
@@ -38,14 +38,14 @@ this is a static screen, the demo dies.
 
 ## Likely files / surfaces touched
 
-- `witness/events.ts` (publisher)
+- `hush/events.ts` (publisher)
 - `app/receipt/[sessionId]/page.tsx` (subscriber UI)
-- `witness/types.ts` (event union)
+- `hush/types.ts` (event union)
 
 ## Notes
 
 This is the only place we use Realtime; keep the channel name scheme
-simple (`witness:session:<id>`). The receipt page styling lives in the
+simple (`hush:session:<id>`). The receipt page styling lives in the
 deck CSS already — match the look in [demo/slides/index.html](../../demo/slides/index.html)
 slide 5.
 

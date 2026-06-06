@@ -1,4 +1,4 @@
-# Witness — pitch deck
+# Hush — pitch deck
 
 [`index.html`](index.html) is the deck. Open it in any browser. No build step.
 
@@ -31,10 +31,10 @@ Touch: swipe left/right on tablets. URL hash deep-links: `#5` opens slide 5.
 
 | # | Title | Beat |
 |---|---|---|
-| 01 | Hero — *Witness.* | open |
+| 01 | Hero — *Hush.* | open |
 | 02 | Customer's empty orders page | problem story |
 | 03 | The 70% gap | stat |
-| 04 | What Witness does | one-liner |
+| 04 | What Hush does | one-liner |
 | 05 | Receipt page lights up | demo beat 1 |
 | 06 | Same session, two backends | demo beat 2 — money shot |
 | 07 | Four-line TOML diff, shipped | demo beat 3 — PR |

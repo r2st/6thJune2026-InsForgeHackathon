@@ -1,4 +1,4 @@
-# Pitch script — Witness.
+# Pitch script — Hush.
 
 **Slot:** 3 min pitch + 2 min Q&A
 **Deck:** [demo/slides/index.html](slides/index.html) · open fullscreen (press `F`), arrow-keys to advance.
@@ -26,8 +26,8 @@ Read aloud with a timer. If you're over by 10s, cut a sentence. Cuts are at the 
 
 ## 0:40 – 0:55 — Solution one-liner (slide 4)
 
-> "We built **Witness.** — the bug-fixer for the bugs that don't crash.
-> Witness watches the session, replays it on a forked InsForge backend,
+> "We built **Hush.** — the bug-fixer for the bugs that don't crash.
+> Hush watches the session, replays it on a forked InsForge backend,
 > patches `insforge.toml`, and ships the PR. In under a minute."
 
 ## 0:55 – 2:15 — Live demo (slides 5 → 7)
@@ -36,7 +36,7 @@ Happy path. Pre-loaded data. No login. Three beats.
 
 | Time   | Slide | What happens on screen                                                | What you say                                                                 |
 |--------|-------|-----------------------------------------------------------------------|------------------------------------------------------------------------------|
-| 0:55   | 5     | Customer rage-clicks. Receipt panel lights up. Session captured · backend log tapped · anomaly. | "Witness saw the rage-click and pulled the matching backend log." |
+| 0:55   | 5     | Customer rage-clicks. Receipt panel lights up. Session captured · backend log tapped · anomaly. | "Hush saw the rage-click and pulled the matching backend log." |
 | 1:20   | 6     | Diagnosis: RLS policy `orders_select` reads `auth.jwt() ->> 'tenant'`. JWT migrated to `tenant_ids[]` last week. Branch project spawns; prod (red) and branch (green) replay side-by-side. | "It traced the empty page to one RLS policy. Then it forked the backend and *proved* the fix on the fork, against the same session." |
 | 1:50   | 7     | GitHub PR opens. Four-line `insforge.toml` diff. Confidence 92%. CI green. Session clip + before/after RLS trace attached. | *"And here's the proof — a four-line TOML patch, with the session clip and the RLS trace embedded. From rage-click to PR in under a minute."* |
 
@@ -44,7 +44,7 @@ Happy path. Pre-loaded data. No login. Three beats.
 
 ## 2:15 – 2:40 — Confidence tiers + why InsForge (slides 8 → 9)
 
-> "Witness doesn't spam your PR queue. Every finding is scored —
+> "Hush doesn't spam your PR queue. Every finding is scored —
 > high-confidence small diffs open a PR, mediums open a draft, lows file
 > an issue with the clip and the log diff."
 
@@ -55,21 +55,21 @@ Happy path. Pre-loaded data. No login. Three beats.
 
 ## 2:40 – 3:00 — Close (slide 10)
 
-> "Sentry catches the bugs that crash your server. Witness catches the
+> "Sentry catches the bugs that crash your server. Hush catches the
 > bugs that quietly break your customers. Built on InsForge — branch
 > projects, RLS, realtime, pgvector, AI — plus rrweb for capture and
 > Devin to drive the patch."
 >
 > "Next we wire the learn-from-rejections loop: every closed PR becomes a
-> negative training shape, so Witness gets quieter over time, not noisier."
+> negative training shape, so Hush gets quieter over time, not noisier."
 
 ---
 
 ## Planted seed (pick one — judge will ask)
 
-- **Learn-from-rejections loop** (default — strongest answer): "Every closed-as-not-a-bug PR embeds back into pgvector as a negative shape. Witness's false-positive rate drops with use, not up."
+- **Learn-from-rejections loop** (default — strongest answer): "Every closed-as-not-a-bug PR embeds back into pgvector as a negative shape. Hush's false-positive rate drops with use, not up."
 - **What about non-RLS bugs?** "Today, RLS + auth policy. The same loop generalizes to any declarative config — feature flags, edge-fn routing. We start where the fix is small and the blast radius is bounded."
-- **Multi-tenant deploy story:** "Witness runs as an InsForge edge function plus a GitHub App. Customers install both, point us at a repo, done. Half-day of work to ship."
+- **Multi-tenant deploy story:** "Hush runs as an InsForge edge function plus a GitHub App. Customers install both, point us at a repo, done. Half-day of work to ship."
 
 ## Q&A prep
 
@@ -79,7 +79,7 @@ Happy path. Pre-loaded data. No login. Three beats.
 | "How do you replay a session deterministically?" | We don't replay the *page*. We replay the *policy*. The rrweb clip is evidence, not the test. The test is the failing request against the branch project. That's tractable in 9 hours; deterministic page-replay is not, and we'd be lying if we claimed it. |
 | "Why not Supabase?" | Supabase has RLS but no branch projects. No safe place to test a policy diff against real schema without risking prod. `insforge.toml` makes the fix declarative — Supabase's RLS lives in migrations, which is one more thing to roll back. |
 | "Why not just have Sentry add this?" | Sentry has no backend fork primitive. They could add session replay (they have), but they can't ship the fix because they can't safely test it. We can. |
-| "How does Witness handle false positives?" | The branch-project replay *is* the false-positive filter. If the fix doesn't make the session green on the fork, no PR. That's the whole point of the engine. |
+| "How does Hush handle false positives?" | The branch-project replay *is* the false-positive filter. If the fix doesn't make the session green on the fork, no PR. That's the whole point of the engine. |
 | "What's the business model?" | Per-confirmed-fix pricing — you pay when an open PR gets merged. Aligns incentives. We skipped pricing UI for the hackathon. |
 | "What about non-Postgres / non-RLS bugs?" | Out of scope today. The first wedge is multi-tenant SaaS on InsForge, where RLS misfires are the silent-bug category that lands in security postmortems. |
 

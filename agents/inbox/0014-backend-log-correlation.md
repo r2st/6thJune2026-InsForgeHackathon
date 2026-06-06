@@ -12,20 +12,20 @@ demo_path: yes — this is the pivot's load-bearing trick
 
 ## Goal
 
-Every toy-app request to InsForge carries `x-witness-session-id`. After a
+Every toy-app request to InsForge carries `x-hush-session-id`. After a
 capture lands, fetch the matching slice of edge-function / DB request logs
 for that session in a ±10s window and write it onto the `sessions` row
 as `request_log_window` (JSONB).
 
 ## Why it matters for the demo
 
-This is the *only* reason the pivoted Witness can claim to find backend
+This is the *only* reason the pivoted Hush can claim to find backend
 causes from frontend symptoms. Without correlation, we're just another
 session-replay tool.
 
 ## Acceptance criteria
 
-- [ ] Toy-app fetch wrapper injects `x-witness-session-id` header on every
+- [ ] Toy-app fetch wrapper injects `x-hush-session-id` header on every
       InsForge request
 - [ ] Every edge fn logs `{ ts, route, session_id, user_id, tenant_id,
       rls_decisions, returned_rows }` to a `request_log` table
@@ -41,7 +41,7 @@ session-replay tool.
 
 ## Likely files / surfaces touched
 
-- toy app: `src/witness/insforge-client.ts` (wrapped fetch)
+- toy app: `src/hush/insforge-client.ts` (wrapped fetch)
 - `insforge.toml` (`request_log` table)
 - `edge-functions/capture.ts` or `edge-functions/correlate.ts`
 - `docs/architecture.md`
