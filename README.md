@@ -13,7 +13,7 @@ finishes writing the support ticket.
 | **Receipt page** (judge-facing live status) | https://w369egnp.insforge.site/ | ✅ deployed |
 | **Receipt — demo mode** (full arc, no backend needed) | https://w369egnp.insforge.site/r/demo?demo=1 | ✅ deployed · **start here** |
 | **Backend** (InsForge project `hush`, seeded demo bug) | https://w369egnp.us-east.insforge.app/api/health | ✅ live — API host; bare `/` returns `Cannot GET /` by design, check `/api/health` |
-| **Victim app** (`apps/demo` — "Acme Store / My Orders") | https://demo-seven-omega-26.vercel.app/orders | ✅ deployed (Vercel) · migrated user → empty page; legacy → 3 orders |
+| **Victim app** (`apps/demo` — "Acme Store / My Orders") | https://hush-acme-store.vercel.app/orders | ✅ deployed (Vercel) · migrated user → empty page; legacy → 3 orders |
 | **PR target** (`hush-victim-acme` — where Hush opens the fix PR) | https://github.com/r2st/hush-victim-acme/pull/1 | ✅ live PR (4-line `insforge.toml` diff) |
 
 > The **demo-mode receipt** (`/r/demo?demo=1`) rehearses the whole five-step
@@ -22,6 +22,16 @@ finishes writing the support ticket.
 > where a migrated user opens **My Orders** and sees an empty page; toggling
 > to the legacy user shows the 3 orders that were always there. That contrast
 > is the 0:00 beat of the pitch.
+
+> **Demo-day note — drive the loop from the receipt demo-mode, not a live
+> rage-click.** A rage-click on the live storefront posts to the `ingest` edge
+> fn, but ingest requires a JWT carrying a `tenant` claim and the storefront has
+> no login flow (the `tenant`/`tenant_ids` claim is modeled in the fixture and
+> proven at the SQL/fork level, not wired into real InsForge auth tokens) — so
+> the capture currently 401s ("no tenant in token") and the receipt won't light
+> up from a live click. Use the storefront for the visible empty-page beat, then
+> `/r/demo?demo=1` to narrate capture→ship. Closing the gap = a demo login that
+> mints a tenant-claimed token (future ticket).
 
 ## Quick links
 
