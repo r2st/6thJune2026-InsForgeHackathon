@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Witness — pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg-elev: #131418;
+    --bg-elev2: #181a20;
+    --ink: #ecedef;
+    --ink-dim: #9097a3;
+    --line: #25272e;
+    --accent: #ff6b35;
+    --good: #6ee7b7;
+    --cool: #a78bfa;
+    --warn: #fde68a;
+    --bad: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #000;
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+  code, .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Deck = stage that holds 1920×1080 slides, scaled to viewport */
+  #stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #deck {
+    width: 1920px; height: 1080px;
+    transform-origin: center center;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute; inset: 0;
+    padding: 96px 120px;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .slide.active { display: flex; }
+
+  /* Shared bits */
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 16px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 32px;
+  }
+  .eyebrow::before {
+    content: ""; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 18px var(--accent);
+  }
+  .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 18px;
+  }
+  h1.display {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 240px;
+    line-height: 0.88;
+    margin: 0 0 32px;
+    letter-spacing: -0.03em;
+  }
+  h1.display .dot { color: var(--accent); }
+  h2 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 96px; line-height: 1;
+    margin: 0 0 36px; letter-spacing: -0.02em;
+  }
+  h2.tight { font-size: 76px; }
+  h3 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 36px; margin: 0 0 14px;
+  }
+  p { font-size: 30px; line-height: 1.45; color: var(--ink); max-width: 28ch; margin: 0 0 24px; }
+  p.lede { font-size: 40px; font-family: 'Instrument Serif', serif; max-width: 32ch; line-height: 1.3; }
+  p.muted { color: var(--ink-dim); }
+  p em { color: var(--accent); font-style: italic; font-weight: 500; }
+  p b { color: var(--ink); font-weight: 600; }
+
+  /* Page footer / mark */
+  .deckmark {
+    position: absolute; left: 120px; bottom: 64px;
+    display: flex; align-items: center; gap: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim);
+  }
+  .deckmark::before {
+    content: ""; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 14px var(--accent);
+  }
+  .pagenum {
+    position: absolute; right: 120px; bottom: 64px;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    letter-spacing: 0.18em; color: var(--ink-dim);
+  }
+
+  /* ---- SLIDE 1 — HERO ---- */
+  #s-hero { justify-content: flex-end; padding-bottom: 160px; }
+  #s-hero .one-line {
+    font-family: 'Instrument Serif', serif;
+    font-size: 52px; line-height: 1.3; color: var(--ink);
+    max-width: 36ch; margin: 0;
+  }
+  #s-hero .one-line .hi { color: var(--good); font-style: italic; }
+  .built-on {
+    position: absolute; right: 120px; top: 96px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px; letter-spacing: 0.12em;
+    color: var(--ink-dim); text-align: right;
+  }
+  .built-on .key { color: var(--good); }
+
+  /* ---- SLIDE 2 — PROBLEM ---- */
+  .scene {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+    margin-top: 40px;
+  }
+  .browser {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden;
+    height: 540px; display: flex; flex-direction: column;
+  }
+  .browser .bar {
+    background: var(--bg-elev2); border-bottom: 1px solid var(--line);
+    padding: 14px 20px; display: flex; gap: 8px; align-items: center;
+  }
+  .browser .bar .d { width: 12px; height: 12px; border-radius: 50%; background: #2a2c33; }
+  .browser .url {
+    margin-left: 12px; padding: 6px 14px; background: #0d0e12;
+    border-radius: 6px; font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; color: var(--ink-dim); flex: 1;
+  }
+  .browser .body {
+    flex: 1; padding: 32px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 20px;
+  }
+  .browser h4 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 36px; margin: 0; color: var(--ink);
+  }
+  .browser .empty {
+    color: var(--ink-dim); font-size: 22px;
+  }
+  .browser .reload {
+    margin-top: 12px;
+    padding: 14px 26px; border-radius: 10px;
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink); font-size: 18px; font-family: 'Inter', sans-serif;
+  }
+  .browser .reload.click { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,107,53,0.18); }
+  .stack {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 14px; padding: 40px;
+    height: 540px; display: flex; flex-direction: column;
+    justify-content: center; gap: 22px;
+  }
+  .stack .row {
+    display: flex; align-items: center; gap: 18px;
+    font-family: 'JetBrains Mono', monospace; font-size: 22px;
+    color: var(--ink-dim);
+  }
+  .stack .row .name { color: var(--ink); width: 140px; }
+  .stack .row .sig { padding: 6px 14px; border-radius: 6px; background: #0d0e12; font-size: 18px; }
+  .stack .row .sig.quiet { color: var(--ink-dim); }
+  .stack .row.live .sig { background: rgba(255,107,53,0.14); color: var(--accent); }
+  .stack .row.live .name { color: var(--accent); }
+
+  /* ---- SLIDE 3 — THE GAP / 70% ---- */
+  #s-gap .big-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 360px; line-height: 0.9; color: var(--accent);
+    letter-spacing: -0.04em;
+    text-shadow: 0 0 80px rgba(255,107,53,0.25);
+    margin: 0;
+  }
+  #s-gap .caption {
+    font-family: 'Instrument Serif', serif;
+    font-size: 56px; line-height: 1.2;
+    max-width: 24ch; margin-top: 24px;
+  }
+  #s-gap .caption .hi { color: var(--accent); font-style: italic; }
+
+  /* ---- SLIDE 4 — SOLUTION ONE-LINER ---- */
+  #s-one .quote {
+    font-family: 'Instrument Serif', serif; font-style: italic;
+    font-size: 64px; line-height: 1.25;
+    max-width: 24ch; color: var(--ink);
+  }
+  #s-one .quote .a { color: var(--accent); font-style: normal; }
+  #s-one .quote .g { color: var(--good); font-style: normal; }
+  #s-one .attrib {
+    margin-top: 48px;
+    font-family: 'JetBrains Mono', monospace; font-size: 18px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim);
+  }
+
+  /* ---- SLIDE 5 / 6 / 7 — DEMO BEATS ---- */
+  .demo {
+    display: grid; grid-template-columns: 460px 1fr; gap: 56px;
+    height: 100%; align-items: stretch;
+  }
+  .demo .side { display: flex; flex-direction: column; justify-content: center; }
+  .demo .beat-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px; letter-spacing: 0.2em;
+    color: var(--accent); margin-bottom: 16px;
+  }
+  .demo h2 { font-size: 64px; margin-bottom: 22px; }
+  .demo p { font-size: 26px; max-width: 22ch; }
+
+  /* Receipt panel */
+  .receipt {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 16px; padding: 40px; display: flex; flex-direction: column;
+    gap: 22px;
+    align-self: center;
+  }
+  .receipt .head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 22px; border-bottom: 1px solid var(--line);
+  }
+  .receipt .head .id {
+    font-family: 'JetBrains Mono', monospace; font-size: 18px;
+    color: var(--ink-dim); letter-spacing: 0.1em;
+  }
+  .receipt .head .live {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 16px;
+    color: var(--accent); letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .receipt .head .live::before {
+    content: ""; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 14px var(--accent);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; box-shadow: 0 0 14px var(--accent); }
+    50%     { opacity: 0.45; box-shadow: 0 0 24px var(--accent); }
+  }
+  .receipt .step {
+    display: grid; grid-template-columns: 36px 1fr auto; gap: 18px;
+    align-items: center;
+    font-size: 22px;
+  }
+  .receipt .step .n {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--line); display: flex;
+    align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    color: var(--ink-dim);
+  }
+  .receipt .step.done .n { border-color: var(--good); color: var(--good); }
+  .receipt .step.live .n { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 4px rgba(255,107,53,0.12); }
+  .receipt .step .label-l { color: var(--ink); }
+  .receipt .step .meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 16px;
+    color: var(--ink-dim);
+  }
+  .receipt .step.done .meta { color: var(--good); }
+  .receipt .step.live .meta { color: var(--accent); }
+  .receipt .step.idle { opacity: 0.45; }
+  .receipt .diag {
+    margin-top: 8px;
+    background: rgba(255,107,53,0.06);
+    border: 1px solid rgba(255,107,53,0.22);
+    border-radius: 10px; padding: 22px;
+    font-size: 20px; line-height: 1.5;
+  }
+  .receipt .diag .pol {
+    font-family: 'JetBrains Mono', monospace; font-size: 18px;
+    color: var(--accent);
+  }
+
+  /* Branch diff (money shot) */
+  .branchwrap {
+    display: grid; grid-template-rows: auto 1fr auto; gap: 22px;
+  }
+  .branchwrap .twocols {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: stretch;
+  }
+  .term {
+    background: #0a0b0e; border: 1px solid var(--line);
+    border-radius: 14px; padding: 28px;
+    display: flex; flex-direction: column; gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px; line-height: 1.55;
+  }
+  .term.prod { border-color: rgba(255,107,53,0.4); box-shadow: 0 0 0 1px rgba(255,107,53,0.12) inset; }
+  .term.branch { border-color: rgba(110,231,183,0.4); box-shadow: 0 0 0 1px rgba(110,231,183,0.12) inset; }
+  .term .head {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-dim); padding-bottom: 10px; border-bottom: 1px solid var(--line);
+  }
+  .term.prod .head .tag { color: var(--accent); }
+  .term.branch .head .tag { color: var(--good); }
+  .term .ln { color: var(--ink-dim); }
+  .term .ln .k { color: var(--ink); }
+  .term .ln .ok { color: var(--good); }
+  .term .ln .bad { color: var(--accent); }
+  .verdict {
+    display: flex; gap: 16px; align-items: center; justify-content: space-between;
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 18px 26px;
+    font-family: 'JetBrains Mono', monospace; font-size: 18px;
+  }
+  .verdict .left { color: var(--ink-dim); letter-spacing: 0.14em; text-transform: uppercase; }
+  .verdict .right { color: var(--good); font-size: 20px; }
+  .verdict .right.bad { color: var(--accent); }
+
+  /* PR view */
+  .pr {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 16px; padding: 36px;
+    display: flex; flex-direction: column; gap: 22px;
+    align-self: center;
+  }
+  .pr .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 22px; }
+  .pr .head h3 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 30px; margin: 0; line-height: 1.2;
+  }
+  .pr .head .badge {
+    padding: 6px 14px; border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    background: rgba(110,231,183,0.14); color: var(--good);
+    border: 1px solid rgba(110,231,183,0.3);
+  }
+  .pr .meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 16px; color: var(--ink-dim);
+    display: flex; gap: 16px;
+  }
+  .pr .diff {
+    background: #0a0b0e; border: 1px solid var(--line);
+    border-radius: 10px; padding: 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: 16px; line-height: 1.6;
+  }
+  .pr .diff .file {
+    color: var(--ink-dim); padding-bottom: 8px; border-bottom: 1px solid var(--line); margin-bottom: 12px;
+    font-size: 14px; letter-spacing: 0.1em;
+  }
+  .pr .diff .rm { color: var(--accent); }
+  .pr .diff .ad { color: var(--good); }
+  .pr .checks {
+    display: flex; gap: 22px; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 16px; color: var(--ink-dim);
+  }
+  .pr .checks .ok { color: var(--good); }
+
+  /* ---- SLIDE 8 — CONFIDENCE TIERS ---- */
+  .tiers {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+    margin-top: 40px;
+  }
+  .tier {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 16px; padding: 36px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .tier .pct {
+    font-family: 'Instrument Serif', serif;
+    font-size: 72px; line-height: 1;
+  }
+  .tier .verdict {
+    font-family: 'JetBrains Mono', monospace; font-size: 16px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    background: transparent; border: 0; padding: 0;
+  }
+  .tier.hi { border-color: rgba(110,231,183,0.4); }
+  .tier.hi .pct, .tier.hi .verdict { color: var(--good); }
+  .tier.md { border-color: rgba(253,230,138,0.35); }
+  .tier.md .pct, .tier.md .verdict { color: var(--warn); }
+  .tier.lo { border-color: rgba(167,139,250,0.35); }
+  .tier.lo .pct, .tier.lo .verdict { color: var(--cool); }
+  .tier p { font-size: 22px; max-width: none; margin: 0; color: var(--ink-dim); }
+  .tier p b { color: var(--ink); }
+
+  /* ---- SLIDE 9 — WHY INSFORGE ---- */
+  .whygrid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 56px;
+    align-items: start;
+    margin-top: 28px;
+  }
+  .whygrid h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin: 0 0 22px;
+  }
+  .whygrid .commodity h3 { color: var(--ink-dim); }
+  .whygrid .moat h3 { color: var(--good); }
+  .whygrid .item {
+    padding: 22px 0; border-top: 1px solid var(--line);
+    font-size: 24px; line-height: 1.4;
+  }
+  .whygrid .commodity .item { color: var(--ink-dim); }
+  .whygrid .commodity .item .k { color: var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 22px; }
+  .whygrid .moat .item { color: var(--ink); }
+  .whygrid .moat .item .k {
+    color: var(--good); font-family: 'JetBrains Mono', monospace; font-size: 22px;
+    display: block; margin-bottom: 6px;
+  }
+  .whygrid .moat .item em { color: var(--accent); font-style: italic; }
+
+  /* ---- SLIDE 10 — CLOSE ---- */
+  #s-close .close-line {
+    font-family: 'Instrument Serif', serif; font-style: italic;
+    font-size: 64px; line-height: 1.25; max-width: 30ch;
+  }
+  #s-close .close-line .a { color: var(--accent); font-style: normal; }
+  #s-close .close-line .g { color: var(--good); font-style: normal; }
+  #s-close .stack-row {
+    margin-top: 64px;
+    display: flex; gap: 36px; flex-wrap: wrap;
+  }
+  #s-close .stack-row .item {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 20px 28px;
+    font-family: 'JetBrains Mono', monospace; font-size: 18px;
+    color: var(--ink-dim); letter-spacing: 0.12em;
+  }
+  #s-close .stack-row .item .k { color: var(--ink); }
+  #s-close .seed {
+    position: absolute; right: 120px; bottom: 130px;
+    max-width: 30ch;
+    font-family: 'JetBrains Mono', monospace; font-size: 16px;
+    letter-spacing: 0.12em; color: var(--ink-dim);
+    text-align: right;
+  }
+  #s-close .seed .q { color: var(--accent); }
+
+  /* Nav hints */
+  .navhint {
+    position: fixed; right: 16px; bottom: 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #444; letter-spacing: 0.12em;
+    pointer-events: none; z-index: 50;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="deck">
+
+    <!-- ============ 1 · HERO ============ -->
+    <section class="slide active" id="s-hero">
+      <div class="built-on">
+        built on <span class="key">InsForge</span><br/>
+        06 June hackathon
+      </div>
+      <h1 class="display">Witness<span class="dot">.</span></h1>
+      <p class="one-line">
+        The bug-fixer for the <span class="hi">bugs that don't crash.</span>
+      </p>
+      <div class="deckmark">witness · live</div>
+      <div class="pagenum">01 / 10</div>
+    </section>
+
+    <!-- ============ 2 · PROBLEM ============ -->
+    <section class="slide" id="s-problem">
+      <span class="eyebrow">The problem</span>
+      <h2 class="tight">A customer opens<br/>their orders page.<br/>It's empty.</h2>
+      <p class="muted">They refresh. Still empty. They rage-click <em>reload</em>, then close the tab and email support.</p>
+      <div class="scene">
+        <div class="browser">
+          <div class="bar">
+            <div class="d"></div><div class="d"></div><div class="d"></div>
+            <div class="url">app.acme.com/orders</div>
+          </div>
+          <div class="body">
+            <h4>My orders</h4>
+            <div class="empty">— nothing here yet —</div>
+            <button class="reload click">Reload</button>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="row"><span class="name">Sentry</span><span class="sig quiet">no error</span></div>
+          <div class="row"><span class="name">Datadog</span><span class="sig quiet">all green</span></div>
+          <div class="row"><span class="name">PagerDuty</span><span class="sig quiet">silent</span></div>
+          <div class="row live"><span class="name">User</span><span class="sig">leaves</span></div>
+        </div>
+      </div>
+      <div class="deckmark">witness · live</div>
+      <div class="pagenum">02 / 10</div>
+    </section>
+
+    <!-- ============ 3 · THE GAP ============ -->
+    <section class="slide" id="s-gap">
+      <span class="eyebrow">The silent gap</span>
+      <p class="big-num">70%</p>
+      <p class="caption">of user-reported bugs <span class="hi">never throw an error</span>. Your monitoring sees nothing. The customer just leaves.</p>
+      <div class="deckmark">witness · live</div>
+      <div class="pagenum">03 / 10</div>
+    </section>
+
+    <!-- ============ 4 · SOLUTION ONE-LINER ============ -->
+    <section class="slide" id="s-one">
+      <span class="eyebrow">What Witness does</span>
+      <p class="quote">
+        Witness <span class="a">watches</span> the session,<br/>
+        <span class="a">replays</span> it on a forked backend,<br/>
+        <span class="g">patches</span> <code>insforge.toml</code>,<br/>
+        and ships the PR — in under a minute.
+      </p>
+      <div class="attrib">watch · correlate · diagnose · test on a fork · ship</div>
+      <div class="deckmark">witness · live</div>
+      <div class="pagenum">04 / 10</div>
+    </section>
+
+    <!-- ============ 5 · DEMO BEAT 1 — CAPTURED ============ -->
+    <section class="slide" id="s-demo1">
+      <div class="demo">
+        <div class="side">
+          <div class="beat-num">DEMO · 0:00 – 0:20</div>
+          <h2>The receipt page<br/>lights up.</h2>
+          <p>Witness sees the rage-click, captures the session, and taps the matching backend request log.</p>
+        </div>
+        <div class="receipt">
+          <div class="head">
+            <div class="id">session · 7f3a91</div>
+            <div class="live">live</div>
+          </div>
+          <div class="step done">
+            <div class="n">1</div>
+            <div class="label-l">Session captured</div>
+            <div class="meta">rrweb · 14s clip</div>
+          </div>
+          <div class="step done">
+            <div class="n">2</div>
+            <div class="label-l">Backend log tapped</div>
+            <div class="meta">edge-fn · 41 req</div>
+          </div>
+          <div class="step live">
+            <div class="n">3</div>
+            <div class="label-l">Anomaly detected</div>
+            <div class="meta">RLS · 1 hit</div>
+          </div>
+          <div class="step idle">
+            <div class="n">4</div>
+            <div class="label-l">Diagnosing</div>
+            <div class="meta">…</div>
+          </div>
+          <div class="step idle">
+            <div class="n">5</div>
+            <div class="label-l">Branch project · replay</div>
+            <div class="meta">—</div>
+          </div>
+          <div class="step idle">
+            <div class="n">6</div>
+            <div class="label-l">PR</div>
+            <div class="meta">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="deckmark">witness · live</div>
+      <div class="pagenum">05 / 10</div>
+    </section>
+
+    <!-- ============ 6 · DEMO BEAT 2 — DIAGNOSIS + BRANCH ============ -->
+    <section class="slide" id="s-demo2">
+      <div class="demo">
+        <div class="side">
+          <div class="beat-num">DEMO · 0:20 – 0:50 · money shot</div>
+          <h2>Same session.<br/>Two backends.</h2>
+          <p>Witness forks the backend, applies the TOML diff, replays the session. Prod still leaks. Branch is green.</p>
+        </div>
+        <div class="branchwrap">
+          <div class="receipt" style="padding: 22px 30px;">
+            <div class="step live" style="grid-template-columns: 36px 1fr;">
+              <div class="n">!</div>
+              <div>
+                <div class="label-l" style="font-size:22px;">RLS policy <code>orders_select</code> filters by <code>auth.jwt() ->> 'tenant'</code>.</div>
+                <div class="meta" style="margin-top:6px;">This user's JWT migrated to <code>tenant_ids[]</code> last week.</div>
+              </div>
+            </div>
+          </div>
+          <div class="twocols">
+            <div class="term prod">
+              <div class="head"><span>prod</span><span class="tag">red</span></div>
+              <div class="ln"><span class="k">$</span> witness replay --env prod</div>
+              <div class="ln">policy <span class="k">orders_select</span> · fired</div>
+              <div class="ln">rows returned: <span class="bad">0</span></div>
+              <div class="ln">user sees: <span class="bad">empty page</span></div>
+              <div class="ln">exit <span class="bad">1</span> · bug reproduced</div>
+            </div>
+            <div class="term branch">
+              <div class="head"><span>branch · pr-7f3a91</span><span class="tag">green</span></div>
+              <div class="ln"><span class="k">$</span> witness replay --env branch</div>
+              <div class="ln">policy <span class="k">orders_select</span> · patched</div>
+              <div class="ln">rows returned: <span class="ok">3</span></div>
+              <div class="ln">user sees: <span class="ok">3 orders</span></div>
+              <div class="ln">exit <span class="ok">0</span> · bug gone</div>
+            </div>
+          </div>
+          <div class="verdict">
+            <span class="left">Verdict</span>
+            <span class="right">bug confirmed · fix verified on fork</span>
+          </div>
+        </div>
+      </div>
+      <div class="deckmark">witness · live</div>
+      <div class="pagenum">06 / 10</div>
+    </section>
+
+    <!-- ============ 7 · DEMO BEAT 3 — PR ============ -->
+    <section class="slide" id="s-demo3">
+      <div class="demo">
+        <div class="side">
+          <div class="beat-num">DEMO · 0:50 – 1:00</div>
+          <h2>A four-line<br/>TOML diff.<br/>Shipped.</h2>
+          <p>The PR carries the session clip, the before/after RLS trace, and a confidence score. CI is green.</p>
+        </div>
+        <div class="pr">
+          <div class="head">
+            <h3>policy(orders): accept tenant_ids[] in orders_select</h3>
+            <div class="badge">92% · open PR</div>
+          </div>
+          <div class="meta">
+            <span>#147</span><span>witness-bot wants to merge 1 commit</span><span>+2 −2</span>
+          </div>
+          <div class="diff">
+            <div class="file">infra/insforge.toml</div>
+            <div>  [policy.orders_select]</div>
+            <div class="rm">- using = "tenant_id = auth.jwt() ->> 'tenant'"</div>
+            <div class="ad">+ using = "tenant_id = auth.jwt() ->> 'tenant'</div>
+            <div class="ad">+      OR tenant_id = ANY(auth.jwt() -> 'tenant_ids')"</div>
+          </div>
+          <div class="checks">
+            <span class="ok">✓ branch-project replay</span>
+            <span class="ok">✓ existing tests</span>
+            <span class="ok">✓ no policy blast</span>
+            <span>· session 7f3a91 attached</span>
+          </div>
+        </div>
+      </div>
+      <div class="deckmark">witness · live</div>
+      <div class="pagenum">07 / 10</div>
+    </section>
+
+    <!-- ============ 8 · CONFIDENCE TIERS ============ -->
+    <section class="slide" id="s-tiers">
+      <span class="eyebrow">Confidence tiers</span>
+      <h2 class="tight">Witness doesn't<br/>spam your PR queue.</h2>
+      <p class="muted">Each finding is scored by diff size, policy blast radius, and similarity to past merged fixes. The action scales to the score.</p>
+      <div class="tiers">
+        <div class="tier hi">
+          <div class="pct">85+</div>
+          <div class="verdict">→ open PR</div>
+          <p><b>Small TOML diff. Single policy. Past similar diffs merged.</b> Ready for review.</p>
+        </div>
+        <div class="tier md">
+          <div class="pct">60-85</div>
+          <div class="verdict">→ draft PR</div>
+          <p><b>Real, reproducible on the fork.</b> Fix touches more than one policy. Humans decide.</p>
+        </div>
+        <div class="tier lo">
+          <div class="pct">&lt;60</div>
+          <div class="verdict">→ issue</div>
+          <p><b>Anomaly is real.</b> Replay didn't reproduce cleanly. Files an issue with clip + log diff.</p>
+        </div>
+      </div>
+      <div class="deckmark">witness · live</div>
+      <div class="pagenum">08 / 10</div>
+    </section>
+
+    <!-- ============ 9 · WHY INSFORGE ============ -->
+    <section class="slide" id="s-why">
+      <span class="eyebrow">Why InsForge</span>
+      <h2 class="tight">Two primitives<br/>nobody else has.</h2>
+      <div class="whygrid">
+        <div class="commodity">
+          <h3>Substrate — others have this</h3>
+          <div class="item"><span class="k">pgvector</span> · dedup &amp; similarity</div>
+          <div class="item"><span class="k">Realtime</span> · the receipt page</div>
+          <div class="item"><span class="k">Storage</span> · signed-URL clips</div>
+          <div class="item"><span class="k">Edge fns</span> · log taps</div>
+        </div>
+        <div class="moat">
+          <h3>Engine — only InsForge has this</h3>
+          <div class="item">
+            <span class="k">Branch projects</span>
+            Forkable backends. Witness <em>tests its fix on a fork of your real schema</em> before opening the PR.
+          </div>
+          <div class="item">
+            <span class="k">insforge.toml</span>
+            Auth &amp; RLS as declarative config. The fix <em>is</em> a TOML diff — small, reviewable, reversible.
+          </div>
+        </div>
+      </div>
+      <div class="deckmark">witness · live</div>
+      <div class="pagenum">09 / 10</div>
+    </section>
+
+    <!-- ============ 10 · CLOSE ============ -->
+    <section class="slide" id="s-close">
+      <span class="eyebrow">Witness · 06 June</span>
+      <p class="close-line">
+        Sentry catches the bugs that <span class="a">crash your server</span>.<br/>
+        Witness catches the bugs that <span class="g">quietly break your customers</span>.
+      </p>
+      <div class="stack-row">
+        <div class="item"><span class="k">InsForge</span> · branch projects · RLS · realtime · pgvector · AI</div>
+        <div class="item"><span class="k">rrweb</span> · session capture</div>
+        <div class="item"><span class="k">Devin</span> · TOML patch agent</div>
+      </div>
+      <div class="seed">
+        Next up: <span class="q">learn-from-rejections</span><br/>
+        loop · closed PRs become<br/>negative training shapes.
+      </div>
+      <div class="deckmark">witness · live</div>
+      <div class="pagenum">10 / 10</div>
+    </section>
+
+  </div>
+</div>
+
+<div class="navhint">← → · space · 1-9 · F = fullscreen</div>
+
+<script>
+  (function () {
+    const deck = document.getElementById('deck');
+    const stage = document.getElementById('stage');
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let idx = 0;
+
+    function scale () {
+      const sw = window.innerWidth, sh = window.innerHeight;
+      const s = Math.min(sw / 1920, sh / 1080);
+      deck.style.transform = 'scale(' + s + ')';
+    }
+    function go (n) {
+      idx = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach((el, i) => el.classList.toggle('active', i === idx));
+      try { history.replaceState(null, '', '#' + (idx + 1)); } catch (e) {}
+    }
+    function next () { go(idx + 1); }
+    function prev () { go(idx - 1); }
+    function full () {
+      const el = document.documentElement;
+      if (!document.fullscreenElement) {
+        (el.requestFullscreen || el.webkitRequestFullscreen || function(){}).call(el);
+      } else {
+        (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+      }
+    }
+
+    window.addEventListener('resize', scale);
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { next(); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { prev(); e.preventDefault(); }
+      else if (e.key === 'Home') { go(0); }
+      else if (e.key === 'End') { go(slides.length - 1); }
+      else if (e.key === 'f' || e.key === 'F') { full(); }
+      else if (/^[1-9]$/.test(e.key)) { go(parseInt(e.key, 10) - 1); }
+      else if (e.key === '0') { go(9); }
+    });
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('a, button')) return;
+      next();
+    });
+
+    const m = (location.hash || '').match(/^#(\d+)$/);
+    if (m) idx = Math.max(0, Math.min(slides.length - 1, parseInt(m[1], 10) - 1));
+    go(idx);
+    scale();
+  })();
+</script>
+</body>
+</html>

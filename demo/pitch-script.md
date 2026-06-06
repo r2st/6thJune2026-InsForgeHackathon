@@ -1,67 +1,98 @@
-# Pitch script
+# Pitch script — Witness.
 
-**Slot:** *(e.g., 3 min pitch + 2 min Q&A — confirm from `docs/brief.md`)*
+**Slot:** 3 min pitch + 2 min Q&A
+**Deck:** [demo/slides/index.html](slides/index.html) · open fullscreen (press `F`), arrow-keys to advance.
 
-Read this aloud with a timer. If you're over by 10s, cut a sentence.
+Read aloud with a timer. If you're over by 10s, cut a sentence. Cuts are at the bottom of this file.
 
 ---
 
-## 0:00 – 0:30 — Problem
+## 0:00 – 0:25 — Problem (slide 1 → 2)
 
-> *(One real customer. One real pain. Concrete number if possible.)*
+> "A customer of an InsForge-hosted SaaS opens their orders page. It's empty.
+> They refresh — still empty. They rage-click *Reload*, then close the tab and
+> email support."
 >
-> "Meet [name], who [does what]. Every [time period], they have to
-> [painful task] because [why current tools fail]. It costs them [cost in
-> time / dollars / risk]."
+> "Sentry sees no error. Datadog is all green. PagerDuty is silent.
+> The customer just leaves."
 
-**What the judge feels:** *they know someone with this exact problem.*
+**What the judge feels:** *they have shipped this bug. Their team has missed it.*
 
-## 0:30 – 0:45 — Solution one-liner
+## 0:25 – 0:40 — The gap (slide 3)
 
-> "We built [name]: [one sentence — verb-first — that ends with the
-> outcome, not the tech]."
+> "70% of user-reported bugs never throw an error. They don't crash —
+> they just *frustrate*. Your monitoring is built for stack traces.
+> Most of your bugs don't have one."
 
-## 0:45 – 2:30 — Live demo
+## 0:40 – 0:55 — Solution one-liner (slide 4)
 
-The happy path only. Pre-loaded data. No login screen. Walk through
-3–5 steps; each lands a beat.
+> "We built **Witness.** — the bug-fixer for the bugs that don't crash.
+> Witness watches the session, replays it on a forked InsForge backend,
+> patches `insforge.toml`, and ships the PR. In under a minute."
 
-| Time   | What happens on screen          | What you say                         |
-|--------|---------------------------------|--------------------------------------|
-| 0:45   | *(opening view)*                |                                      |
-| 1:00   | *(action 1 → result 1)*         |                                      |
-| 1:30   | *(action 2 → result 2)*         |                                      |
-| 2:00   | *(action 3 → the money shot)*   | *"And here's the proof — [artifact]."* |
+## 0:55 – 2:15 — Live demo (slides 5 → 7)
 
-**Fallback:** if anything in the live demo breaks, switch to the recording
-in `demo/recordings/` and narrate over it. Don't apologize — keep going.
+Happy path. Pre-loaded data. No login. Three beats.
 
-## 2:30 – 3:00 — Close
+| Time   | Slide | What happens on screen                                                | What you say                                                                 |
+|--------|-------|-----------------------------------------------------------------------|------------------------------------------------------------------------------|
+| 0:55   | 5     | Customer rage-clicks. Receipt panel lights up. Session captured · backend log tapped · anomaly. | "Witness saw the rage-click and pulled the matching backend log." |
+| 1:20   | 6     | Diagnosis: RLS policy `orders_select` reads `auth.jwt() ->> 'tenant'`. JWT migrated to `tenant_ids[]` last week. Branch project spawns; prod (red) and branch (green) replay side-by-side. | "It traced the empty page to one RLS policy. Then it forked the backend and *proved* the fix on the fork, against the same session." |
+| 1:50   | 7     | GitHub PR opens. Four-line `insforge.toml` diff. Confidence 92%. CI green. Session clip + before/after RLS trace attached. | *"And here's the proof — a four-line TOML patch, with the session clip and the RLS trace embedded. From rage-click to PR in under a minute."* |
 
-> "We used [sponsor APIs, named explicitly], shipped in [time], and the
-> next thing we'd add is [planted seed for Q&A]."
+**Fallback:** if anything live breaks, switch to `demo/recordings/latest.mp4` and narrate over it. Don't apologize — keep going. The receipt page (slide 5) and the branch replay (slide 6) are the two beats that *must* land; the PR shot is the closer.
 
-**Planted-seed candidates** (pick one — judge will ask, you'll have the
-answer ready):
+## 2:15 – 2:40 — Confidence tiers + why InsForge (slides 8 → 9)
 
-- *Monetization model* — "We have a hypothesis but skipped it for time."
-- *Compliance story* — "We've scoped it out, happy to walk through it."
-- *Multi-tenant deploy* — "We have a path, ~half-day of work."
+> "Witness doesn't spam your PR queue. Every finding is scored —
+> high-confidence small diffs open a PR, mediums open a draft, lows file
+> an issue with the clip and the log diff."
+
+> "And this only works on InsForge. Branch projects let us test the fix
+> against your real schema before opening the PR. `insforge.toml` makes
+> the fix a four-line diff instead of a refactor. Supabase has neither.
+> Convex has neither. **InsForge is the engine, not the substrate.**"
+
+## 2:40 – 3:00 — Close (slide 10)
+
+> "Sentry catches the bugs that crash your server. Witness catches the
+> bugs that quietly break your customers. Built on InsForge — branch
+> projects, RLS, realtime, pgvector, AI — plus rrweb for capture and
+> Devin to drive the patch."
+>
+> "Next we wire the learn-from-rejections loop: every closed PR becomes a
+> negative training shape, so Witness gets quieter over time, not noisier."
 
 ---
+
+## Planted seed (pick one — judge will ask)
+
+- **Learn-from-rejections loop** (default — strongest answer): "Every closed-as-not-a-bug PR embeds back into pgvector as a negative shape. Witness's false-positive rate drops with use, not up."
+- **What about non-RLS bugs?** "Today, RLS + auth policy. The same loop generalizes to any declarative config — feature flags, edge-fn routing. We start where the fix is small and the blast radius is bounded."
+- **Multi-tenant deploy story:** "Witness runs as an InsForge edge function plus a GitHub App. Customers install both, point us at a repo, done. Half-day of work to ship."
 
 ## Q&A prep
 
-Pre-rehearsed answers — agents grill the presenter the night before.
-
 | Likely question | Our answer |
 |-----------------|------------|
-|                 |            |
+| "Won't this open garbage PRs?" | Confidence tiers. Anything under 85% is a draft or an issue. The 92% in the demo is what an *open* PR looks like — small diff, single policy, similar to past merged fixes. |
+| "How do you replay a session deterministically?" | We don't replay the *page*. We replay the *policy*. The rrweb clip is evidence, not the test. The test is the failing request against the branch project. That's tractable in 9 hours; deterministic page-replay is not, and we'd be lying if we claimed it. |
+| "Why not Supabase?" | Supabase has RLS but no branch projects. No safe place to test a policy diff against real schema without risking prod. `insforge.toml` makes the fix declarative — Supabase's RLS lives in migrations, which is one more thing to roll back. |
+| "Why not just have Sentry add this?" | Sentry has no backend fork primitive. They could add session replay (they have), but they can't ship the fix because they can't safely test it. We can. |
+| "How does Witness handle false positives?" | The branch-project replay *is* the false-positive filter. If the fix doesn't make the session green on the fork, no PR. That's the whole point of the engine. |
+| "What's the business model?" | Per-confirmed-fix pricing — you pay when an open PR gets merged. Aligns incentives. We skipped pricing UI for the hackathon. |
+| "What about non-Postgres / non-RLS bugs?" | Out of scope today. The first wedge is multi-tenant SaaS on InsForge, where RLS misfires are the silent-bug category that lands in security postmortems. |
 
-## Cut list (if running long)
+## Cut list (if running long, drop top first)
 
-In priority order — drop top first.
+1. The Datadog / PagerDuty line in the problem ("silent" lands without it).
+2. The restated-as-70% framing — go straight from problem to solution.
+3. The third bullet on confidence tiers (low / issue) — leave PR + draft.
+4. The "next we wire learn-from-rejections" line — save it for Q&A as the planted seed.
 
-1. *(weakest demo beat)*
-2. *(secondary sponsor mention)*
-3. *(roadmap slide)*
+## Operator (keyboard driver) notes
+
+- Open `demo/slides/index.html` fullscreen. Press `F` to toggle.
+- Advance: `→` / space / click. Back: `←`. Jump: `1`–`9` / `0`.
+- Step through 1 → 10 in order; the script timing assumes one slide per beat.
+- Keep slide 7 (the PR) on screen during Q&A — it's the money shot.
