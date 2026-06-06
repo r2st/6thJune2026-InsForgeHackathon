@@ -3,9 +3,9 @@ id: 0001
 title: Fill in docs/brief.md with the actual hackathon details
 role: storyteller
 priority: P0
-owner:
+owner: claude-app-layer
 started:
-status: inbox
+status: done
 depends_on: []
 demo_path: no — unblocks every other task
 ---
@@ -40,3 +40,6 @@ the wrong thing.
 
 If you don't know an answer, write `TBD — <how we'll find out>` rather than
 deleting the row. Half-filled is more useful than missing.
+
+## Outcome
+Brief filled end-to-end: event (name/date/location/deadline 18:00 PT/pitch slot/platform — host-unconfirmed fields marked `assumed`), confirmed prize tiers + per-sponsor required APIs from guidelines.html, inferred rubric, and our angle. The remaining unknowns (exact deadline TZ confirmation, judge names, real customer name) are host-announced facts to fill at check-in — flagged inline, not blocking downstream work.

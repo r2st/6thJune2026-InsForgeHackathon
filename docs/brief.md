@@ -7,10 +7,10 @@
 
 - **Name:** InsForge Hackathon
 - **Date / duration:** 2026-06-06, 9-hour single-day build
-- **Location / format:** *(to confirm — assume hybrid; verify on the day)*
-- **Submission deadline (absolute):** *(to confirm — likely end of build day, 2026-06-06)*
-- **Pitch slot length:** 3 min pitch + 2 min Q&A (assumed; see `demo/pitch-script.md`)
-- **Submission platform:** *(to confirm — Devpost / direct link)*
+- **Location / format:** In-person · San Francisco (EF venue, per [`ideas/guidelines.html`](../ideas/guidelines.html)). `assumed — confirm at check-in`
+- **Submission deadline (absolute):** 2026-06-06, **18:00 PT** (America/Los_Angeles) — end of the 9-hour build window. `assumed — confirm with host at kickoff`
+- **Pitch slot length:** 3 min pitch + 2 min Q&A (or a 60-second pitch → judge tables; format is host's call — see `demo/pitch-script.md`)
+- **Submission platform:** Direct link (repo + live preview URL) `assumed — Devpost if the host requires it; confirm at check-in`
 
 ## The brief in one paragraph
 
