@@ -3,9 +3,9 @@ id: 0006
 title: Apply a proposed insforge.toml diff to a branch project
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0004]
 demo_path: yes — slide 6 requires the fork to actually have the new policy
 ---
@@ -48,3 +48,13 @@ and pushing via the API. Confirm via `insforge-cli` skill before
 starting.
 
 ## Outcome
+
+- `functions/tomlPatch.ts` — pure `applyPatch(toml, {path,before,after})`:
+  dotted-path scalar swap, idempotent re-apply (changed=false), refuses to
+  clobber on a value mismatch with file:line.
+- `functions/applyDiff.ts` — `applyTomlDiff(branchId, diff, deps?)` patches the
+  canonical TOML then `insforge config apply --env <branchId>`; returns the new
+  version or a structured lint error. CLI exec injectable; 3s timeout.
+- Note: honors the canonical `TomlPatch` (`{path,before,after}`) from types.ts,
+  not the older list-of-ops shape in this ticket's first draft.
+- 10 hermetic tests across tomlPatch.test.ts + applyDiff.test.ts.
