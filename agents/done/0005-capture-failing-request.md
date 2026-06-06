@@ -3,9 +3,9 @@ id: 0005
 title: Capture the failing HTTP request from edge-fn logs as a replay payload
 role: builder
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: []
 demo_path: yes — this is the input to slide 6's replay
 ---
@@ -51,3 +51,11 @@ candidate. Don't over-engineer the heuristic — the demo only needs to
 catch the one case.
 
 ## Outcome
+
+- `functions/capture.ts` — `captureFailingRequest(sessionId, capturedAt, opts)`
+  reuses correlate() (0014) to pick the one failing request, then serializes it
+  to a `ReplayPayload` (path/query from route, verbatim JWT). Returns null
+  cleanly on no-anomaly / ambiguity / missing JWT.
+- Pure `toReplayPayload()` + 7 hermetic tests (`capture.test.ts`).
+- Note: lives in `functions/` (canonical), not the older `hush/` path; built on
+  the typed correlate picker rather than re-parsing raw edge-fn logs.
