@@ -10,10 +10,12 @@ import {
   recallSimilarity,
   createMemoirClient,
   nullMemoir,
+  RealMemoir,
   NEUTRAL_SIMILARITY,
   type RecallResult,
   type Neighbour,
   type MemoirClient,
+  type MemoirRunner,
 } from './memory.js';
 import { scoreConfidence } from './score.js';
 
@@ -107,14 +109,13 @@ describe('nullMemoir + createMemoirClient — the honest no-op', () => {
     })).resolves.toBeUndefined();
   });
 
-  it('createMemoirClient returns the null client when no key is set', async () => {
+  it('createMemoirClient returns the null client when MEMOIR_STORE is unset', async () => {
     const c = createMemoirClient({} as NodeJS.ProcessEnv);
     expect(await c.recallSimilar({ failingPolicy: 'x', tomlDiff: DIFF })).toEqual({ neighbours: [] });
   });
 
-  it('createMemoirClient falls back (not a guessed adapter) even when a key IS set', async () => {
-    // Until the Memoir SDK is confirmed, a set key must not silently mis-call a
-    // guessed API — it falls back to neutral, never breaks the run.
+  it('a stale MEMOIR_API_KEY (no MEMOIR_STORE) still falls back to neutral', async () => {
+    // The old token env is dead; only MEMOIR_STORE activates the real adapter.
     const c = createMemoirClient({ MEMOIR_API_KEY: 'sk-test' } as NodeJS.ProcessEnv);
     expect(await c.recallSimilar({ failingPolicy: 'x', tomlDiff: DIFF })).toEqual({ neighbours: [] });
   });
@@ -122,6 +123,88 @@ describe('nullMemoir + createMemoirClient — the honest no-op', () => {
   it('through createMemoirClient, recallSimilarity yields the neutral 50', async () => {
     const sim = await recallSimilarity(createMemoirClient({} as NodeJS.ProcessEnv), { failingPolicy: 'x', tomlDiff: DIFF });
     expect(sim).toBe(NEUTRAL_SIMILARITY);
+  });
+});
+
+// ── RealMemoir: the memoir-ai.dev CLI adapter (ticket 0046) ───────────────────
+
+describe('RealMemoir — CLI adapter (injected runner, never spawns the binary)', () => {
+  const STORE = '/tmp/test-store';
+  const Q = { failingPolicy: 'orders.orders_select', tomlDiff: DIFF };
+
+  // A fake `memoir` whose recall returns the given memories and records remember calls.
+  function fakeRunner(memories: Array<{ content: string; relevance_score: number }>) {
+    const calls: string[][] = [];
+    const run: MemoirRunner = async (args) => {
+      calls.push(args);
+      if (args.includes('recall')) return JSON.stringify({ success: true, memories });
+      if (args.includes('remember')) return JSON.stringify({ success: true, commit_hash: 'abc' });
+      return '{}';
+    };
+    return { run, calls };
+  }
+
+  const blob = (over: Partial<{ runId: string; decision: string; diff: TomlPatch }>) =>
+    JSON.stringify({ runId: 'r1', decision: 'merged', failingPolicy: 'orders.orders_select', bugConfirmed: true, diff: DIFF, ...over });
+
+  it('parses a merged JSON-blob neighbour; relevance → 0–100 similarity', async () => {
+    const { run } = fakeRunner([{ content: blob({ decision: 'merged' }), relevance_score: 0.6 }]);
+    const r = await new RealMemoir(STORE, run).recallSimilar(Q);
+    expect(r.neighbours).toEqual([{ runId: 'r1', similarity: 60, outcome: 'merged', diff: DIFF }]);
+  });
+
+  it('parses a rejected neighbour (negative evidence)', async () => {
+    const { run } = fakeRunner([{ content: blob({ runId: 'r2', decision: 'rejected' }), relevance_score: 0.8 }]);
+    const r = await new RealMemoir(STORE, run).recallSimilar(Q);
+    expect(r.neighbours[0]).toMatchObject({ outcome: 'rejected', similarity: 80, runId: 'r2' });
+  });
+
+  it('drops hits below the relevance floor (a weak match is not a neighbour)', async () => {
+    const { run } = fakeRunner([{ content: blob({}), relevance_score: 0.1 }]);
+    const r = await new RealMemoir(STORE, run).recallSimilar(Q);
+    expect(r.neighbours).toEqual([]); // → similarityForScorer returns neutral 50
+  });
+
+  it('falls back to a leading keyword for plain-text (seed) memories', async () => {
+    const { run } = fakeRunner([{ content: 'merged: orders_select RLS fix, tenant claim', relevance_score: 0.9 }]);
+    const r = await new RealMemoir(STORE, run).recallSimilar(Q);
+    expect(r.neighbours[0]).toMatchObject({ outcome: 'merged', similarity: 90 });
+  });
+
+  it('a CLI error (missing binary / non-zero exit) → no neighbours, never throws', async () => {
+    const run: MemoirRunner = async () => { throw new Error('spawn memoir ENOENT'); };
+    await expect(new RealMemoir(STORE, run).recallSimilar(Q)).resolves.toEqual({ neighbours: [] });
+  });
+
+  it('non-JSON stdout (e.g. an error banner) → no neighbours', async () => {
+    const run: MemoirRunner = async () => 'Error: credit balance too low';
+    await expect(new RealMemoir(STORE, run).recallSimilar(Q)).resolves.toEqual({ neighbours: [] });
+  });
+
+  it('recordOutcome shells out to `remember` under a runId-keyed path', async () => {
+    const { run, calls } = fakeRunner([]);
+    await new RealMemoir(STORE, run).recordOutcome({
+      runId: 'run abc/123', failingPolicy: 'orders.orders_select', tomlDiff: DIFF,
+      bugConfirmed: true, decision: 'merged', at: '2026-06-06',
+    });
+    const call = calls.find((c) => c.includes('remember'))!;
+    expect(call).toContain('-s'); expect(call).toContain(STORE);
+    expect(call).toContain('-n'); expect(call).toContain('hush');
+    expect(call).toContain('-p'); expect(call).toContain('outcome.run-abc-123'); // sanitised
+  });
+
+  it('recordOutcome swallows a CLI failure (memory never breaks a run)', async () => {
+    const run: MemoirRunner = async () => { throw new Error('disk full'); };
+    await expect(new RealMemoir(STORE, run).recordOutcome({
+      runId: 'r', failingPolicy: 'x', tomlDiff: DIFF, bugConfirmed: true, decision: 'merged', at: '2026-06-06',
+    })).resolves.toBeUndefined();
+  });
+
+  it('createMemoirClient returns RealMemoir when MEMOIR_STORE is set, and recall flows through', async () => {
+    const { run } = fakeRunner([{ content: blob({ decision: 'merged' }), relevance_score: 0.75 }]);
+    const client = createMemoirClient({ MEMOIR_STORE: STORE } as NodeJS.ProcessEnv, run);
+    expect(client).toBeInstanceOf(RealMemoir);
+    await expect(recallSimilarity(client, Q)).resolves.toBe(75); // real neighbour → real signal
   });
 });
 

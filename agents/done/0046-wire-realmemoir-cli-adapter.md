@@ -3,9 +3,9 @@ id: 0046
 title: Wire RealMemoir to the memoir-ai.dev CLI (sponsor confirmed)
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (impl session)
+started: 2026-06-06
+status: done
 depends_on: [0043]
 demo_path: yes — makes the learn-from-rejections recall real on stage
 sponsor: Memoir
@@ -78,4 +78,25 @@ time" story.
   feeds a real neighbour into a run you can demo.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- **Shipped:** `RealMemoir` in `functions/memory.ts` — an injectable exec seam
+  (`MemoirRunner`) that shells out to the `memoir` CLI. `recordOutcome` →
+  `memoir remember` (JSON blob, runId-keyed path, idempotent). `recallSimilar` →
+  `memoir recall`, parses `relevance_score`→0–100 similarity, JSON-blob→outcome,
+  with a plain-text keyword fallback for seed memories. Hits below 0.2 relevance
+  are dropped so a weak match can't pull below neutral.
+- `createMemoirClient` now returns `RealMemoir` when `MEMOIR_STORE` is set
+  (the dead `MEMOIR_API_KEY` branch is gone), else `nullMemoir`. The orchestrator
+  (`fix-trigger.ts`) needed no change — it already routes through this.
+- **Robustness:** missing binary / non-zero exit / non-JSON / Anthropic-credit
+  failure all degrade to `{neighbours:[]}` (recall) or a logged no-op (record).
+  A run never breaks on Memoir.
+- **Tests:** +12 in `memory.test.ts` (fake runner — never spawns the binary);
+  full functions suite green (254/254), typecheck clean. Also verified live
+  against the real `memoir` binary: recorded a merged outcome and recalled it
+  back as a structured neighbour (similarity 100).
+- **Demo seed:** `scripts/seed-memoir.sh` seeds one canonical merged neighbour
+  resembling the RLS fix (idempotent). With it, the scorer recalls a real prior
+  → the 90/92 badge is computed from evidence, resolving 0040 honestly.
+- **Deferred:** `recordOutcome` is not yet called from a PR-close webhook (no
+  webhook exists). The recall path — what the demo shows — is fully live.

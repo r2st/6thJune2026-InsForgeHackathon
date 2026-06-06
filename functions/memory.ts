@@ -18,13 +18,27 @@
 // docs (see ticket). Until it is, `createMemoirClient` returns the null client,
 // so the pipeline behaves exactly as today (neutral 50) and never breaks.
 
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import type { TomlPatch } from './types.js';
+
+const execFileAsync = promisify(execFile);
 
 /** No corpus → neutral signal. Mirrors fix-trigger's constant; the honest default. */
 export const NEUTRAL_SIMILARITY = 50;
 
 /** How hard a similar *rejected* outcome pulls confidence down. */
 const REJECTION_WEIGHT = 0.6;
+
+/** memoir namespace Hush writes its outcomes under (keeps them off the user's taxonomy). */
+const MEMOIR_NAMESPACE = 'hush';
+
+/** Recall hits below this relevance (0–1) are dropped, so a weak match can't
+ *  pull the scorer *below* neutral. No real neighbour → empty → neutral 50. */
+const MIN_RELEVANCE = 0.2;
+
+/** How many recall hits to consider. */
+const RECALL_LIMIT = 5;
 
 export type OutcomeDecision = 'merged' | 'rejected' | 'dismissed' | 'duplicate' | 'pending';
 
@@ -118,24 +132,140 @@ export const nullMemoir: MemoirClient = {
   },
 };
 
+// ── RealMemoir: the memoir-ai.dev CLI adapter (ticket 0046) ───────────────────
+//
+// Sponsor confirmed as memoir-ai.dev (zhangfengcdt/memoir): a LOCAL CLI, no
+// token. We shell out to `memoir` against a store path (MEMOIR_STORE). Outcomes
+// are written as JSON blobs under the `hush` namespace, keyed by runId, so
+// recall round-trips structured data we control rather than parsing prose.
+//
+// Every CLI path is wrapped: a missing binary, a non-zero exit, malformed JSON,
+// or an Anthropic-credit failure on semantic recall all degrade to "no
+// neighbours" (recall) or a logged no-op (record). Memory never breaks a run.
+
+/** Injectable exec seam — tests pass a fake; prod spawns the real binary. */
+export type MemoirRunner = (args: string[]) => Promise<string>;
+
+/** Default runner: spawn `memoir` and return stdout. 10s cap. */
+export const defaultMemoirRunner: MemoirRunner = async (args) => {
+  const { stdout } = await execFileAsync('memoir', args, {
+    timeout: 10_000,
+    maxBuffer: 8 * 1024 * 1024,
+  });
+  return stdout;
+};
+
+/** memoir taxonomy paths are `[a-z0-9._-]`; sanitise a runId into one segment. */
+function keyForRun(runId: string): string {
+  const safe = runId.replace(/[^a-zA-Z0-9._-]/g, '-').replace(/^-+|-+$/g, '');
+  return `outcome.${safe || 'unknown'}`;
+}
+
+/** The JSON blob we store as a memory's content and parse back on recall. */
+interface OutcomeBlob {
+  runId: string;
+  decision: OutcomeDecision;
+  failingPolicy: string;
+  bugConfirmed: boolean;
+  diff: TomlPatch;
+}
+
+const DECISION_WORDS: OutcomeDecision[] = ['merged', 'rejected', 'dismissed', 'duplicate', 'pending'];
+
+/** Recover an outcome from a recalled memory: prefer our JSON blob; fall back to
+ *  a leading keyword for plain-text/seed memories; else 'pending' (counts as
+ *  neither positive nor negative evidence). */
+function parseOutcome(content: string, fallbackDiff: TomlPatch): { decision: OutcomeDecision; runId: string; diff: TomlPatch } {
+  try {
+    const blob = JSON.parse(content) as Partial<OutcomeBlob>;
+    if (blob && typeof blob === 'object' && blob.decision && DECISION_WORDS.includes(blob.decision)) {
+      return {
+        decision: blob.decision,
+        runId: blob.runId ?? 'unknown',
+        diff: blob.diff ?? fallbackDiff,
+      };
+    }
+  } catch {
+    /* not our JSON — fall through to keyword detection */
+  }
+  const head = content.trimStart().toLowerCase();
+  const word = DECISION_WORDS.find((w) => head.startsWith(w));
+  return { decision: word ?? 'pending', runId: 'unknown', diff: fallbackDiff };
+}
+
+export class RealMemoir implements MemoirClient {
+  constructor(
+    private readonly store: string,
+    private readonly run: MemoirRunner = defaultMemoirRunner,
+  ) {}
+
+  async recordOutcome(record: OutcomeRecord): Promise<void> {
+    const blob: OutcomeBlob = {
+      runId: record.runId,
+      decision: record.decision,
+      failingPolicy: record.failingPolicy,
+      bugConfirmed: record.bugConfirmed,
+      diff: record.tomlDiff,
+    };
+    try {
+      // Same runId → same path → memoir versions it (update, not duplicate).
+      await this.run([
+        '-s', this.store, '--json',
+        'remember', JSON.stringify(blob),
+        '-n', MEMOIR_NAMESPACE,
+        '-p', keyForRun(record.runId),
+      ]);
+    } catch (err) {
+      warnOnce(`recordOutcome failed (non-fatal): ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  async recallSimilar(query: RecallQuery): Promise<RecallResult> {
+    const q = `${query.failingPolicy} ${query.tomlDiff.after ?? ''}`.trim();
+    let stdout: string;
+    try {
+      stdout = await this.run([
+        '-s', this.store, '--json',
+        'recall', q,
+        '-n', MEMOIR_NAMESPACE,
+        '-l', String(RECALL_LIMIT),
+      ]);
+    } catch {
+      return { neighbours: [] }; // missing binary / non-zero exit / timeout
+    }
+
+    let parsed: { memories?: Array<{ content?: string; relevance_score?: number }> };
+    try {
+      parsed = JSON.parse(stdout);
+    } catch {
+      return { neighbours: [] }; // non-JSON (e.g. an error banner)
+    }
+
+    const neighbours: Neighbour[] = [];
+    for (const m of parsed.memories ?? []) {
+      const relevance = typeof m.relevance_score === 'number' ? m.relevance_score : 0;
+      if (relevance < MIN_RELEVANCE) continue; // weak match → not a neighbour
+      const { decision, runId, diff } = parseOutcome(m.content ?? '', query.tomlDiff);
+      neighbours.push({ runId, similarity: clamp(relevance * 100), outcome: decision, diff });
+    }
+    return { neighbours };
+  }
+}
+
 /**
  * Resolve a Memoir client from the environment.
  *
- * NOTE(0043): when `MEMOIR_API_KEY` is set the real adapter should be returned,
- * but the Memoir SDK surface is not yet confirmed (two products share the name —
- * see the ticket). Returning a *guessed* adapter would violate the project's
- * honesty rail, so until the SDK is confirmed this returns `nullMemoir` and logs
- * once. Wiring the real client is a one-function change here; nothing downstream
- * moves, because every caller goes through `recallSimilarity`/this interface.
+ * `MEMOIR_STORE` set → the real memoir-ai.dev CLI adapter (ticket 0046).
+ * Unset → the honest no-op (`nullMemoir`), so the pipeline behaves exactly as
+ * before (neutral 50). Either way, callers go through `recallSimilarity`/this
+ * interface, so nothing downstream changes.
  */
-export function createMemoirClient(env: NodeJS.ProcessEnv = process.env): MemoirClient {
-  if (env.MEMOIR_API_KEY) {
-    warnOnce(
-      'MEMOIR_API_KEY is set but the Memoir SDK adapter is not wired yet ' +
-        '(confirm the API per ticket 0043). Using the neutral fallback.',
-    );
-    // return new RealMemoir(env.MEMOIR_API_KEY);  ← drop-in once the SDK is confirmed
-  }
+export function createMemoirClient(
+  env: NodeJS.ProcessEnv = process.env,
+  runner: MemoirRunner = defaultMemoirRunner,
+): MemoirClient {
+  const store = env.MEMOIR_STORE?.trim();
+  if (store) return new RealMemoir(store, runner);
   return nullMemoir;
 }
 

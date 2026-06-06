@@ -261,7 +261,7 @@ self-report.
 | **InsForge** (sponsor) | DB, auth/RLS, edge fns, Storage, Realtime, branch projects, AI — the structural core | Project keys | Pre-recorded screencast (`demo/recordings/latest.mp4`). |
 | **Replicas** (sponsor) | "Watch" — production session capture feeding `ingest` (ticket 0041) | `REPLICAS_API_KEY` | rrweb capture in the toy app (built-in fallback). |
 | **Lim.run** (sponsor) | "Test on a fork" — cloud browser re-verifies the fix on the fork + live preview URL (ticket 0042) | org key → per-instance token | Policy replay verdict stands alone; preview link omitted. |
-| **Memoir** (sponsor) | Learning loop — versioned memory of fix outcomes; real similarity neighbour for the scorer (ticket 0043) | `MEMOIR_API_KEY` | Scorer uses neutral pgvector 50; no recall. |
+| **Memoir** (sponsor) | Learning loop — versioned memory of fix outcomes; real similarity neighbour for the scorer (tickets 0043, 0046). Local CLI (memoir-ai.dev), **no token** — store path in `MEMOIR_STORE` | `MEMOIR_STORE` (path) | Scorer uses neutral pgvector 50; no recall. |
 | GitHub | PR open, status checks | GitHub App | Pre-rendered PR screenshot embedded in slide 7. |
 | Anthropic (Claude) | Diagnosis step (`functions/diagnose.ts`, `claude-opus-4-8`) | `ANTHROPIC_API_KEY` | Cached diagnosis fixture for the demo bug. |
 | OpenRouter | Embeddings via the InsForge AI gateway | `OPENROUTER_API_KEY` | Precomputed embeddings. |
@@ -429,8 +429,10 @@ realtime, pgvector, AI — plus rrweb for capture and Devin to drive the
 patch."*
 
 No ticket touches Devin. Diagnose (ticket 0018) calls InsForge AI
-directly. No ticket touches pgvector. The "learn from rejections" loop
-is a Q&A planted seed, not code.
+directly. The "learn from rejections" loop is now real: ticket 0046
+wired Memoir (local CLI, memoir-ai.dev) as the recalled-neighbour memory,
+so the scorer gets a real similarity prior instead of the neutral 50.
+Only **Devin** remains name-only.
 
 A judge who reads the pitch and the repo will notice. Two options:
 
