@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hush · the hardest part</title>
+<link rel="icon" type="image/svg+xml" href="../assets/brand/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg-elev: #131418;
+    --bg-elev2: #181a20;
+    --ink: #ecedef;
+    --ink-dim: #9097a3;
+    --line: #25272e;
+    --accent: #ff6b35;
+    --good: #6ee7b7;
+    --cool: #a78bfa;
+    --warn: #fde68a;
+    --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; background: rgba(255,107,53,0.1); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+  a { color: var(--good); text-decoration: none; border-bottom: 1px dotted rgba(110,231,183,0.4); }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 64px 32px 96px; }
+
+  /* HERO */
+  header.hero { border-bottom: 1px solid var(--line); padding-bottom: 48px; margin-bottom: 56px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent);
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(44px, 6.5vw, 84px);
+    line-height: 1.0; letter-spacing: -0.03em;
+    margin: 0 0 22px;
+  }
+  h1 em { color: var(--accent); font-style: italic; }
+  h1 .hi { color: var(--good); font-style: italic; }
+  .one-line {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(20px, 2.4vw, 28px);
+    line-height: 1.4; color: var(--ink-dim);
+    max-width: 48ch; margin: 0;
+  }
+  .one-line em { color: var(--accent); font-style: italic; }
+  .one-line .hi { color: var(--good); font-style: italic; }
+
+  /* SECTIONS */
+  section { margin-bottom: 72px; }
+  .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 12px;
+  }
+  h2 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(32px, 4.5vw, 48px); line-height: 1.05;
+    margin: 0 0 24px; letter-spacing: -0.02em;
+  }
+  h2 em { color: var(--accent); font-style: italic; }
+  h2 .hi { color: var(--good); font-style: italic; }
+  p { font-size: 17px; line-height: 1.65; color: var(--ink); max-width: 62ch; margin: 0 0 16px; }
+  p.muted { color: var(--ink-dim); }
+  p.lede { font-size: 22px; line-height: 1.5; max-width: 50ch; font-family: 'Instrument Serif', serif; color: var(--ink); }
+  p b { color: var(--ink); font-weight: 600; }
+  p em { color: var(--accent); font-style: italic; font-weight: 500; }
+
+  /* PULL QUOTE */
+  .pull {
+    margin: 32px 0;
+    padding: 28px 32px;
+    background: var(--bg-elev);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(22px, 2.4vw, 30px);
+    line-height: 1.4; color: var(--ink);
+  }
+  .pull em { color: var(--accent); font-style: italic; }
+  .pull .hi { color: var(--good); font-style: italic; }
+
+  /* OBVIOUS-VS-ACTUAL split */
+  .vs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+  .vs .pane {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 24px 26px;
+  }
+  .vs .pane.cold { opacity: 0.85; }
+  .vs .pane.hot { border-color: rgba(255,107,53,0.55); background: linear-gradient(180deg, rgba(255,107,53,0.06), transparent 70%); }
+  .vs .pane .tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: var(--ink-dim); text-transform: uppercase; margin-bottom: 8px; }
+  .vs .pane.hot .tag { color: var(--accent); }
+  .vs .pane h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(22px, 2.2vw, 30px); margin: 0 0 12px; line-height: 1.15; }
+  .vs .pane p { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--ink-dim); max-width: none; }
+  .vs .pane.hot p { color: var(--ink); }
+
+  /* LIES */
+  .lies { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 24px 0; }
+  .lie {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 20px 22px;
+    border-left: 3px solid var(--bad);
+  }
+  .lie .n {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.16em; color: var(--bad); text-transform: uppercase;
+  }
+  .lie h4 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 22px; margin: 6px 0 8px; line-height: 1.2;
+  }
+  .lie p { margin: 0 0 10px; font-size: 14px; line-height: 1.55; color: var(--ink-dim); max-width: none; }
+  .lie p:last-child { margin-bottom: 0; }
+  .lie .sym {
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px dashed var(--line);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.06em; color: var(--ink-dim);
+    line-height: 1.55;
+  }
+  .lie .sym .k { color: var(--bad); }
+
+  /* DEFENSES TABLE */
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  table th {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim);
+    text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line);
+    font-weight: 500;
+  }
+  table td { padding: 14px; border-bottom: 1px solid var(--line); line-height: 1.55; vertical-align: top; }
+  table td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--bad); text-transform: uppercase; width: 170px; }
+  table td:nth-child(2) { color: var(--ink); }
+  table td:nth-child(2) b { color: var(--good); font-weight: 600; }
+  table td:nth-child(2) code { font-size: 12px; }
+  table tr:last-child td { border-bottom: none; }
+
+  /* PRINCIPLE */
+  .principle {
+    background: linear-gradient(180deg, rgba(110,231,183,0.08), transparent 80%);
+    border: 1px solid rgba(110,231,183,0.4); border-radius: 14px;
+    padding: 28px 32px; margin: 24px 0;
+  }
+  .principle .tag-p { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: var(--good); text-transform: uppercase; margin-bottom: 10px; }
+  .principle p { font-family: 'Instrument Serif', serif; font-size: clamp(22px, 2.4vw, 30px); line-height: 1.4; color: var(--ink); margin: 0; max-width: none; }
+  .principle p em { color: var(--good); font-style: italic; }
+
+  /* WHY-HARD list */
+  ul.dense { padding-left: 0; list-style: none; margin: 16px 0; }
+  ul.dense li {
+    padding: 12px 0 12px 22px; border-bottom: 1px dashed var(--line);
+    position: relative; font-size: 15px; line-height: 1.55; color: var(--ink);
+  }
+  ul.dense li:last-child { border-bottom: none; }
+  ul.dense li::before { content: "—"; position: absolute; left: 0; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+  ul.dense li b { color: var(--ink); font-weight: 600; }
+  ul.dense li small { display: block; color: var(--ink-dim); font-size: 13px; margin-top: 2px; line-height: 1.55; }
+
+  footer {
+    margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    color: var(--ink-dim); font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+  }
+
+  @media (max-width: 780px) {
+    .vs, .lies { grid-template-columns: 1fr; }
+    table { font-size: 13px; }
+    table td:first-child { width: auto; }
+    table th, table td { padding: 10px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="eyebrow">Hush · engineering brief · 2026-06-06</div>
+    <h1>The hardest part is making the system <em>tell us when it's wrong.</em></h1>
+    <p class="one-line">Capture is plumbing. Diagnose is a prompt. The hard part is <em>refusing to ship a confident-but-wrong PR.</em> Every step can lie. The architecture is a layered defense against being lied to <span class="hi">by ourselves.</span></p>
+  </header>
+
+  <!-- 01 — OBVIOUS VS ACTUAL -->
+  <section>
+    <div class="label">01 · The obvious vs the actual</div>
+    <h2>The first answer is the wrong one.</h2>
+    <p>Ask "what's the hardest part of Hush?" and the natural answer is a specific component — the JWT forging, the branch project lifecycle, the LLM prompt. Each of those is fiddly engineering. None of them is the hardest thing.</p>
+
+    <div class="vs">
+      <div class="pane cold">
+        <div class="tag">// the obvious answer</div>
+        <h3>A specific component is hardest.</h3>
+        <p>"The JWT forging is the tricky bit." "The branch project lifecycle is racy." "The diagnosis prompt is finicky." Each is real but each is solvable in isolation by writing more careful code. None requires a structural answer.</p>
+      </div>
+      <div class="pane hot">
+        <div class="tag">// the actual answer</div>
+        <h3>Keeping the system honest is hardest.</h3>
+        <p><b>Every step can produce a plausible-but-wrong output.</b> A wrong PR is worse than no PR — it burns the credibility the rest of the product depends on. The hardest engineering work is making the agent prefer "I don't know" over "I'm confident and wrong."</p>
+      </div>
+    </div>
+
+    <div class="pull">A wrong-fix PR is a worse failure mode than a missed-bug silence. <em>Hush has to know when it doesn't know,</em> because the entire product's credibility lives there.</div>
+  </section>
+
+  <!-- 02 — THE FIVE WAYS -->
+  <section>
+    <div class="label">02 · The five ways Hush could lie to itself</div>
+    <h2>Each step has a confident-but-wrong failure mode.</h2>
+    <p>If you map the loop and ask "where could this confidently produce a wrong answer that survives downstream checks?", you get exactly five places. Naming them is the first step to defending against them.</p>
+
+    <div class="lies">
+      <div class="lie">
+        <div class="n">LIE 01 · CORRELATION</div>
+        <h4>Wrong-request selection.</h4>
+        <p>The user did 10 things in the session. 100 backend requests fired. We pick one as "the bug." If we pick the wrong one, we diagnose the wrong policy, propose the wrong patch, and everything downstream confidently builds on the lie.</p>
+        <div class="sym"><span class="k">// failure mode:</span><br/>fix lands · wrong policy patched · real bug still there</div>
+      </div>
+      <div class="lie">
+        <div class="n">LIE 02 · GROUNDING</div>
+        <h4>Hallucinated schema.</h4>
+        <p>The LLM proposes a TOML diff referencing a column or policy that doesn't exist. The patch looks reasonable. The branch project may even accept it. The replay tells us nothing because the column was never queried.</p>
+        <div class="sym"><span class="k">// failure mode:</span><br/>PR opens · code references <code>tenant_id_arr</code> · column doesn't exist</div>
+      </div>
+      <div class="lie">
+        <div class="n">LIE 03 · NO-OP PATCH</div>
+        <h4>The patch doesn't change behavior.</h4>
+        <p>The LLM emits a diff that looks like a fix but is logically equivalent to the original. The fork passes the replay only because the policy still filters nothing the user cared about. The verdict is a false positive.</p>
+        <div class="sym"><span class="k">// failure mode:</span><br/>both prod and fork match · we declare "fix verified" · nothing changed</div>
+      </div>
+      <div class="lie">
+        <div class="n">LIE 04 · ACCESS WIDENING</div>
+        <h4>The patch fixes the symptom by removing the check.</h4>
+        <p>The simplest way to make an RLS policy return more rows is to weaken the predicate. The LLM, under prompt pressure to "return more rows," may emit a diff that drops the tenant scoping entirely. Tests pass; security collapses.</p>
+        <div class="sym"><span class="k">// failure mode:</span><br/>PR ships · access widened · cross-tenant data leak</div>
+      </div>
+      <div class="lie">
+        <div class="n">LIE 05 · OVERFIT VERDICT</div>
+        <h4>The fix passes one case and breaks others.</h4>
+        <p>We replay the captured failing request. The fork passes. We declare the fix verified. But the patched policy now returns rows for sessions that should have stayed empty — a different RLS misfire we created while fixing the first one.</p>
+        <div class="sym"><span class="k">// failure mode:</span><br/>demo bug fixed · neighboring test case now fails · regression shipped</div>
+      </div>
+      <div class="lie">
+        <div class="n">LIE 06 · STALE FORK</div>
+        <h4>The fork doesn't match prod's current shape.</h4>
+        <p>Pre-warmed branch projects sit idle. Schema drifts on prod (a migration runs, an admin tweaks a policy in the dashboard). The fork's replay verdict no longer reflects prod behavior. We "prove" a fix against a backend that no longer exists.</p>
+        <div class="sym"><span class="k">// failure mode:</span><br/>fork passes · prod shape diverged · verdict is fiction</div>
+      </div>
+    </div>
+    <p class="muted">Each lie is plausible. Each survives a casual review of the PR. Each ships a fix that looks right and is wrong. The architecture's job is to detect each one before the PR opens.</p>
+  </section>
+
+  <!-- 03 — THE DEFENSES -->
+  <section>
+    <div class="label">03 · The defenses, matched to each lie</div>
+    <h2>Six failure modes. <span class="hi">Six structural answers.</span></h2>
+    <p>Each lie gets a specific defensive mechanism. None of these is "be careful." Each is something a deterministic check or a falsifiable signal enforces — because "be careful" is what teams say right before they ship a bad PR.</p>
+    <table>
+      <tr>
+        <th>Failure mode</th>
+        <th>The defense</th>
+      </tr>
+      <tr>
+        <td>01 · Wrong request</td>
+        <td>The correlation helper returns <b>one candidate or escalates to issue</b>. Multiple plausible candidates → low confidence → no PR. Better silence than a wrong fix. <code>functions/correlate.ts</code></td>
+      </tr>
+      <tr>
+        <td>02 · Hallucinated schema</td>
+        <td>The diagnose prompt gets the <b>current TOML slice</b> for the implicated table, extracted live. The LLM can only reference columns that exist. <code>functions/toml.ts</code></td>
+      </tr>
+      <tr>
+        <td>03 · No-op patch</td>
+        <td>The verdict requires <b>two independent signals</b>: prod must fail AND fork must pass. A no-op patch makes the fork match prod, not differ from it. <code>functions/replay.ts</code></td>
+      </tr>
+      <tr>
+        <td>04 · Access widening</td>
+        <td>Deterministic post-LLM check: <b>fewer conjuncts, looser claim paths, or removed scoping columns</b> → flag widening → force-route to issue. <code>functions/safety.ts</code></td>
+      </tr>
+      <tr>
+        <td>05 · Overfit verdict</td>
+        <td>The branch project carries <b>two seeded tenants</b>. The replay covers both directions — the failing case must pass AND the neighboring case must not regress. Single-tenant replay is not enough.</td>
+      </tr>
+      <tr>
+        <td>06 · Stale fork</td>
+        <td>Forks are <b>provisioned fresh from prod</b> at the moment of replay, not pre-warmed and held. The pre-warm pool exists for latency; the schema is pulled at apply-time, not at creation.</td>
+      </tr>
+    </table>
+    <p class="muted">Every defense is referenced from a ticket in <code>agents/inbox/</code>. None of them is "add a comment to be careful."</p>
+  </section>
+
+  <!-- 04 — THE PRINCIPLE -->
+  <section>
+    <div class="label">04 · The principle</div>
+    <h2>Two signals. <em>One is not enough.</em></h2>
+    <p>Every claim Hush ships has to be backed by two independent signals. One signal is a hunch. Two independent signals — neither derived from the other — is proof.</p>
+
+    <ul class="dense">
+      <li><b>"The bug is real":</b> the prod replay fails AND the user's session timestamps line up with the request window. <small>One alone could be coincidence.</small></li>
+      <li><b>"The fix works":</b> the fork replay passes AND the diff did not widen access. <small>A passing replay alone doesn't prove the fix is safe.</small></li>
+      <li><b>"This patch generalizes":</b> the failing tenant's request passes AND the neighboring tenant's request still fails to read the wrong rows. <small>One direction proves nothing about the other.</small></li>
+      <li><b>"We're confident enough to PR":</b> the confidence score is ≥85 AND the safety rail didn't flag the diff. <small>The score alone can be wrong; the rail alone can pass a no-op.</small></li>
+    </ul>
+
+    <div class="principle">
+      <div class="tag-p">// the rule</div>
+      <p><em>Every load-bearing claim in Hush has to be backed by two independent signals.</em> When we have one, we drop a confidence tier. When we have none, we file an issue.</p>
+    </div>
+  </section>
+
+  <!-- 05 — WHY THIS IS HARDER THAN IT LOOKS -->
+  <section>
+    <div class="label">05 · Why this is harder than it looks</div>
+    <h2>The temptation is to skip the second signal.</h2>
+    <p>It is always faster to ship a PR backed by one signal. The replay passed — that's enough, right? The diff looks small — surely it's not widening. The correlation found a request — let's diagnose from there.</p>
+    <p>Every single-signal PR is plausible in isolation. The cost only shows up in aggregate, after the agent has been running for weeks and the false-positive rate is what it is. By the time you measure it, you've burned the trust the product was supposed to earn.</p>
+    <p>The discipline is to <em>build in the second signal up front</em>, even when you could ship without it. Because once a PR ships wrong, the next ten PRs are read with that suspicion. Confidence tiers and the safety rail aren't features — they're the product's right to exist.</p>
+
+    <p class="muted">This is also why the architecture leans on InsForge's primitives so heavily. Branch projects give us a second signal cheaply (the fork's verdict). <code>insforge.toml</code> gives us a structured diff we can validate deterministically. On a different substrate, every second signal would be expensive to compute, and we would skip them when budgets got tight.</p>
+  </section>
+
+  <!-- 06 — CLOSING -->
+  <section>
+    <div class="label">06 · One sentence</div>
+    <h2>What a technical judge should walk away with.</h2>
+    <div class="principle">
+      <div class="tag-p">// the take-away</div>
+      <p>The hardest part of Hush isn't building the loop. <em>It's building the loop so it refuses to lie</em> — and on InsForge, that refusal is structurally cheap. On any other substrate, it's structurally expensive, which means most agents on other substrates will skip it.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>// engineering brief · v1 · 2026-06-06</span>
+    <span>see also: <a href="the-hard-part.html">the-hard-part.html</a> · <a href="architecture.html">architecture.html</a> · <a href="../ideas/FINAL.html">FINAL.html</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
