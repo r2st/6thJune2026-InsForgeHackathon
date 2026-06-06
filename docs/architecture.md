@@ -88,7 +88,7 @@ renders five step rows in real time — this is the demo's narrator.
 then the screen shows two counts side by side: **prod `0`, fork `3`.**
 The judge realizes Hush didn't just flag the bug; it forked the backend,
 applied the policy patch, replayed the same session, and *proved the fix*
-— then opened a PR with 92% confidence. **Sees:** the same request return
+— then opened a PR with 90% confidence. **Sees:** the same request return
 0 rows on prod and 3 on the fork. **Realizes:** this is a fix you can
 trust, not a guess, and it only works because the backend is forkable.
 
@@ -486,15 +486,28 @@ fn can take 2–3s and eat the receipt-page moment.
 *Action:* Architect, on ticket 0013 — target p95 ≤500ms and warm the
 edge fn at demo start, same as the fork pool.
 
-### I — The confidence formula leans on a corpus we don't have
+### I — Confidence formula and the corpus we don't have (resolved)
 
-Ticket 0020 multiplies diff size × policy blast × past-merged similarity
-× verdict. At hour 9 we have zero merged history. Similarity is 0 and
-the score is fiction. The pitch shows `92% = diff(95) × blast(98) ×
-similarity(89)` — that 89 is invented.
+Original concern: a multiplicative `diff × blast × similarity × verdict`
+formula with a fabricated similarity factor (the old decks showed
+`92% = diff(95) × blast(98) × similarity(89)` — that 89 was invented,
+and with zero merge history the real similarity is undefined).
 
-*Action:* Architect, on ticket 0020 — seed 5–10 hand-written "past
-PRs" so similarity is real, or drop the factor and rebalance.
+How the shipped scorer handles it (`functions/score.ts` `WEIGHTS`): a
+weighted **sum**, not a product, with pgvector similarity defaulting to
+a **neutral 50** when there's no merge-history corpus — the honest
+day-one default, not a fabricated high score. For the demo bug:
+
+```
+90 = 0.4·replay(100) + 0.2·diff(100) + 0.2·blast(100) + 0.2·pgvector(50)
+```
+
+90 ≥ 85, so the tier is still `pr` — the "→ open PR" pitch line holds.
+The badge reads **90** everywhere (deck, script, glossary, live receipt)
+because that's what the code computes (ticket 0040). A legitimate 92 is
+available only once [[0043-memoir-learn-from-rejections-memory]] feeds a
+real prior neighbour at similarity 60 into the kNN lookup — until then,
+90 is the honest number and no surface claims otherwise.
 
 ### J — The trace-only fallback gives up the InsForge moat
 

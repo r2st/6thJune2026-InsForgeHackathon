@@ -45,7 +45,7 @@ Happy path. Pre-loaded data. No login. Three beats.
 |--------|-------|-----------------------------------------------------------------------|------------------------------------------------------------------------------|
 | 0:55   | 5     | Customer rage-clicks. Receipt panel lights up. Session captured · backend log tapped · anomaly. | "Hush saw the rage-click and pulled the matching backend log." |
 | 1:20   | 6     | Diagnosis: RLS policy `orders_select` reads `auth.jwt() ->> 'tenant'`. JWT migrated to `tenant_ids[]` last week. Branch project spawns; prod (red) and branch (green) replay side-by-side. | "It traced the empty page to one RLS policy. Then it forked the backend and *proved* the fix on the fork, against the same session." |
-| 1:50   | 7     | GitHub PR opens. Four-line `insforge.toml` diff. Confidence 92%. CI green. Session clip + before/after RLS trace attached. | *"And here's the proof — a four-line TOML patch, with the session clip and the RLS trace embedded. From rage-click to PR in under a minute."* |
+| 1:50   | 7     | GitHub PR opens. Four-line `insforge.toml` diff. Confidence 90%. CI green. Session clip + before/after RLS trace attached. | *"And here's the proof — a four-line TOML patch, with the session clip and the RLS trace embedded. From rage-click to PR in under a minute."* |
 
 **Fallback:** if anything live breaks, switch to `demo/recordings/latest.mp4` and narrate over it. Don't apologize — keep going. The receipt page (slide 5) and the branch replay (slide 6) are the two beats that *must* land; the PR shot is the closer.
 
@@ -90,7 +90,7 @@ Happy path. Pre-loaded data. No login. Three beats.
 
 | Likely question | Our answer |
 |-----------------|------------|
-| "Won't this open garbage PRs?" | Confidence tiers. Anything under 85% is a draft or an issue. The 92% in the demo is what an *open* PR looks like — small diff, single policy, similar to past merged fixes. |
+| "Won't this open garbage PRs?" | Confidence tiers. Anything under 85% is a draft or an issue. The 90% in the demo is what an *open* PR looks like — small diff (replay 100, diff-size 100, blast 100), with pgvector similarity at the neutral 50 because there's no merge-history corpus on day one. |
 | "How do you replay a session deterministically?" | We don't replay the *page*. We replay the *policy*. The rrweb clip is evidence, not the test. The test is the failing request against the branch project. That's tractable in 9 hours; deterministic page-replay is not, and we'd be lying if we claimed it. |
 | "Why not Supabase?" | Supabase has RLS but no branch projects. No safe place to test a policy diff against real schema without risking prod. `insforge.toml` makes the fix declarative — Supabase's RLS lives in migrations, which is one more thing to roll back. |
 | "Why not just have Sentry add this?" | Sentry has no backend fork primitive. They could add session replay (they have), but they can't ship the fix because they can't safely test it. We can. |

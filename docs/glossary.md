@@ -26,6 +26,6 @@ understand it, it goes here.
 | **Safety rail** | A deterministic check after the LLM: does the patch widen access? If yes, drop the tier to issue, no matter the confidence. Ticket 0021. |
 | **`request_log`** | One table row per backend request. Has `session_id`, RLS decisions, returned row count. The link from Capture to Correlate. |
 | **`insforge.toml`** | The InsForge project's config file: schema, RLS, auth, edge-fn routing. Hush patches this file, not application code. |
-| **Money shot** | Slide 7: a GitHub PR with a 4-line TOML diff, the clip, the RLS trace, and a 92% badge. The demo closes here. |
+| **Money shot** | Slide 7: a GitHub PR with a 4-line TOML diff, the clip, the RLS trace, and a 90% badge. The demo closes here. |
 | **Toy app** | The SaaS we built for the demo. Multi-tenant orders app on InsForge. Hosts the seeded RLS bug. *(No ticket yet — see `architecture.md` §F.)* |
 | **Pivot (v5 → v6)** | The call in `ideas/FINAL-analysis.md`: replay the *policy* on a forked backend, not the *page* in a sandbox. |

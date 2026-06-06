@@ -3,9 +3,9 @@ id: 0040
 title: Reconcile the confidence badge — deck/docs say 92%, the scorer computes 90%
 role: storyteller
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0020, 0035]
 demo_path: yes — the badge is the slide-07 money shot and a guaranteed Q&A line
 ---
@@ -89,4 +89,20 @@ way deck and code must agree.
   honest number.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+Did option 1 (copy → 90). 0043 (Memoir) has landed as a *mechanism*, but
+`createMemoirClient` defaults to `nullMemoir` until `MEMOIR_API_KEY` + a real
+corpus exist (`functions/memory.ts`) — no neighbours → `NEUTRAL_SIMILARITY` (50)
+→ `score.ts` still computes **90**. Confirmed by the live E2E (`score=90`). So
+the honest number is 90 *even with 0043 merged* — Memoir correctly refuses to
+fabricate a corpus. Option 2 (real 92) only becomes honest once a `MEMOIR_API_KEY`
+with a merged similarity-60 neighbour is wired in. Edited: `demo/slides/index.html` badge, `demo/pitch-script.md`
+(both the demo row and the Q&A line, now spelling out the signal breakdown),
+`docs/glossary.md` money-shot, `docs/architecture.md` (prose + rewrote the stale
+§I critique — it described a fabricated multiplicative formula; replaced with the
+real weighted-sum `90 = 0.4·replay(100)+0.2·diff(100)+0.2·blast(100)+0.2·pgvector(50)`
+and marked the concern resolved). No `score.ts` change. Tests green (27/27).
+
+**Follow-up if 0043 lands:** flip the four copy surfaces back to 92 — at that
+point Memoir feeds a real similarity-60 neighbour, so `40+20+20+12=92` is honest.
+Left FINAL.html / FINAL-analysis.md untouched (v5 historical).
