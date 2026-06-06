@@ -15,6 +15,11 @@ const functions = [
 ];
 
 const processShim = [
+  // The InsForge edge runtime is Deno: it has no Node `Buffer` global, which
+  // several functions (jwt decode, gzip, diagnose, base64) rely on. Pull it from
+  // node:buffer (externalized below) and install it before any module code runs.
+  'import { Buffer as __NodeBuffer } from "node:buffer";',
+  'globalThis.Buffer = globalThis.Buffer ?? __NodeBuffer;',
   'var process = globalThis.process ?? {',
   '  env: new Proxy({}, {',
   '    get(_target, key) { return globalThis.Deno?.env?.get?.(String(key)); }',
@@ -26,7 +31,7 @@ function denoExternalsPlugin() {
   return {
     name: 'deno-externals',
     setup(build) {
-      build.onResolve({ filter: /^node:(fs|url|path|crypto|os|child_process)$/ }, (args) => ({
+      build.onResolve({ filter: /^node:(fs|url|path|crypto|os|child_process|buffer|util)$/ }, (args) => ({
         path: args.path,
         external: true,
       }));

@@ -1,0 +1,118 @@
+// functions/infraToml.ts
+// AUTO-EMBEDDED from infra/insforge.toml so the edge bundle can ground
+// diagnose() without a disk read (the Deno runtime has no infra/ on disk).
+// Regenerate when infra/insforge.toml changes.
+
+export const INFRA_TOML = `# Hush — canonical InsForge declarative config.
+#
+# This file is BOTH the demo schema AND the thing Hush patches on a fork.
+# It is intentionally committed in the BUGGY state so the demo can show the fix.
+#
+# Apply with:   insforge config apply --file infra/insforge.toml
+# Lint with:    insforge config lint --file infra/insforge.toml
+#
+# See docs/architecture.html → §05 (data model) for context.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TABLES
+# ─────────────────────────────────────────────────────────────────────────────
+
+[tables.tenants]
+columns = [
+  "id uuid pk default gen_random_uuid()",
+  "name text not null",
+  "created_at timestamptz not null default now()",
+]
+
+[tables.orders]
+columns = [
+  "id uuid pk default gen_random_uuid()",
+  "tenant_id uuid not null references tenants(id)",
+  "user_id uuid not null",
+  "total numeric(10,2) not null",
+  "created_at timestamptz not null default now()",
+]
+# ↓↓↓ THE DEMO BUG LIVES HERE ↓↓↓
+# Policy reads \`tenant\` (singular) but the JWT migrated to \`tenant_ids\` (array).
+# After the patch, the OR branch covers both shapes — see docs/the-hardest-part.html.
+rls = "tenant_id = (auth.jwt() ->> 'tenant')::uuid"
+
+[tables.bug_runs]
+columns = [
+  "id uuid pk default gen_random_uuid()",
+  "tenant_id uuid not null references tenants(id)",
+  "captured_at timestamptz not null default now()",
+  "session_clip_url text",
+  "capture_source text default 'rrweb'",  # ticket 0041 — 'replicas' | 'rrweb' provenance
+  "request_log_window jsonb",     # ticket 0014 — correlated backend log slice
+  "session_id text",              # x-hush-session-id that produced this run
+  "diagnosis jsonb",
+  "toml_diff jsonb",
+  "confidence integer",
+  "tier text",                    # 'pr' | 'draft_pr' | 'issue'
+  "status text not null default 'captured'",
+  "pr_url text",
+  "prompt_version text",
+]
+embedding = "vector(1536)"
+rls = "tenant_id = (auth.jwt() ->> 'tenant')::uuid"
+
+[tables.bug_decisions]
+columns = [
+  "run_id uuid not null references bug_runs(id)",
+  "verdict text not null",        # 'merged' | 'rejected' | 'dismissed' | 'duplicate'
+  "closed_at timestamptz not null default now()",
+  "closed_by text",
+]
+
+[tables.request_log]
+# Per ticket 0014 — every backend request lands here for correlation.
+columns = [
+  "id bigserial pk",
+  "ts timestamptz not null default now()",
+  "session_id text",              # x-hush-session-id header
+  "user_id uuid",
+  "tenant_id uuid",
+  "route text not null",
+  "method text not null",
+  "rls_decisions jsonb",          # [{policy, rows_before, rows_after}]
+  "returned_rows integer",
+  "status integer",
+]
+indexes = ["(session_id, ts)", "(tenant_id, ts)"]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STORAGE
+# ─────────────────────────────────────────────────────────────────────────────
+
+[storage.buckets.clips]
+visibility = "signed"
+ttl_seconds = 3600
+
+# ─────────────────────────────────────────────────────────────────────────────
+# REALTIME
+# ─────────────────────────────────────────────────────────────────────────────
+
+[realtime.channels.receipt]
+events = ["captured", "correlated", "diagnosed", "testing", "shipped", "failed"]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EDGE FUNCTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+[functions.ingest]
+entry  = "functions/ingest.ts"
+secret = ["INSFORGE_URL", "INSFORGE_SERVICE_KEY", "OPENROUTER_API_KEY", "REPLICAS_API_KEY"]
+
+[functions.fix-trigger]
+entry  = "functions/fix-trigger.ts"
+secret = [
+  "INSFORGE_URL",
+  "INSFORGE_SERVICE_KEY",
+  "INSFORGE_BRANCH_PROJECT_ID",
+  "ANTHROPIC_API_KEY",
+  "DEVIN_API_KEY",
+  "GITHUB_REPO",
+  "GITHUB_TOKEN",
+]
+`;
