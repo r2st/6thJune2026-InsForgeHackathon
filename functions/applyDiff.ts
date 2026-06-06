@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 import { applyPatch } from './tomlPatch.js';
 import { fingerprintSchema } from './fingerprint.js';
+import { checkTomlDiffSafety } from './guardrails.js';
 import type { TomlPatch } from './types.js';
 
 export type ApplyResult =
@@ -47,6 +48,12 @@ export async function applyTomlDiff(
 
   const patched = applyPatch(loadToml(branchId), diff);
   if (!patched.ok) return { ok: false, lintError: patched.error };
+
+  // Guardrail check: ensure the patched TOML doesn't contain dangerous patterns
+  const safetyCheck = await checkTomlDiffSafety(patched.toml);
+  if (!safetyCheck.safe) {
+    return { ok: false, lintError: `Guardrail blocked: ${safetyCheck.reason}` };
+  }
 
   const res = await runApply(branchId, patched.toml);
   if (!res.ok || !res.version) {
