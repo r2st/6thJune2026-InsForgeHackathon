@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Hush — the bugs that don't make a sound</title>
+<title>Hush — the bugs that quietly break your customers</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -19,6 +19,7 @@
     --good: #6ee7b7;
     --cool: #a78bfa;
     --warn: #fde68a;
+    --bad: #fca5a5;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -52,7 +53,7 @@
     font-size: clamp(22px, 2.6vw, 28px);
     line-height: 1.4;
     color: var(--ink);
-    max-width: 32ch;
+    max-width: 36ch;
     margin: 0;
   }
   .one-line .hi { color: var(--good); font-style: italic; }
@@ -62,6 +63,33 @@
     color: var(--ink-dim); margin-top: 32px;
   }
   .built-on .key { color: var(--good); }
+
+  /* STAGE PITCH */
+  .stage-pitch {
+    background: linear-gradient(180deg, rgba(110,231,183,0.06), transparent 70%);
+    border: 1px solid rgba(110,231,183,0.25);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin: 28px 0 0;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink);
+    max-width: none;
+  }
+  .stage-pitch::before {
+    content: "// stage one-liner";
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-style: normal;
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--good);
+    margin-bottom: 12px;
+  }
+  .stage-pitch b { color: var(--good); font-weight: 600; font-style: normal; }
 
   /* SECTIONS */
   section { margin-bottom: 64px; }
@@ -81,21 +109,7 @@
   p b { color: var(--ink); font-weight: 600; }
   p em { color: var(--accent); font-style: italic; font-weight: 500; }
 
-  /* BIG STAT */
-  .stat-card {
-    background: var(--bg-elev); border: 1px solid var(--line);
-    border-radius: 16px; padding: 28px 32px; margin: 24px 0;
-    display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center;
-  }
-  .stat-num {
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(64px, 9vw, 96px);
-    line-height: 1; color: var(--accent); letter-spacing: -0.02em;
-  }
-  .stat-card p { margin: 0; font-size: 16px; max-width: none; }
-  .stat-card p b { color: var(--accent); }
-
-  /* TWO-UP */
+  /* TWO-UP COMPARE */
   .twoup { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
   .card {
     background: var(--bg-elev); border: 1px solid var(--line);
@@ -115,19 +129,19 @@
   .card p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-dim); max-width: none; }
   .card p b { color: var(--ink); }
 
-  /* LOOP */
-  .loop { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0 12px; }
+  /* LOOP — 5 verbs */
+  .loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px 0 12px; }
   .step {
     background: var(--bg-elev); border: 1px solid var(--line);
-    border-radius: 10px; padding: 16px 14px;
+    border-radius: 10px; padding: 14px 12px;
   }
   .step .n {
     font-family: 'JetBrains Mono', monospace; font-size: 10px;
     color: var(--accent); letter-spacing: 0.12em;
   }
-  .step .v { font-family: 'Instrument Serif', serif; font-size: 22px; margin-top: 4px; }
-  .step .s { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); margin-top: 4px; }
-  .step .d { font-size: 13px; line-height: 1.45; color: var(--ink); margin-top: 10px; }
+  .step .v { font-family: 'Instrument Serif', serif; font-size: 20px; margin-top: 4px; letter-spacing: -0.01em; }
+  .step .s { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--ink-dim); margin-top: 4px; }
+  .step .d { font-size: 12.5px; line-height: 1.45; color: var(--ink); margin-top: 10px; }
 
   .platform {
     background: linear-gradient(180deg, rgba(110,231,183,0.08), transparent 80%);
@@ -146,7 +160,37 @@
   .platform p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink); max-width: none; }
   .platform p b { color: var(--good); font-weight: 600; }
 
-  /* TIER CARDS for confidence */
+  /* MOAT BLOCK */
+  .moat {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin: 24px 0;
+  }
+  .moat h3 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 26px; margin: 0 0 16px;
+  }
+  .moat .compare {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 18px;
+    font-size: 13px;
+  }
+  .moat .compare .col {
+    background: var(--bg-elev2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 14px 16px;
+  }
+  .moat .compare .col .name {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: var(--ink-dim); letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .moat .compare .col p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-dim); max-width: none; }
+  .moat .compare .col.win { border-color: rgba(110,231,183,0.35); background: linear-gradient(180deg, rgba(110,231,183,0.06), var(--bg-elev2) 70%); }
+  .moat .compare .col.win .name { color: var(--good); }
+  .moat .compare .col.win p { color: var(--ink); }
+
+  /* TIERS */
   .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
   .tier {
     background: var(--bg-elev); border: 1px solid var(--line);
@@ -168,19 +212,6 @@
     font-size: 20px; margin: 4px 0 8px;
   }
   .tier p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-dim); max-width: none; }
-
-  /* INSFORGE FEATURES — simpler version */
-  .feats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .feat {
-    background: var(--bg-elev); border: 1px solid var(--line);
-    border-radius: 10px; padding: 16px 20px;
-    display: grid; grid-template-columns: 130px 1fr; gap: 18px; align-items: baseline;
-  }
-  .feat .name {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    letter-spacing: 0.1em; color: var(--good); text-transform: uppercase;
-  }
-  .feat .does { font-size: 14px; line-height: 1.5; color: var(--ink); }
 
   /* STORYBOARD */
   .beats { margin: 20px 0; }
@@ -224,6 +255,14 @@
   details .inner { padding: 0 22px 18px; font-size: 13.5px; line-height: 1.55; color: var(--ink-dim); border-top: 1px dashed var(--line); padding-top: 14px; }
   details .inner b { color: var(--ink); }
 
+  /* CHANGELOG CALLOUT */
+  .changelog {
+    background: var(--bg-elev2); border: 1px dashed var(--line);
+    border-radius: 12px; padding: 16px 22px; margin-top: 20px;
+    font-size: 13px; color: var(--ink-dim); line-height: 1.55;
+  }
+  .changelog b { color: var(--ink); }
+
   footer {
     margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line);
     display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
@@ -231,10 +270,9 @@
   }
 
   @media (max-width: 780px) {
-    .twoup, .tiers, .feats { grid-template-columns: 1fr; }
+    .twoup, .tiers { grid-template-columns: 1fr; }
     .loop { grid-template-columns: 1fr 1fr; }
-    .feat { grid-template-columns: 1fr; gap: 4px; }
-    .stat-card { grid-template-columns: 1fr; gap: 8px; }
+    .moat .compare { grid-template-columns: 1fr; }
     details summary { flex-direction: column; align-items: flex-start; gap: 8px; }
     details summary .one { text-align: left; }
   }
@@ -245,39 +283,38 @@
 
   <!-- HERO -->
   <header class="hero">
-    <div class="eyebrow">InsForge Hackathon · 6 June · Final pitch · v6 · Hush</div>
+    <div class="eyebrow">InsForge Hackathon · 6 June · Final pitch · v7 · post-analysis pivot</div>
     <h1>Hush.</h1>
-    <p class="one-line">Catches the bugs that <span class="hi">don't make a sound.</span></p>
-    <div class="built-on">Built on <span class="key">InsForge</span> · powered by Replicas, Limrun, Devin, Vercel</div>
+    <p class="one-line">Catches the bugs that <span class="hi">quietly break your customers.</span></p>
+    <div class="built-on">Built on <span class="key">InsForge</span> · powered by Limrun, Devin, Vercel · rrweb in the app</div>
+    <div class="stage-pitch">
+      Sentry catches the bugs that crash your server. <b>Hush</b> catches the bugs that quietly break your customers — silent RLS misfires, leaked tenants, vanished records — by replaying them on a <b>forked InsForge backend</b>, patching <b>insforge.toml</b>, and shipping the PR before the user has finished writing the support ticket.
+    </div>
   </header>
 
   <!-- 1 — THE PROBLEM -->
   <section>
     <div class="label">01 · The problem</div>
-    <h2>Most bugs don't crash. They just frustrate.</h2>
-    <p>A button that does nothing when you click it. A form that says "saved" but doesn't save. A dropdown that opens behind the modal. <b>None of these throw an error.</b> Sentry sees nothing. The dev sees nothing. The user just leaves.</p>
-    <div class="stat-card">
-      <div class="stat-num">~70%</div>
-      <p>of user-reported bugs in modern web apps <b>never throw a server error.</b> They fail at the screen, not in the code path your error tracker watches. (Industry estimate from FullStory and LogRocket behavioural-bug studies.)</p>
-    </div>
-    <p class="muted">Today, finding these bugs means a customer emails support. Support pings engineering. Engineering asks for a repro. The user can't repro it. The ticket dies. Meanwhile the bug keeps shipping.</p>
+    <h2>The worst bugs don't crash. They leak.</h2>
+    <p>A logged-in customer opens "My Orders." The list is empty — but their orders exist. A different user briefly sees rows that belong to another tenant. A receipt URL returns 200 but loads a stranger's PDF. <b>Nothing throws.</b> Your error tracker is silent. Your support inbox is not.</p>
+    <p class="muted">These are silent backend bugs — RLS misfires, stale JWT claims, policy regressions, auth boundary drift. Most user-reported bugs never reach Sentry because they fail at the <em>policy layer</em>, not the code path. Today, finding them means a customer emails support, support pings engineering, engineering asks for a repro, the user can't repro it, the ticket dies. Meanwhile the bug keeps shipping.</p>
   </section>
 
   <!-- 2 — THE INSIGHT -->
   <section>
     <div class="label">02 · The shift</div>
-    <h2>Watch the user, not the stack trace.</h2>
-    <p>Every silent bug leaves a trail in the <b>user's session</b>: rage-clicks, abandoned forms, repeated taps, fast back-button presses. Session replay tools already capture this — they just show the recording to humans. Hush lets an <em>agent</em> watch it, run the bug again on its own, and ship the fix.</p>
+    <h2>Trace the symptom to the policy.</h2>
+    <p>Every silent backend bug leaves two trails: the user's frustration on the frontend (rage-clicks, refreshes, abandoned pages) and the corresponding decision in the backend logs (which policy ran, what it returned). Existing tools see one or the other. <em>Hush correlates them.</em> Then it fixes the policy, not the page.</p>
     <div class="twoup">
       <div class="card">
         <div class="tag">// the current way</div>
         <h3>Sentry · Seer · Autofix</h3>
-        <p>Starts from a <b>stack trace.</b> Great at fixing the bug that already broke production. Blind to every bug that didn't throw.</p>
+        <p>Starts from a <b>stack trace.</b> Brilliant at fixing the bug that already broke production. Blind to bugs where the response is 200 but wrong.</p>
       </div>
       <div class="card win">
         <div class="tag">// hush</div>
         <h3>Hush</h3>
-        <p>Starts from a <b>session.</b> Catches the broken button, the silent form, the dropdown nobody can click. <b>The 70% Sentry can't see.</b></p>
+        <p>Starts from a <b>session + backend log pair.</b> Identifies the policy that misfired, drafts the <code>insforge.toml</code> diff, verifies it on a forked backend, ships the PR.</p>
       </div>
     </div>
   </section>
@@ -285,106 +322,108 @@
   <!-- 3 — HOW IT WORKS -->
   <section>
     <div class="label">03 · How it works</div>
-    <h2>Four steps. One platform.</h2>
-    <p>A user gets stuck. Sixty seconds later, a fix lands in the repo with a video of the original bug attached.</p>
+    <h2>Five steps. One platform.</h2>
+    <p>A user gets stuck. Sixty seconds later, a policy fix lands in the repo with the original session, the backend log diff, and the before/after RLS trace embedded.</p>
 
     <div class="loop">
       <div class="step">
         <div class="n">01</div>
         <div class="v">Watch</div>
-        <div class="s">Replicas</div>
-        <div class="d">Spots a user getting stuck — rage clicks, abandons, or a "report bug" tap.</div>
+        <div class="s">rrweb + edge fn</div>
+        <div class="d">Frontend frustration signal (rage-clicks, refresh storm, "report bug" tap). Backend request log around the same timestamp gets tapped.</div>
       </div>
       <div class="step">
         <div class="n">02</div>
-        <div class="v">Run it again</div>
-        <div class="s">Limrun</div>
-        <div class="d">Boots a clean browser sandbox and replays the session as a test. If the bug is real, the test fails.</div>
+        <div class="v">Correlate</div>
+        <div class="s">pgvector</div>
+        <div class="d">Embeds the (session shape, request log, RLS decision) tuple. Dedupes against known bug shapes. New? Continue. Known? Attach and skip.</div>
       </div>
       <div class="step">
         <div class="n">03</div>
         <div class="v">Diagnose</div>
         <div class="s">InsForge AI</div>
-        <div class="d">Writes a plain-English bug report: what the user expected, what happened, what's likely broken.</div>
+        <div class="d">"User expected to see their orders. Policy <code>orders_select</code> filtered them because tenant_id was read from a stale JWT claim. Suggested fix: …"</div>
       </div>
       <div class="step">
         <div class="n">04</div>
+        <div class="v">Fork &amp; test</div>
+        <div class="s">Branch project + Limrun</div>
+        <div class="d">Branch project is spawned. TOML diff applies. Same session replays. Bug gone on branch; still present on main. Proof.</div>
+      </div>
+      <div class="step">
+        <div class="n">05</div>
         <div class="v">Fix &amp; ship</div>
         <div class="s">Devin → GitHub</div>
-        <div class="d">Edits the code until the test passes. Opens a PR with the session clip inside.</div>
+        <div class="d">PR opens. Diff is a few lines of <code>insforge.toml</code>. Session clip + before/after RLS trace embedded in the description.</div>
       </div>
     </div>
 
     <div class="platform">
-      <div class="label-platform">InsForge<small>the platform underneath all four</small></div>
-      <p>Holds the memory of every bug, the live status of every run, the safe test data, and the multi-tenant access rules. <b>Without InsForge, the loop is four tools shouting at each other.</b> With it, they share state.</p>
+      <div class="label-platform">InsForge<small>the platform underneath all five</small></div>
+      <p>Holds the schema, the policies, the forkable test backend, the request log, the realtime status stream, and the memory of every prior bug. <b>Without InsForge, this loop cannot exist on any other backend — and that is the whole point.</b></p>
     </div>
   </section>
 
-  <!-- 4 — IMPROVEMENT: CONFIDENCE TIERS -->
+  <!-- 4 — THE MOAT -->
   <section>
-    <div class="label">04 · What's new — confidence tiers</div>
-    <h2>Don't always open a PR. Match the action to the certainty.</h2>
-    <p>Every engineer's first objection to bug-fixing agents: "what if it opens a bunch of bad PRs?" Hush handles this directly. Before acting, it scores its own confidence using pgvector similarity to past, human-confirmed fixes. Then it picks the right output.</p>
+    <div class="label">04 · The moat</div>
+    <h2>Why this can only be built on InsForge.</h2>
+    <p>Most agentic dev tools are platform-agnostic — they'd work on Supabase, Convex, Neon, anything. Hush is not. Two InsForge primitives are <b>load-bearing</b>; you cannot replace them with anything in the market.</p>
+
+    <div class="moat">
+      <h3>Forkable backends + declarative auth.</h3>
+      <p>To safely propose a policy patch, the agent must (a) run the patch against prod-shaped data and (b) compare the result deterministically. Both require forking the entire backend — schema, policies, auth — and running the same session against it. That's <b>InsForge branch projects</b>. And the patch itself is a diff against <b>insforge.toml</b>, which is small, structured, auditable, and within Devin's one-shot range. No other platform has this pairing.</p>
+
+      <div class="compare">
+        <div class="col">
+          <div class="name">Supabase</div>
+          <p>Has RLS. <b>No branch projects.</b> Patches are SQL migrations against shared infra. Risky to test.</p>
+        </div>
+        <div class="col">
+          <div class="name">Convex / Neon</div>
+          <p>Convex has no RLS layer. Neon has branches but no auth/RLS at all. Neither composes.</p>
+        </div>
+        <div class="col win">
+          <div class="name">InsForge</div>
+          <p>Branch projects fork backend + auth + RLS together. <code>insforge.toml</code> is the declarative source of truth. <b>Hush exists because of this pairing.</b></p>
+        </div>
+      </div>
+    </div>
+
+    <p class="muted">pgvector, Realtime, Storage, and InsForge AI are also used — but those are supporting roles. They're not what makes the product impossible elsewhere.</p>
+  </section>
+
+  <!-- 5 — CONFIDENCE TIERS -->
+  <section>
+    <div class="label">05 · What's new — confidence tiers</div>
+    <h2>Match the action to the certainty.</h2>
+    <p>Every engineer's first objection to autonomous PRs: "what if it ships a bad policy change?" Hush handles this directly. Before acting, it scores its own confidence using three signals: <b>diff size</b>, <b>policy blast radius</b> (how many tables / routes the patch touches), and <b>pgvector similarity to past human-confirmed merges</b>. Then it picks the right output.</p>
     <div class="tiers">
       <div class="tier hi">
         <div class="pct">High · 85%+</div>
         <h4>Open a PR with the fix</h4>
-        <p>The fix passed the test. Similar bugs in the past got merged unchanged. Ship it for review.</p>
+        <p>Small diff, single policy, branch project replays clean. Similar diffs were merged before. Ship for review.</p>
       </div>
       <div class="tier mid">
         <div class="pct">Medium · 60–85%</div>
-        <h4>Open a draft PR — test only, no fix</h4>
-        <p>The bug is real and we can prove it. We're not sure of the fix. Hand the failing test and the diagnosis to a human.</p>
+        <h4>Open a draft PR — trace only</h4>
+        <p>Bug reproduces on the branch project. Fix touches more than one policy or changes a column. Hand the failing trace to a human.</p>
       </div>
       <div class="tier lo">
         <div class="pct">Low · &lt;60%</div>
         <h4>Open a GitHub issue with the clip</h4>
-        <p>Something looks wrong but it's not certain. File it, attach the session video, let someone decide.</p>
+        <p>Something looks anomalous but the branch replay doesn't reproduce it cleanly. File it, attach the session video and the request-log diff.</p>
       </div>
     </div>
-    <p class="muted">This is the difference between a hackathon toy and a tool a real engineering team would install. It also gives us three different demos in one — depending on the audience, lead with whichever moment they react to.</p>
+    <p class="muted">This is the difference between a hackathon toy and a tool a team would let near production. It also gives us three demo paths in one — lead with whichever beat the room reacts to.</p>
   </section>
 
-  <!-- 5 — IMPROVEMENT: LEARNS FROM YOU -->
+  <!-- 6 — LEARNS FROM YOU -->
   <section>
-    <div class="label">05 · What's new — it gets smarter</div>
+    <div class="label">06 · What's new — it gets smarter</div>
     <h2>Closing a PR teaches Hush.</h2>
-    <p>When a dev closes a Hush PR as "not a bug, by design" or "duplicate," that signal goes back into pgvector. The next time a similar session fires, Hush recognises the shape and skips it — or drops it from PR straight to issue. <b>Every rejection makes the next one quieter.</b></p>
-    <p>Sentry Seer can't do this. It doesn't have memory of <em>this team's taste</em>. Hush does, because InsForge gives it a vector store and an RLS-scoped data model out of the box.</p>
-  </section>
-
-  <!-- 6 — WHY INSFORGE -->
-  <section>
-    <div class="label">06 · Why InsForge sits at the center</div>
-    <h2>Five things, each load-bearing.</h2>
-    <p>It would be easy to use InsForge as just a database. We don't. Hush leans on five distinct features — each earns its place because the loop genuinely needs it.</p>
-    <div class="feats">
-      <div class="feat">
-        <div class="name">pgvector</div>
-        <div class="does">Powers dedup, confidence tiers, and the "learns from rejection" loop. Bugs become embeddings; memory becomes the moat.</div>
-      </div>
-      <div class="feat">
-        <div class="name">Branch projects</div>
-        <div class="does">Devin tests the fix against a fork of the customer's real data. Safe. The kind of detail judges nod at.</div>
-      </div>
-      <div class="feat">
-        <div class="name">Realtime</div>
-        <div class="does">The receipt page streams every step live: captured → testing → fixing → shipped. This is the demo wow.</div>
-      </div>
-      <div class="feat">
-        <div class="name">Auth + RLS</div>
-        <div class="does">Multi-tenant from day one. Customer A never sees Customer B's bug stream. A real product, not a demo.</div>
-      </div>
-      <div class="feat">
-        <div class="name">Storage + edge fns</div>
-        <div class="does">Session clips with signed URLs (so PRs can embed them) and the whole backend as one <code>insforge.toml</code>.</div>
-      </div>
-      <div class="feat">
-        <div class="name">InsForge AI</div>
-        <div class="does">The diagnosis step calls InsForge's built-in AI gateway. The whole brain runs on one platform.</div>
-      </div>
-    </div>
+    <p>When a dev closes a Hush PR as "by design" or "wontfix," that signal goes back into pgvector. The next time a similar (session, policy, log) tuple fires, Hush recognises the shape and skips it — or drops it from PR straight to issue. <b>Every rejection makes the next one quieter.</b></p>
+    <p>Sentry Seer can't do this. It has no memory of <em>this team's policy taste</em>. Hush does, because InsForge gives it a vector store + RLS-scoped data model out of the box.</p>
   </section>
 
   <!-- 7 — DEMO -->
@@ -394,28 +433,33 @@
     <div class="beats">
       <div class="beat">
         <div class="t">0:00</div>
-        <div class="w">A user clicks "Add to cart." Nothing happens.
-          <small>Split screen: their cursor on the left, the empty cart on the right. They rage-click. No error in the console. Sentry sees nothing.</small></div>
+        <div class="w">A logged-in customer opens "My Orders." Empty. They refresh. Still empty.
+          <small>Split screen: their screen on the left, the receipt page on the right (still dark). They've placed three orders this month. None are showing. Server returns 200.</small></div>
       </div>
       <div class="beat">
         <div class="t">0:10</div>
         <div class="w">The receipt page lights up.
-          <small>InsForge gets the Replicas webhook. pgvector checks: new bug. Realtime broadcasts <b>"Session captured ✓ · Booting sandbox…"</b> The user (and the judge) can see Hush is on it.</small></div>
+          <small>InsForge edge fn fires on the frustration signal. pgvector says new. Realtime streams: <b>"Session captured · Backend log tapped · 1 anomaly."</b></small></div>
       </div>
       <div class="beat">
-        <div class="t">0:25</div>
-        <div class="w">A test runs and fails.
-          <small>Limrun replays the session against an InsForge branch project. It clicks the button. The cart doesn't update. Red. Receipt updates: <b>"Test failing · Diagnosing…"</b></small></div>
+        <div class="t">0:20</div>
+        <div class="w">A plain-English diagnosis appears.
+          <small>InsForge AI: "Policy <code>orders_select</code> reads tenant_id from <code>auth.jwt() ->> 'tenant'</code>. This user's JWT migrated to <code>tenant_ids[]</code> last week. Policy never updated. Likely fix: read from the array."</small></div>
       </div>
       <div class="beat">
-        <div class="t">0:40</div>
-        <div class="w">Devin opens a PR. Green CI.
-          <small>InsForge AI writes the bug report. Devin edits a one-line CSS regression, reruns the test, passes. The PR description embeds the session clip from InsForge Storage. <b>Confidence: 91% → open PR with fix.</b></small></div>
+        <div class="t">0:35</div>
+        <div class="w">A branch project spawns. The TOML diff applies. The session replays. Orders appear.
+          <small>Two terminals side by side: <b>prod (red — still empty)</b> and <b>branch (green — orders visible)</b>. The bug is gone on the branch. Proof.</small></div>
       </div>
       <div class="beat">
-        <div class="t">0:55</div>
-        <div class="w">"Sentry would still be silent. Hush shipped the fix in under a minute."
-          <small>Close on the GitHub PR. Judges can click through. The InsForge dashboard behind shows the audit row for the run.</small></div>
+        <div class="t">0:50</div>
+        <div class="w">Devin opens a PR. 4 lines of <code>insforge.toml</code>.
+          <small>PR description: the session clip, the before/after RLS trace, the branch project's run id. CI green. <b>Confidence: 92% → PR with fix.</b></small></div>
+      </div>
+      <div class="beat">
+        <div class="t">0:58</div>
+        <div class="w">"Sentry is silent on auth bugs. Hush shipped the policy fix in under a minute."
+          <small>Close on the InsForge dashboard showing the audit row for the run. Judges can click through to the PR.</small></div>
       </div>
     </div>
   </section>
@@ -425,14 +469,14 @@
     <div class="label">08 · Build plan</div>
     <h2>Nine hours, seven checkpoints.</h2>
     <div class="plan">
-      <div class="row" style="display:contents"><div class="t">T+0h</div><div class="b"><b>Lock the demo bug.</b> A toy e-commerce app with a broken "Add to cart" button (CSS regression). Pre-record one Replicas session as a fallback.</div></div>
-      <div class="row" style="display:contents"><div class="t">T+1h</div><div class="b"><b>InsForge backend up.</b> One <code>insforge.toml</code>: schema with pgvector, RLS, Storage bucket, Realtime channel. Branch project forked. Demo app on Vercel points at it.</div></div>
-      <div class="row" style="display:contents"><div class="t">T+3h</div><div class="b"><b>Signal end-to-end.</b> Replicas → edge fn → pgvector dedup → Storage clip → Realtime "session captured." Limrun boots, runs Playwright against the branch project. Test fails.</div></div>
-      <div class="row" style="display:contents"><div class="t">T+5h</div><div class="b"><b>Devin closes the loop.</b> InsForge AI writes the diagnosis. Devin edits, reruns, passes. Edge fn opens the GitHub PR with the embedded clip.</div></div>
-      <div class="row" style="display:contents"><div class="t">T+6h</div><div class="b"><b>Confidence tiers.</b> Score each run via pgvector similarity. Switch behaviour: high → PR, medium → draft PR, low → issue. Three demo paths, one loop.</div></div>
-      <div class="row" style="display:contents"><div class="t">T+7h</div><div class="b"><b>Receipt page.</b> Next.js on Vercel subscribed to the Realtime channel. Status lines stream in live. Click-through to the PR works.</div></div>
-      <div class="row" style="display:contents"><div class="t">T+8h</div><div class="b"><b>Pitch + fallback.</b> Pre-record the 60-second demo video for wifi failure. Rehearse 3×. 90-second cap.</div></div>
-      <div class="row" style="display:contents"><div class="t">T+9h</div><div class="b"><b>Demo.</b> Open on the broken button. Close on the green PR with the InsForge dashboard behind it. Don't narrate architecture — let the loop close.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+0h</div><div class="b"><b>Lock the demo bug.</b> A toy multi-tenant app with an <code>orders</code> table and an RLS misfire — one wrong JWT claim path. Pre-seed two users so the leak/filter direction is obvious. One pre-recorded session as fallback.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+1h</div><div class="b"><b>InsForge backend up.</b> <code>insforge.toml</code> declares: <code>orders</code> table + RLS, an edge fn that logs every request, a Storage bucket, a Realtime channel, a pgvector column on <code>bugs</code>. Branch project forked. Demo app on Vercel.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+3h</div><div class="b"><b>Watch + Correlate end-to-end.</b> rrweb in the toy app posts to an edge fn. Edge fn taps the matching backend log window. pgvector dedup checks. Realtime broadcasts "session captured."</div></div>
+      <div class="row" style="display:contents"><div class="t">T+5h</div><div class="b"><b>Fork + diagnose.</b> InsForge AI writes the plain-English diagnosis from the failing log. Branch project spawns. Devin gets a narrowly scoped prompt: "propose a <code>insforge.toml</code> diff that satisfies this failing branch-project test." High one-shot success.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+6h</div><div class="b"><b>Confidence tiers.</b> Score = (diff size × blast radius × pgvector similarity). Branch to PR / draft PR / issue. Seed two demo runs at different scores so all three paths can be shown.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+7h</div><div class="b"><b>Receipt page.</b> Next.js on Vercel subscribed to the Realtime channel. Five status lines stream live. The <b>branch-vs-prod diff terminal pair</b> is the climax visual — not a GitHub PR. More InsForge-specific.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+8h</div><div class="b"><b>Pitch + fallback.</b> Pre-record the 60-second demo video. Use the branch diff view as the climax shot. Rehearse 3×. Hard 90s cap.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+9h</div><div class="b"><b>Demo.</b> Open on the empty Orders page. Close on the green branch + the PR. Don't narrate architecture — let the policy fix land on stage.</div></div>
     </div>
   </section>
 
@@ -440,22 +484,22 @@
   <section>
     <div class="label">09 · If we have to pivot</div>
     <h2>Backups, collapsed.</h2>
-    <p class="muted">Hot-swap order: Hush → DepWatch → SOC2 Pilot. Click to expand.</p>
-
-    <details>
-      <summary>
-        <h3>DepWatch</h3>
-        <span class="one">A morning agent that watches your lockfile for supply-chain risk. Same downstream stack as Hush — just swap session capture for lockfile parse.</span>
-      </summary>
-      <div class="inner">Reuses the Bellwether deck architecture. Lower build risk; saves ~3 hours of design work. <b>Use if Replicas blocks.</b></div>
-    </details>
+    <p class="muted">Hot-swap order: Hush → Migration Pilot (closest) → DepWatch → SOC2 Pilot. Click to expand.</p>
 
     <details>
       <summary>
         <h3>Migration Pilot</h3>
-        <span class="one">InsForge branch projects + blast-radius report before any migration PR opens.</span>
+        <span class="one">Branch-project blast-radius preview before any migration PR. Closest neighbour to Hush — could be merged if needed.</span>
       </summary>
-      <div class="inner">Hits the InsForge sponsor head-on. Lower demo wow than Hush but unmistakably native to the primary sponsor.</div>
+      <div class="inner">Same branch-project + <code>insforge.toml</code> primitives, but the trigger is a developer-authored migration rather than a user session. If the Watch step (rrweb capture) blocks, fold Hush into this — same demo wow without the capture dependency.</div>
+    </details>
+
+    <details>
+      <summary>
+        <h3>DepWatch</h3>
+        <span class="one">A morning agent that watches your lockfile for supply-chain risk. Same downstream stack as Hush minus the capture step.</span>
+      </summary>
+      <div class="inner">Reuses the prior Bellwether deck architecture. Lower build risk, saves ~3 hours of design. Use if both rrweb and branch projects are blocked.</div>
     </details>
 
     <details>
@@ -463,7 +507,7 @@
         <h3>SOC2 Pilot</h3>
         <span class="one">Drop a security questionnaire URL; the agent fills it overnight with cited answers.</span>
       </summary>
-      <div class="inner">Same loop shape as Hush, different buyer. Use if the room reads less dev-focused than we expect.</div>
+      <div class="inner">Same loop shape, different buyer. Use only if the room reads less dev-focused than expected.</div>
     </details>
 
     <details>
@@ -471,13 +515,30 @@
         <h3>The other six</h3>
         <span class="one">PR Diplomat · Doc Twin · Flake Court · Drift Sentinel · Onboarding Compiler · Spec → Stack</span>
       </summary>
-      <div class="inner">Full scoring matrix lives in <code>archive/prior-events/</code>. None outscored Hush or DepWatch. Pull only if both top picks fail.</div>
+      <div class="inner">Full scoring matrix lives in <code>archive/prior-events/</code>. None outscored Hush or Migration Pilot on the post-analysis rubric.</div>
     </details>
   </section>
 
+  <!-- CHANGELOG: v6 → v7 -->
+  <section>
+    <div class="label">10 · What changed from v6</div>
+    <div class="changelog">
+      <p style="margin:0 0 10px;"><b>v6 → v7 reflects the critique in <code>FINAL-analysis.md</code>.</b> Same shell (name, tagline, demo arc, confidence tiers, learning loop), different engine.</p>
+      <ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.7;color:var(--ink-dim);">
+        <li><b>Pivoted bug class</b> from "broken Add-to-cart (CSS regression)" → "silent RLS misfire on My Orders." Higher stakes, easier to fix, impossible to ignore.</li>
+        <li><b>Replicas → rrweb in the toy app.</b> Removes sponsor-API dependency risk. Frontend capture is now ours to control.</li>
+        <li><b>Devin's job narrowed</b> from "fix arbitrary React/TS code" → "propose a <code>insforge.toml</code> diff that satisfies a failing branch-project test." Far higher one-shot rate.</li>
+        <li><b>InsForge moat made structural, not cosmetic.</b> Branch projects + declarative <code>insforge.toml</code> are now load-bearing. Survives "why not Supabase?" in one sentence.</li>
+        <li><b>Dropped the uncited 70% stat.</b> Replaced with a directional claim and a concrete demo bug.</li>
+        <li><b>Demo climax shot changed</b> from a GitHub PR view → a branch-vs-prod diff terminal pair. More InsForge-specific, more visceral.</li>
+        <li><b>Stage one-liner added</b> at the top — a sentence a technical judge can't poke holes in.</li>
+      </ul>
+    </div>
+  </section>
+
   <footer>
-    <span>// hush · idea doc · v6 · drafted 2026-06-06</span>
-    <span>see also: <a href="guidelines.html">guidelines.html</a> · <a href="archive/">archive/</a></span>
+    <span>// hush · idea doc · v7 · drafted 2026-06-06 · post-analysis pivot</span>
+    <span>see: <a href="FINAL-analysis.md">FINAL-analysis.md</a> · <a href="guidelines.html">guidelines.html</a></span>
   </footer>
 
 </div>
