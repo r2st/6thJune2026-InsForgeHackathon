@@ -10,9 +10,11 @@ every kind of context, so you don't have to grep.
 |------------------------------------|------------------------------------------|
 | **Canonical pitch (Hush v7)**      | `ideas/FINAL.html`                       |
 | Day-of operating playbook          | `ideas/guidelines.html`                  |
-| Critical analysis of the pitch     | `ideas/FINAL-analysis.md`                |
+| **Pivot brief** (Witness→Hush)     | `ideas/FINAL-analysis.md`                |
+| **Positioning brief** (the moat)   | `docs/the-hard-part.html`                |
+| **Engineering brief** (system honesty) | `docs/the-hardest-part.html`         |
 | The hackathon brief & rubric       | `docs/brief.md`                          |
-| Current system design              | `docs/architecture.md`                   |
+| Current system design              | `docs/architecture.md` · `docs/architecture.html` |
 | Why a decision was made            | `docs/decisions/` (ADRs)                 |
 | Domain terms                       | `docs/glossary.md`                       |
 | Background research / strategy     | `research/`                              |

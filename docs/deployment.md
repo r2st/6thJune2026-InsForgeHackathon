@@ -91,7 +91,7 @@ Minimum surface for the demo:
 - `tables.tenants` — for RLS scoping
 - `storage.buckets.clips` — session video clips with signed URLs
 - `realtime.channels.receipt` — broadcast bus for the receipt page
-- `functions.ingest` — Replicas/rrweb webhook
+- `functions.ingest` — rrweb webhook (primary capture path; Replicas only if the sponsor surfaces a working API)
 - `functions.fix-trigger` — kicks Devin, opens the PR
 - `auth.policies.*` — JWT claim → RLS bridge
 
@@ -142,7 +142,7 @@ Two functions, both deployed via `insforge functions deploy`.
 
 Path: `functions/ingest.ts` (in this repo).
 
-Receives the session payload from rrweb (or Replicas, if reinstated). Does:
+Receives the session payload from rrweb. (Replicas remains a plug-in capture option — wire only if the sponsor's API materialises demo-day. See [`ideas/FINAL-analysis.md` §2.4](../ideas/FINAL-analysis.md).) Does:
 
 1. Pulls the backend request-log window matching the session timestamp.
 2. Embeds (session shape + request log + RLS decision) via InsForge AI.
@@ -321,6 +321,6 @@ Not for demo day. The day after, before any of this stays running:
 
 ## Open questions
 
-- [ ] Is Replicas the actual sponsor for session capture, or are we shipping rrweb only? — pending sponsor confirmation
+- [ ] Replicas is treated as a plug-in path only; rrweb is the primary capture. Decision rationale in [`ideas/FINAL-analysis.md` §2.4](../ideas/FINAL-analysis.md). Confirm at T+0h that no sponsor track forces Replicas integration.
 - [ ] Does the InsForge AI gateway hit OpenRouter directly, or do we proxy? — affects the OPENROUTER_API_KEY line in §2
 - [ ] Branch project warm-boot time — needs measuring at T+1h so the demo-clock budget is honest

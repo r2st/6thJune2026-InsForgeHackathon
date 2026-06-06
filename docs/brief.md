@@ -1,56 +1,80 @@
 # Hackathon brief
 
-> Fill this in before any building starts. Everything downstream (tasks,
-> architecture, pitch) keys off this document. Keep it short — link out for
-> long-form rules.
+> Living doc. Update if event details land that contradict this. Everything
+> downstream (tasks, architecture, pitch) keys off it.
 
 ## Event
 
-- **Name:** *(e.g., Web Data UNLOCKED)*
-- **Date / duration:** *(e.g., 31 May 2026, 24h)*
-- **Location / format:** *(in-person / virtual / hybrid)*
-- **Submission deadline (absolute):** *(YYYY-MM-DD HH:MM TZ)*
-- **Pitch slot length:** *(e.g., 3 min + 2 min Q&A)*
-- **Submission platform:** *(Devpost / etc — direct link)*
+- **Name:** InsForge Hackathon
+- **Date / duration:** 2026-06-06, 9-hour single-day build
+- **Location / format:** *(to confirm — assume hybrid; verify on the day)*
+- **Submission deadline (absolute):** *(to confirm — likely end of build day, 2026-06-06)*
+- **Pitch slot length:** 3 min pitch + 2 min Q&A (assumed; see `demo/pitch-script.md`)
+- **Submission platform:** *(to confirm — Devpost / direct link)*
 
 ## The brief in one paragraph
 
-*(What problem are organizers asking participants to solve? Paraphrase in
-your own words — don't paste their marketing copy.)*
+InsForge wants demonstrations of agentic dev tools that lean structurally on
+its primitives — branch projects, declarative `insforge.toml`, RLS, edge
+functions, pgvector, Realtime, Storage, the AI gateway. The sponsor stack
+(InsForge / Vercel / Cognition / Replicas / Limrun) points at execution-layer
+infra: judges reward agents that **do something visible, on real infra, that
+another engineer would want to install**. See [`ideas/guidelines.html`](../ideas/guidelines.html)
+for the operating playbook.
 
 ## Tracks & prizes
 
-| Track / sponsor | Prize | API / tech we must use | Notes |
-|-----------------|-------|------------------------|-------|
-|                 |       |                        |       |
+| Track / sponsor | Required tech | Notes |
+|---|---|---|
+| **InsForge (primary)** | InsForge backend — must be load-bearing | We use branch projects + `insforge.toml` as the moat (see [`docs/the-hard-part.html`](the-hard-part.html)). |
+| **Vercel** | Vercel hosting | Two apps: `apps/demo` storefront and `apps/receipt` live status page. |
+| **Cognition (Devin)** | Devin opens the PR | Wired in `functions/fix-trigger.ts`. Pre-staged PR is our fallback. |
+| **Limrun** | Browser sandbox for replay | Used for prod/fork parallel replay verification. |
+| **Replicas** | Plug-in capture only | rrweb is the primary; Replicas is wired only if the sponsor surfaces a working API demo-day. See [`ideas/FINAL-analysis.md` §2.4](../ideas/FINAL-analysis.md). |
 
 ## Judging rubric
 
-*(Copy verbatim from organizer site. If they don't publish one, link the
-closest thing and note that.)*
+No published rubric. The day-of-operating playbook ([`ideas/guidelines.html`](../ideas/guidelines.html))
+reverse-engineers a four-axis rubric from the sponsor mix and the room
+composition (dev-tools founders + YC P26 partners). Anchor on that until
+the host announces otherwise.
 
-| Criterion | Weight | What "great" looks like for us |
-|-----------|--------|--------------------------------|
-|           |        |                                |
+| Criterion (inferred) | Weight | What "great" looks like for us |
+|---|---|---|
+| **Real infra, working end-to-end** | high | Live 60-second loop: rage-click → captured → diagnosed → branch fork passes, prod fails → PR opens. Not a slide reel. |
+| **Sponsor primitive is load-bearing** | high | Branch projects + `insforge.toml` are structurally necessary. The product collapses without InsForge — see [`docs/the-hard-part.html`](the-hard-part.html). |
+| **Visible artifact a judge can click** | medium | The GitHub PR — 4-line TOML diff with signed clip URL embedded and the RLS trace attached. |
+| **Honest engineering discipline** | medium | Confidence tiers, safety rail, two-signal verdicts — Q&A defense lives here. See [`docs/the-hardest-part.html`](the-hardest-part.html). |
 
 ## Judges
 
-*(Name, role, what they'll care about. See "reverse-engineer the judges"
-in research/winning-tips.md.)*
+*(Names to fill in on the day. Background read:
+[`research/winning-tips.md`](../research/winning-tips.md) → "reverse-engineer
+the judges.")*
 
 | Judge | Background | What they'll likely value |
-|-------|------------|---------------------------|
-|       |            |                           |
+|---|---|---|
+| *(TBC)* | dev-tools founder | The "would I install this?" gut check. Lead with the PR. |
+| *(TBC)* | YC P26 partner | Defensibility. The moat sentence in [`docs/the-hard-part.html`](the-hard-part.html). |
+| *(TBC)* | InsForge engineer | That the InsForge dependency is structural, not cosmetic. Branch projects + `insforge.toml` are where they look. |
 
 ## Our angle
 
-- **One-line pitch:** *(refined as we go — start rough)*
-- **Real customer name:** *(not a persona — a real person/company)*
-- **The pain in one sentence:** *(if you can't, sharpen until you can)*
-- **Sponsor APIs we'll showcase:** *(name each, where in the demo it appears)*
-- **What we're explicitly NOT building:** *(owning non-goals signals
-  discipline — see Q&A section of winning-tips.md)*
+- **One-line pitch:** *Hush — the bug-fixer for the bugs that don't crash.*
+- **Real customer name:** *(TBC — ideally an InsForge customer running multi-tenant SaaS. Until confirmed, we frame as "any multi-tenant SaaS on InsForge.")*
+- **The pain in one sentence:** Silent RLS misfires — a user's orders page is empty because a policy reads the wrong JWT claim shape; Sentry/Datadog stay green; the customer just leaves.
+- **Sponsor APIs we'll showcase:**
+  - **InsForge:** branch projects (the moat), `insforge.toml` (the unit of fix), pgvector (dedup + similarity), RLS (the bug surface), Realtime (the receipt page), Storage (signed clip URLs), AI gateway (the diagnosis call).
+  - **Vercel:** hosts the toy storefront and the receipt page.
+  - **Devin (Cognition):** opens the PR with the TOML diff embedded.
+  - **Limrun:** runs the parallel prod/fork replay.
+  - **rrweb:** the capture path (we ship this end-to-end, not the sponsor's).
+- **What we're explicitly NOT building:** see [`docs/architecture.html` §07](architecture.html) for the full list. Headline: no production-grade session-capture SDK (rrweb stub is the demo), no general code-fix agent (we patch `insforge.toml`, period), no multi-tenant billing or admin UI, no learning-from-rejections loop on stage (architecture supports it; on stage we wire the write and defer the read).
 
 ## Hard constraints
 
-- *(e.g., must use Bright Data, must be web-deployable, no team > 4, etc.)*
+- **InsForge must be load-bearing**, not just a database. The whole pitch argument is that branch projects + `insforge.toml` make Hush possible.
+- **The fix must be a `insforge.toml` diff**, not arbitrary application code. Patching React/TS at the demo scope is not credible in a 60-second window; patching TOML is.
+- **The PR must be clickable on stage** — branch protection on the victim repo is disabled for the demo.
+- **The replay must produce two independent signals** (prod fails AND fork passes). Single-signal verdicts drop a confidence tier — see [`docs/the-hardest-part.html`](the-hardest-part.html).
+- **No unverifiable stats in the pitch.** The "70% of bugs don't crash" line is dropped (see [`ideas/FINAL-analysis.md` §2.3](../ideas/FINAL-analysis.md)); the demo carries the weight.
