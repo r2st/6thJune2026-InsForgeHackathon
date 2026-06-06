@@ -3,9 +3,9 @@ id: 0004
 title: Pre-warm a pool of 2 InsForge branch projects at demo start
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: []
 demo_path: yes — without this, slide 6 stalls and the pitch dies
 ---
@@ -53,3 +53,16 @@ demos via `insforge branch reset`.
 
 ## Outcome
 <!-- Fill in when moving to done/. -->
+
+## Outcome
+
+- `scripts/prewarm.sh` matured: `--count N` creates/reuses `hush-fork-<i>`
+  branches (verified CLI: `branch create --mode full --no-switch`, reuse via
+  `branch reset`), seeds each from `infra/seed/two-tenants.sql`, and writes
+  `.hush/pool.json` in the exact `functions/lib/pool.ts` PoolEntry shape
+  (jwtSecret = parent's shared JWT_SECRET).
+- Idempotent (no-op when >=N unclaimed pooled); `--teardown` deletes branches +
+  removes pool.json; `--mock` synthesises a valid pool offline (validated
+  against pool.ts: entries=2, firstFree ok).
+- Caveat: `branch list --json` fields + `db query` seed invocation to be
+  confirmed on the live CLI; overridable via HUSH_FORK_BASE_URL_<i>.
