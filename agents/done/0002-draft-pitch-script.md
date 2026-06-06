@@ -5,7 +5,7 @@ role: storyteller
 priority: P0
 owner:
 started:
-status: inbox
+status: done
 depends_on: [0001]
 demo_path: yes — IS the pitch
 ---
@@ -38,3 +38,6 @@ it to decide what's in scope.
 ## Notes
 
 Don't worry about polish. The dry-runs will rewrite this 3+ times.
+
+## Outcome
+Already satisfied: demo/pitch-script.md is a full timed script — concrete customer + pain opener, sub-10s one-liner, beat-by-beat demo with 'what the judge feels', backups. Closed as done (stale inbox ticket).

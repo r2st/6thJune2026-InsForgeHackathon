@@ -78,8 +78,26 @@ Target on stage: under 45 seconds, end to end.
               [ slide 7 — money shot ]
 ```
 
-The receipt page subscribes to one channel (`hush:session:<id>`) and
+The receipt page subscribes to one channel (`receipt`) and
 renders five step rows in real time — this is the demo's narrator.
+
+### The money shot (ticket 0003)
+
+**Judge watches the receipt page.** A customer's "My Orders" is empty
+(prod). The status feed lights up — captured, log tapped, diagnosed —
+then the screen shows two counts side by side: **prod `0`, fork `3`.**
+The judge realizes Hush didn't just flag the bug; it forked the backend,
+applied the policy patch, replayed the same session, and *proved the fix*
+— then opened a PR with 92% confidence. **Sees:** the same request return
+0 rows on prod and 3 on the fork. **Realizes:** this is a fix you can
+trust, not a guess, and it only works because the backend is forkable.
+
+End-to-end flow to that artifact: frustrated click → rrweb buffer +
+`x-hush-session-id` → `/capture` edge fn → `request_log` correlation →
+`diagnose` (TOML diff) → safety + TOML-validation rails → branch project
+fork + `applyDiff` + forged JWT → parallel replay → `Verdict {prod, fork}`
+→ confidence tier → PR. The receipt page renders the verdict pair
+(`VerdictPair.tsx`) as the climax frame.
 
 ## Stage-by-stage detail
 

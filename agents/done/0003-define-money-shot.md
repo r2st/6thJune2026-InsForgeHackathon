@@ -5,7 +5,7 @@ role: architect
 priority: P0
 owner:
 started:
-status: inbox
+status: done
 depends_on: [0001]
 demo_path: yes — the single moment the pitch lands on
 ---
@@ -37,3 +37,6 @@ doesn't touch the money-shot flow, it's a candidate to cut.
 
 Resist building the money shot first by feel. Write it down, get one other
 agent to agree, then build.
+
+## Outcome
+Added explicit money-shot definition to docs/architecture.md (judge sees prod 0 / fork 3, realizes the fix is proven not guessed) + the end-to-end data flow to that artifact. VerdictPair.tsx renders it.
