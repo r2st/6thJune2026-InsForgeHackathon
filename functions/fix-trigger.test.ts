@@ -134,6 +134,17 @@ describe('fixTrigger orchestrator', () => {
     expect(events.at(-1)?.step).toBe('failed');
   });
 
+  it('degrades visibly on a DiagnoseError (timeout/overload) with the reason', async () => {
+    const { DiagnoseError } = await import('./diagnose.js');
+    const { events, deps } = harness({
+      diagnose: async () => { throw new DiagnoseError('timeout', 'diagnose: timed out after 12000ms'); },
+    });
+    const r = await fixTrigger('run_1', deps);
+    expect(r.status).toBe('failed');
+    expect(events.at(-1)).toMatchObject({ step: 'failed', detail: { stage: 'diagnose' } });
+    expect(String(events.at(-1)?.detail?.reason)).toMatch(/timeout/);
+  });
+
   it('publishes failed and stops when a stage throws', async () => {
     const { events, deps } = harness({ diagnose: async () => { throw new Error('AI timeout'); } });
     const r = await fixTrigger('run_1', deps);

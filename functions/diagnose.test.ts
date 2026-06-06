@@ -132,3 +132,82 @@ describe('diagnose v2 prompt wiring (ticket 0031)', () => {
     expect(msg).not.toContain('<user-data');
   });
 });
+
+import { diagnose, DiagnoseError, type AnthropicLike } from './diagnose.js';
+
+describe('diagnose resilience (ticket 0036)', () => {
+  const input = {
+    session: { sessionId: 's1', tenantId: 't1', userId: 'u1', startedAt: 'x', endedAt: 'y', frustrationAt: null, clipUrl: '' },
+    failingRequest: { id: 1, ts: 't', sessionId: 's1', userId: 'u1', tenantId: 't1', route: '/orders', method: 'GET', rlsDecisions: [], returnedRows: 0, status: 200 },
+    expectedRows: 3,
+    tomlContext: '[tables.orders]',
+  };
+  const noSleep = async () => {};
+
+  const goodResponse = {
+    stop_reason: 'tool_use',
+    content: [{
+      type: 'tool_use', name: 'emit_diagnosis',
+      input: {
+        summary: 's', expectation: 'e', observation: 'o',
+        failingPolicy: 'orders.orders_select', failingJwtClaim: 'j',
+        tomlDiff: { path: 'tables.orders.rls', before: 'a', after: 'b' },
+        widensAccess: false,
+        confidenceInputs: { diffLoc: 1, tablesTouched: 1, policyBlast: 1 },
+      },
+    }],
+  };
+
+  function client(create: AnthropicLike['messages']['create']): () => Promise<AnthropicLike> {
+    return async () => ({ messages: { create } });
+  }
+
+  it('times out and throws a typed DiagnoseError(timeout)', async () => {
+    const hang: AnthropicLike['messages']['create'] = () => new Promise(() => {}); // never resolves
+    await expect(
+      diagnose(input, { timeoutMs: 30, sleep: noSleep, createClient: client(hang) }),
+    ).rejects.toMatchObject({ name: 'DiagnoseError', reason: 'timeout' });
+  });
+
+  it('retries a transient 429 then succeeds', async () => {
+    let calls = 0;
+    const flaky: AnthropicLike['messages']['create'] = async () => {
+      calls++;
+      if (calls < 2) throw Object.assign(new Error('rate limited'), { status: 429 });
+      return goodResponse;
+    };
+    const d = await diagnose(input, { sleep: noSleep, createClient: client(flaky) });
+    expect(calls).toBe(2);
+    expect(d.failingPolicy).toBe('orders.orders_select');
+    expect(d.promptVersion).toBe('diagnose-v1.0.0');
+  });
+
+  it('exhausts retries on persistent 529 → DiagnoseError(unavailable)', async () => {
+    let calls = 0;
+    const down: AnthropicLike['messages']['create'] = async () => {
+      calls++; throw Object.assign(new Error('overloaded'), { status: 529 });
+    };
+    await expect(
+      diagnose(input, { maxRetries: 2, sleep: noSleep, createClient: client(down) }),
+    ).rejects.toMatchObject({ reason: 'unavailable' });
+    expect(calls).toBe(3); // initial + 2 retries
+  });
+
+  it('does NOT retry a 401 bad key → DiagnoseError(bad_request), fails fast', async () => {
+    let calls = 0;
+    const badKey: AnthropicLike['messages']['create'] = async () => {
+      calls++; throw Object.assign(new Error('unauthorized'), { status: 401 });
+    };
+    await expect(
+      diagnose(input, { sleep: noSleep, createClient: client(badKey) }),
+    ).rejects.toMatchObject({ reason: 'bad_request' });
+    expect(calls).toBe(1);
+  });
+
+  it('treats a max_tokens truncation as DiagnoseError(truncated), not validate-then-throw', async () => {
+    const truncated: AnthropicLike['messages']['create'] = async () => ({ stop_reason: 'max_tokens', content: [] });
+    await expect(
+      diagnose(input, { sleep: noSleep, createClient: client(truncated) }),
+    ).rejects.toMatchObject({ reason: 'truncated' });
+  });
+});

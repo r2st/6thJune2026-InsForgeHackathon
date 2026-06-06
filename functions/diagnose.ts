@@ -16,11 +16,10 @@
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-// Type-only import — erased at compile time, so importing this module for the
-// pure-helper unit tests never resolves @anthropic-ai/sdk at runtime. The
-// constructor is loaded dynamically inside diagnose(), the only code path that
-// actually needs it.
-import type Anthropic from '@anthropic-ai/sdk';
+// The SDK is loaded dynamically inside diagnose() (the only code path that needs
+// it) via the injectable createClient seam, so the pure-helper and resilience
+// unit tests never resolve @anthropic-ai/sdk. We model the slice we depend on as
+// AnthropicLike below rather than import the SDK's types.
 
 import type { CapturedSession, RequestLogEntry, Diagnosis, SanitisedContext } from './types.js';
 import { validate, type JsonSchema } from './lib/validateSchema.js';
@@ -79,9 +78,9 @@ export function parsePrompt(raw: string): PromptParts {
   if (!userMatch) throw new Error('diagnose.v1.md: missing user-template fenced block');
 
   return {
-    promptVersion: versionMatch[1],
-    system: systemMatch[1].trim(),
-    userTemplate: userMatch[1].trim(),
+    promptVersion: versionMatch[1]!,
+    system: systemMatch[1]!.trim(),
+    userTemplate: userMatch[1]!.trim(),
   };
 }
 
@@ -116,8 +115,9 @@ export function promptVersion(): string {
  *  so a renamed template field fails loudly instead of leaking "{{x}}". */
 export function fillTemplate(template: string, vars: Record<string, string>): string {
   return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
-    if (!(key in vars)) throw new Error(`diagnose template: no value for {{${key}}}`);
-    return vars[key];
+    const v = vars[key];
+    if (v === undefined) throw new Error(`diagnose template: no value for {{${key}}}`);
+    return v;
   });
 }
 
@@ -163,19 +163,76 @@ export function buildToolInputSchema(schema: JsonSchema): JsonSchema {
   };
 }
 
+// ── Resilience (ticket 0036) ─────────────────────────────────────────────────
+// diagnose sits on the critical path with a ~6s budget (ADR 0001). A slow,
+// rate-limited, or overloaded Claude must not freeze the receipt mid-pitch. We
+// enforce a hard wall-clock timeout, retry transient failures with bounded
+// backoff inside that budget, and surface a discriminable DiagnoseError the
+// orchestrator routes on — degrade visibly, never hang.
+
+export type DiagnoseFailureReason = 'timeout' | 'unavailable' | 'truncated' | 'bad_request';
+
+export class DiagnoseError extends Error {
+  constructor(public readonly reason: DiagnoseFailureReason, message: string) {
+    super(message);
+    this.name = 'DiagnoseError';
+  }
+}
+
+/** Minimal shape of the Anthropic client we depend on — keeps tests SDK-free. */
+export interface AnthropicLike {
+  messages: { create(body: unknown, opts?: { signal?: AbortSignal }): Promise<AnthropicResponse> };
+}
+interface AnthropicResponse {
+  content: { type: string; name?: string; input?: unknown }[];
+  stop_reason: string | null;
+}
+
+export interface DiagnoseOptions {
+  /** Hard wall-clock ceiling. Default 12s (env HUSH_DIAGNOSE_TIMEOUT_MS), under the 45s envelope. */
+  timeoutMs?: number;
+  /** Transient-error retries inside the timeout budget. Default 2. */
+  maxRetries?: number;
+  /** Injectable backoff sleep (tests pass a no-op). */
+  sleep?: (ms: number) => Promise<void>;
+  /** Injectable client factory — defaults to the lazily-imported real SDK. */
+  createClient?: () => Promise<AnthropicLike>;
+}
+
+const TIMEOUT = Symbol('diagnose-timeout');
+
+async function defaultCreateClient(): Promise<AnthropicLike> {
+  // Lazy import: pure-helper tests never resolve @anthropic-ai/sdk. `new Anthropic()`
+  // reads ANTHROPIC_API_KEY and throws clearly if unset.
+  const { default: Anthropic } = await import('@anthropic-ai/sdk');
+  return new Anthropic() as unknown as AnthropicLike;
+}
+
+/** 429/500/529 and connection errors are transient; 400/401 are not. */
+function errMsg(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+function isTransient(err: unknown): boolean {
+  const status = (err as { status?: number })?.status;
+  if (status === undefined) return true; // network / connection drop
+  if (status === 400 || status === 401 || status === 403 || status === 422) return false;
+  return status === 429 || status >= 500;
+}
+
 // ── The call ────────────────────────────────────────────────────────────────────
 
-export async function diagnose(input: DiagnoseInput): Promise<Diagnosis> {
+export async function diagnose(input: DiagnoseInput, opts: DiagnoseOptions = {}): Promise<Diagnosis> {
   const prompt = promptFor(input);
   const { system } = prompt;
   const schema = getSchema();
 
-  // Load the SDK lazily; `new Anthropic()` resolves ANTHROPIC_API_KEY from the
-  // environment and throws a clear error if it's unset — no need to pre-check.
-  const { default: Anthropic } = await import('@anthropic-ai/sdk');
-  const client = new Anthropic();
+  const timeoutMs = opts.timeoutMs ?? Number(process.env.HUSH_DIAGNOSE_TIMEOUT_MS ?? 12_000);
+  const maxRetries = opts.maxRetries ?? 2;
+  const sleep = opts.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
+  const client = await (opts.createClient ?? defaultCreateClient)();
 
-  const response = await client.messages.create({
+  const body = {
     model: MODEL,
     max_tokens: 2048,
     system,
@@ -186,21 +243,59 @@ export async function diagnose(input: DiagnoseInput): Promise<Diagnosis> {
         description:
           'Emit the structured diagnosis. This is the only output downstream ' +
           'steps consume — do not write prose.',
-        input_schema: buildToolInputSchema(schema) as Anthropic.Tool['input_schema'],
+        input_schema: buildToolInputSchema(schema),
       },
     ],
-    // Force the tool so the response is schema-shaped, never prose. (Forcing a
-    // tool is incompatible with extended thinking, which is why we don't enable
-    // it here — the reasoning happens while the model constructs the args.)
+    // Force the tool so the response is schema-shaped, never prose.
     tool_choice: { type: 'tool', name: 'emit_diagnosis' },
+  };
+
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => { controller.abort(); reject(TIMEOUT); }, timeoutMs);
   });
 
+  let response: AnthropicResponse;
+  try {
+    // Retry transient failures with bounded exponential backoff; race the whole
+    // thing against the hard timeout so a hang can never outlive the budget.
+    const attempt = async (): Promise<AnthropicResponse> => {
+      for (let i = 0; ; i++) {
+        try {
+          return await client.messages.create(body, { signal: controller.signal });
+        } catch (err) {
+          if (controller.signal.aborted) throw err;
+          if (i >= maxRetries || !isTransient(err)) throw err;
+          await sleep(250 * 2 ** i); // 250ms, 500ms
+        }
+      }
+    };
+    response = await Promise.race([attempt(), timeout]);
+  } catch (err) {
+    if (err === TIMEOUT || controller.signal.aborted) {
+      throw new DiagnoseError('timeout', `diagnose: timed out after ${timeoutMs}ms`);
+    }
+    if (!isTransient(err)) {
+      throw new DiagnoseError('bad_request', `diagnose: non-retryable API error — ${errMsg(err)}`);
+    }
+    throw new DiagnoseError('unavailable', `diagnose: API unavailable after ${maxRetries} retries — ${errMsg(err)}`);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+
+  // A max_tokens stop means the tool args may be partial — never validate-then-throw
+  // on a truncated body; treat it as a diagnose failure the orchestrator can route.
+  if (response.stop_reason === 'max_tokens') {
+    throw new DiagnoseError('truncated', 'diagnose: response truncated (stop_reason=max_tokens)');
+  }
+
   const toolUse = response.content.find(
-    (block): block is Anthropic.ToolUseBlock =>
-      block.type === 'tool_use' && block.name === 'emit_diagnosis',
+    (block) => block.type === 'tool_use' && block.name === 'emit_diagnosis',
   );
   if (!toolUse) {
-    throw new Error(
+    throw new DiagnoseError(
+      'unavailable',
       `diagnose: model did not call emit_diagnosis (stop_reason=${response.stop_reason})`,
     );
   }

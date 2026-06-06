@@ -11,7 +11,7 @@ shopt -s nullglob
 
 ok()   { printf "  \033[32m✓\033[0m %s\n" "$1"; }
 warn() { printf "  \033[33m!\033[0m %s\n" "$1"; }
-fail() { printf "  \033[31m✗\033[0m %s\n" "$1"; FAILED=1; }
+fail() { printf "  \033[31m✗\033[0m %s\n" "$1"; FAILED=$((FAILED + 1)); }
 
 FAILED=0
 

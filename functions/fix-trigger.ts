@@ -27,7 +27,7 @@ import type {
 import { correlate } from './correlate.js';
 import { toReplayPayload } from './capture.js';
 import { extractTomlContext } from './toml.js';
-import { diagnose as realDiagnose } from './diagnose.js';
+import { diagnose as realDiagnose, DiagnoseError } from './diagnose.js';
 import { validateDiff } from './safety.js';
 import { validateTomlPatch, tableSchemaFromToml } from './tomlValidate.js';
 import { applyTomlDiff, type ApplyResult } from './applyDiff.js';
@@ -97,15 +97,26 @@ export async function fixTrigger(runId: string, deps?: Partial<OrchestratorDeps>
     const table = corr.entry.rlsDecisions?.[0]?.table ?? stripLeadingSlash(corr.entry.route);
     await emit('correlated', { route: corr.entry.route, expectedRows: corr.expectedRows });
 
-    // 2. diagnose → structured Diagnosis with a TOML diff.
+    // 2. diagnose → structured Diagnosis with a TOML diff. A resilience failure
+    //    (timeout / overload / truncation, ticket 0036) is NOT a hard crash:
+    //    degrade visibly to a failed step with the reason, so the receipt shows
+    //    *why* instead of hanging on "diagnosing…".
     const tomlContext = extractTomlContext({ table });
-    const diagnosis = await d.diagnose({
-      session: toSession(ctx),
-      failingRequest: corr.entry,
-      expectedRows: corr.expectedRows,
-      tomlContext,
-      jwtClaims: ctx.jwtClaims,
-    });
+    let diagnosis: Diagnosis;
+    try {
+      diagnosis = await d.diagnose({
+        session: toSession(ctx),
+        failingRequest: corr.entry,
+        expectedRows: corr.expectedRows,
+        tomlContext,
+        jwtClaims: ctx.jwtClaims,
+      });
+    } catch (err) {
+      if (err instanceof DiagnoseError) {
+        return await fail(d, emit, runId, 'diagnose', `${err.reason}: ${err.message}`);
+      }
+      throw err;
+    }
     await emit('diagnosed', { summary: diagnosis.summary, failingPolicy: diagnosis.failingPolicy });
 
     // 2b. model self-escalation (0037) — the model itself declined a safe fix

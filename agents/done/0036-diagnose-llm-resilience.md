@@ -3,9 +3,9 @@ id: 0036
 title: diagnose() LLM-call resilience — timeout, retry, graceful degrade
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0018, 0012, 0030]
 demo_path: yes — a slow/rate-limited Claude call must not freeze the receipt mid-pitch
 ---
@@ -60,4 +60,14 @@ ceiling and a clean degrade, not a spinner.
   a degrade still fits in the 45s envelope.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- `diagnose.ts` now enforces an AbortSignal wall-clock timeout (default 12s,
+  env HUSH_DIAGNOSE_TIMEOUT_MS), bounded exp-backoff retry for 429/5xx/network
+  (default 2; 400/401/403/422 fail fast), and a max_tokens truncation guard.
+  Failures surface as a typed `DiagnoseError` with reason
+  timeout|unavailable|truncated|bad_request. SDK is injectable (`createClient`)
+  so the suite is fully mock-driven, no live call.
+- `fix-trigger.ts` catches DiagnoseError and degrades to a visible failed step
+  with the reason (receipt shows why) instead of hanging or hard-crashing.
+- 5 resilience tests + 1 orchestrator degrade test. Also dropped the unused SDK
+  type-import and fixed pre-existing strictness in parsePrompt/fillTemplate.
