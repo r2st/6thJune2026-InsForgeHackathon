@@ -12,7 +12,7 @@ finishes writing the support ticket.
 |---|---|---|
 | **Receipt page** (judge-facing live status) | https://w369egnp.insforge.site/ | ✅ deployed |
 | **Receipt — demo mode** (full arc, no backend needed) | https://w369egnp.insforge.site/r/demo?demo=1 | ✅ deployed · **start here** |
-| **Backend** (InsForge project `hush`, seeded demo bug) | https://w369egnp.us-east.insforge.app | ✅ live |
+| **Backend** (InsForge project `hush`, seeded demo bug) | https://w369egnp.us-east.insforge.app/api/health | ✅ live — API host; bare `/` returns `Cannot GET /` by design, check `/api/health` |
 | **Victim app** (`apps/demo` — "Acme Store / My Orders") | _not yet deployed_ — run locally: `pnpm --filter demo dev` → http://localhost:3000/orders | ⏳ builds clean; deploy with `cd apps/demo && vercel --prod` |
 
 > The **demo-mode receipt** (`/r/demo?demo=1`) rehearses the whole five-step
