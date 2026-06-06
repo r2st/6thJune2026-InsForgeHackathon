@@ -20,9 +20,15 @@ Read aloud with a timer. If you're over by 10s, cut a sentence. Cuts are at the 
 
 ## 0:25 – 0:40 — The gap (slide 3)
 
-> "70% of user-reported bugs never throw an error. They don't crash —
-> they just *frustrate*. Your monitoring is built for stack traces.
-> Most of your bugs don't have one."
+> "Most user-reported bugs never reach your error tracker. They don't
+> crash — they just *frustrate*. Your monitoring is built for stack
+> traces. Most of your bugs don't have one."
+
+<!-- v5 used "70% of user-reported bugs never throw an error." The stat
+     had no defensible citation (see ideas/FINAL-analysis.md §2.3 and
+     docs/architecture.md Critical analysis §G). The directional claim
+     survives any judge cross-examination; the demo carries the weight. -->
+
 
 ## 0:40 – 0:55 — Solution one-liner (slide 4)
 
@@ -57,8 +63,16 @@ Happy path. Pre-loaded data. No login. Three beats.
 
 > "Sentry catches the bugs that crash your server. Hush catches the
 > bugs that quietly break your customers. Built on InsForge — branch
-> projects, RLS, realtime, pgvector, AI — plus rrweb for capture and
-> Devin to drive the patch."
+> projects, RLS, realtime, AI — plus rrweb for capture."
+
+<!-- v5 close also name-dropped "pgvector" (learn-from-rejections loop)
+     and "Devin" (the patch driver). Neither is in the build plan: the
+     diagnose step calls InsForge AI directly (ticket 0018) and the
+     learn-loop is a Q&A planted seed, not code. Naming them in the
+     close invites a judge follow-up we can't honor. Both survive as
+     roadmap in the planted-seed answer below. See architecture.md
+     Critical analysis §D for the full thread. -->
+
 >
 > "Next we wire the learn-from-rejections loop: every closed PR becomes a
 > negative training shape, so Hush gets quieter over time, not noisier."
