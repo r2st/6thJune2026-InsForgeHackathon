@@ -3,9 +3,9 @@ id: 0038
 title: Preflight must check ANTHROPIC_API_KEY (diagnosis moved off OpenRouter)
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0018, 0029]
 demo_path: yes — a missing diagnosis key should fail loudly at setup, not on stage
 ---
@@ -48,4 +48,10 @@ the one preflight no longer verifies.
 - Small ticket; bundle into 0029's owner's next pass if they're still active.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- `scripts/preflight.sh` now checks `ANTHROPIC_API_KEY` (diagnosis) alongside
+  `OPENROUTER_API_KEY` (ingest embeddings), with a comment mapping each key to
+  its path. Added `--deep` flag: a live `GET /v1/models` ping that fails on a
+  present-but-invalid key (401/403); fast path unchanged.
+- `docs/deployment.md` §2 secret matrix + the fix-trigger/ingest notes updated:
+  diagnosis → ANTHROPIC_API_KEY, embeddings → OPENROUTER_API_KEY.

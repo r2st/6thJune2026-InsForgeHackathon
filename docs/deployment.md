@@ -72,7 +72,8 @@ Collect these *before* you start coding. A single shared 1Password / vault note 
 | `INSFORGE_SERVICE_KEY` | InsForge dashboard → API keys | edge fns only |
 | `INSFORGE_ANON_KEY` | InsForge dashboard → API keys | demo, receipt |
 | `INSFORGE_BRANCH_PROJECT_ID` | After §4 below | edge fns |
-| `OPENROUTER_API_KEY` (or InsForge AI key) | InsForge AI Gateway / OpenRouter | edge fns |
+| `ANTHROPIC_API_KEY` | Anthropic console → API keys | **diagnosis** (`diagnose()` — direct Anthropic call, ticket 0018) |
+| `OPENROUTER_API_KEY` (or InsForge AI key) | InsForge AI Gateway / OpenRouter | ingest **embeddings** (`bug_runs.embedding`) |
 | `DEVIN_API_KEY` | Devin → settings → API | edge fns |
 | `GITHUB_TOKEN` | `gh auth token` (a fine-grained PAT scoped to the victim repo) | edge fns |
 | `VERCEL_TOKEN` | Vercel → account → tokens | CI only |
@@ -151,14 +152,14 @@ Receives the session payload from rrweb. (Replicas remains a plug-in capture opt
 5. Broadcasts `{step: 'captured'}` on Realtime channel `receipt`.
 6. Calls `fix-trigger` synchronously.
 
-Env: `INSFORGE_SERVICE_KEY`, `OPENROUTER_API_KEY`.
+Env: `INSFORGE_SERVICE_KEY`, `OPENROUTER_API_KEY` (ingest embeddings).
 
 ### `fix-trigger`
 
 Path: `functions/fix-trigger.ts`.
 
 1. Spins up the branch project (already created in §4 — just confirms it's reachable).
-2. Generates the candidate TOML diff via InsForge AI (the diagnosis prompt).
+2. Generates the candidate TOML diff via a direct Anthropic call (`ANTHROPIC_API_KEY`, ticket 0018 — forced tool, schema-validated).
 3. Applies the diff on the branch via `insforge config apply --branch …`.
 4. Runs a Limrun playback against the branch to confirm the bug is gone.
 5. Scores confidence (diff size × past-merge similarity).
