@@ -3,9 +3,9 @@ id: 0011
 title: Open a GitHub PR with the TOML diff, clip, RLS trace, and confidence
 role: builder
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-app-layer
+started: 2026-06-06T13:00Z
+status: in_progress
 depends_on: [0006, 0008]
 demo_path: yes — slide 7 is this PR
 ---

@@ -3,9 +3,9 @@ id: 0016
 title: Seed the RLS-misfire demo bug in the toy app's orders flow
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-app-layer
+started: 2026-06-06T13:00Z
+status: in_progress
 depends_on: [0013]
 demo_path: yes — this IS the bug the receipt page diagnoses
 ---

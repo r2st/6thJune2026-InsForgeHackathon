@@ -3,9 +3,9 @@ id: 0010
 title: Deterministic demo-store fixture seeded into every pre-warmed fork
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-app-layer
+started: 2026-06-06T13:00Z
+status: in_progress
 depends_on: [0004]
 demo_path: yes — without this, prod/branch row counts are not reproducible
 ---

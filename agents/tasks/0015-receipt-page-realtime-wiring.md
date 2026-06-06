@@ -3,9 +3,9 @@ id: 0015
 title: Receipt page subscribes to bug_stream and renders capture in <1s
 role: builder
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-app-layer
+started: 2026-06-06T13:00Z
+status: in_progress
 depends_on: [0013]
 demo_path: yes — the screen the judges watch light up
 ---

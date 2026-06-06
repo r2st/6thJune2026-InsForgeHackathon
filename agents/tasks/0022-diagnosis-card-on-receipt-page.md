@@ -3,9 +3,9 @@ id: 0022
 title: Plain-English diagnosis card on the receipt page
 role: builder
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-app-layer
+started: 2026-06-06T13:00Z
+status: in_progress
 depends_on: [0018, 0015]
 demo_path: yes — the on-stage moment between "diagnosing…" and "shipping…"
 ---

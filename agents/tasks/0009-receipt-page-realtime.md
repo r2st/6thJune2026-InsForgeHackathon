@@ -3,9 +3,9 @@ id: 0009
 title: Stream fork-test steps to the receipt page over Realtime
 role: builder
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-app-layer
+started: 2026-06-06T13:00Z
+status: in_progress
 depends_on: [0008]
 demo_path: yes — slide 5 → 6 transition is driven by these events
 ---
