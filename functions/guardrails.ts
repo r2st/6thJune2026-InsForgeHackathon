@@ -1,6 +1,6 @@
 // Hush guardrails - comprehensive AI safety for diagnosis and code generation
 
-import { GuardrailEngine } from '@llm-guardrails/core';
+import { GuardrailEngine, type GuardrailConfig, type GuardrailResult } from '@llm-guardrails/core';
 
 /**
  * Guardrail configuration for Hush
@@ -12,9 +12,9 @@ import { GuardrailEngine } from '@llm-guardrails/core';
  * - toxicity: ensure appropriate professional language
  */
 const guardrailConfig = {
-  guards: ['injection', 'pii', 'secrets', 'toxicity'],
+  guards: ['injection', 'pii', 'secrets', 'toxicity'].map((name) => ({ name })),
   level: 'standard',
-};
+} satisfies GuardrailConfig;
 
 /**
  * Singleton guardrail engine instance
@@ -50,7 +50,7 @@ export async function checkInput(input: string, context: string = 'default'): Pr
   return {
     safe: !result.blocked,
     reason: result.reason || undefined,
-    confidence: result.confidence || 0
+    confidence: confidenceFor(result)
   };
 }
 
@@ -91,7 +91,7 @@ export async function checkOutput(output: string, context: string = 'default'): 
   return {
     safe: !result.blocked && violations.length === 0,
     reason: result.reason || undefined,
-    confidence: result.confidence || 0,
+    confidence: confidenceFor(result),
     violations
   };
 }
@@ -186,4 +186,9 @@ export function getGuardrailStats() {
     engineInitialized: guardrailEngine !== null,
     version: '1.0.0'
   };
+}
+
+function confidenceFor(result: GuardrailResult): number {
+  const scores = result.results.map((guardResult) => guardResult.confidence ?? 0);
+  return Math.max(result.blocked ? 1 : 0, ...scores);
 }

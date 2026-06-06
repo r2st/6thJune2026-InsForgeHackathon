@@ -91,6 +91,9 @@ importers:
       '@insforge/sdk':
         specifier: ^1.0.0
         version: 1.3.1
+      '@llm-guardrails/core':
+        specifier: ^0.4.1
+        version: 0.4.1(@anthropic-ai/sdk@0.102.0(zod@3.25.76))
     devDependencies:
       '@types/node':
         specifier: ^20.14.0
@@ -441,6 +444,29 @@ packages:
 
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
+
+  '@llm-guardrails/core@0.4.1':
+    resolution: {integrity: sha512-bk9V3a2fXavDN/N9imvCq5J3OR7qolofYWTIbj9lj6Z2LQJ71uGwGFk+G0maUigEvnXfV8TIFOnha+fvGeCWxA==}
+    peerDependencies:
+      '@anthropic-ai/sdk': ^0.20.0
+      '@aws-sdk/client-bedrock-runtime': ^3.0.0
+      '@google-cloud/vertexai': ^1.0.0
+      better-sqlite3: ^9.0.0
+      ioredis: ^5.0.0
+      openai: ^4.0.0
+    peerDependenciesMeta:
+      '@anthropic-ai/sdk':
+        optional: true
+      '@aws-sdk/client-bedrock-runtime':
+        optional: true
+      '@google-cloud/vertexai':
+        optional: true
+      better-sqlite3:
+        optional: true
+      ioredis:
+        optional: true
+      openai:
+        optional: true
 
   '@napi-rs/wasm-runtime@1.1.4':
     resolution: {integrity: sha512-3NQNNgA1YSlJb/kMH1ildASP9HW7/7kYnRI2szWJaofaS1hWmbGI4H+d3+22aGzXXN9IJ+n+GiFVcGipJP18ow==}
@@ -2502,6 +2528,10 @@ snapshots:
       zod: 3.25.76
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
+
+  '@llm-guardrails/core@0.4.1(@anthropic-ai/sdk@0.102.0(zod@3.25.76))':
+    optionalDependencies:
+      '@anthropic-ai/sdk': 0.102.0(zod@3.25.76)
 
   '@napi-rs/wasm-runtime@1.1.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:

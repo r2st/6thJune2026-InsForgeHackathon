@@ -26,16 +26,23 @@ function denoExternalsPlugin() {
   return {
     name: 'deno-externals',
     setup(build) {
-      build.onResolve({ filter: /^(@insforge\/sdk|@anthropic-ai\/sdk)$/ }, (args) => ({
-        path: `npm:${args.path}`,
-        external: true,
-      }));
       build.onResolve({ filter: /^node:(fs|url|path|crypto|os|child_process)$/ }, (args) => ({
         path: args.path,
         external: true,
       }));
+      build.onResolve({ filter: /.*/ }, (args) => {
+        if (isBarePackageSpecifier(args.path)) {
+          return { path: `npm:${args.path}`, external: true };
+        }
+        return undefined;
+      });
     },
   };
+}
+
+function isBarePackageSpecifier(specifier) {
+  if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.startsWith('node:')) return false;
+  return !/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(specifier);
 }
 
 async function buildFunction({ slug, source }) {
