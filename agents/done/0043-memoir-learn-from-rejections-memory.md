@@ -3,9 +3,9 @@ id: 0043
 title: Memoir as the learn-from-rejections memory layer (real pgvector neighbour)
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (impl session)
+started: 2026-06-06
+status: done
 depends_on: [0018, 0020, 0011]
 demo_path: yes — "Hush gets quieter over time" + makes the confidence neighbour real
 sponsor: Memoir
@@ -81,4 +81,29 @@ neighbour recalled at similarity 60, the demo badge legitimately computes
   real neighbour into a run you can demo.
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- **Shipped (verified core):** `functions/memory.ts` — the `MemoirClient` seam
+  (`recordOutcome` / `recallSimilar`), the working `nullMemoir` fallback,
+  `createMemoirClient`, and the pure `similarityForScorer` recall→signal mapping.
+  Wired into the orchestrator: `fix-trigger.ts` now recalls a real similarity
+  neighbour (`d.recallSimilarity`) and feeds it to `scoreConfidence` in place of
+  the hardcoded `NEUTRAL_SIMILARITY`. 14 tests in `memory.test.ts`; full functions
+  suite green (232/232), typecheck clean. `MEMOIR_API_KEY` documented in `.env.example`.
+- **Recall→signal logic:** no neighbours → neutral 50 (we never invent a corpus);
+  best **merged** neighbour → its similarity (raises confidence); a **rejected/
+  dismissed** neighbour subtracts 0.6×its similarity (lowers it — "we tried this,
+  not a bug"), so a near-identical past rejection outweighs a weaker merged match.
+- **Resolves [[0040-confidence-number-deck-code-mismatch]] the honest way:** a
+  cross-check test proves one recalled merged neighbour at similarity 60 →
+  scorer composite **92** (`0.4·100+0.2·100+0.2·100+0.2·60`). Real provenance,
+  not a hardcoded number — when a corpus exists the badge reads 92 legitimately.
+- **Robustness:** `recallSimilarity` swallows a throwing/down Memoir and returns
+  neutral 50 — memory never breaks a run. Non-breaking: with `nullMemoir` the
+  scorer sees exactly today's 50.
+- **Deferred (gated on confirming the Memoir SDK — the ticket's own rail):**
+  `RealMemoir` adapter internals (web search found two products under the name;
+  `createMemoirClient` returns the fallback + warns once until the API is
+  confirmed); `recordOutcome` wiring to a PR-close webhook (no webhook exists
+  yet); the demo-seed historical neighbour (needs RealMemoir + a seeded corpus).
+  Check the Memoir sponsor box only once `RealMemoir` is the live path in a run
+  you can demo — per the honesty rail.

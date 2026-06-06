@@ -36,13 +36,12 @@ import { forgeForkJwt } from './forgeJwt.js';
 import { replayBoth } from './replay.js';
 import { traceReplay } from './traceReplay.js';
 import { scoreConfidence } from './score.js';
+import { createMemoirClient, recallSimilarity, type RecallQuery } from './memory.js';
 import { firstFree, type PoolEntry } from './lib/pool.js';
 import { getClient } from './lib/insforgeClient.js';
 import { defaultShip } from './ship.js';
 
 const CHANNEL = 'receipt';
-/** No corpus on hackathon day — neutral pgvector signal. */
-const NEUTRAL_SIMILARITY = 50;
 
 /** The bug_runs row this run reads, plus the captured user's claims. */
 export interface RunContext {
@@ -73,6 +72,8 @@ export interface OrchestratorDeps {
   replayFork: (payload: ReplayPayload, fork: PoolEntry, forkJwt: string) => Promise<Verdict>;
   traceReplay: (payload: ReplayPayload, patch: Diagnosis['tomlDiff']) => Verdict | Promise<Verdict>;
   ship: (decision: ShipDecision) => Promise<{ prUrl: string | null }>;
+  /** Memoir recall → scorer's 0–100 pgvector signal (0043). Neutral 50 with no corpus. */
+  recallSimilarity: (query: RecallQuery) => Promise<number>;
   now: () => string;
 }
 
@@ -172,8 +173,14 @@ export async function fixTrigger(runId: string, deps?: Partial<OrchestratorDeps>
       verdict = await d.replayFork(payload, fork, forkJwt);
     }
 
-    // 5. score → tier.
-    const confidence = scoreConfidence({ diagnosis, verdict, safety, pgvectorSimilarity: NEUTRAL_SIMILARITY });
+    // 5. score → tier. Memoir (0043) recalls a real similarity neighbour from
+    //    past outcomes; neutral 50 when there's no corpus (recall never blocks).
+    const pgvectorSimilarity = await d.recallSimilarity({
+      failingPolicy: diagnosis.failingPolicy,
+      tomlDiff: diagnosis.tomlDiff,
+      schemaSlice: tomlContext,
+    });
+    const confidence = scoreConfidence({ diagnosis, verdict, safety, pgvectorSimilarity });
 
     // 6. dispatch. A trace verdict can never reach 'pr' — cap it at draft_pr.
     const tier = verdict.mode === 'trace' ? capTrace(confidence.tier) : confidence.tier;
@@ -335,6 +342,7 @@ function withDefaults(deps?: Partial<OrchestratorDeps>): OrchestratorDeps {
       replayBoth({ payload, branchId: fork.branchId, forkJwt }, { forkBaseUrl: fork.baseUrl })),
     traceReplay: deps?.traceReplay ?? ((payload, patch) => traceReplay({ payload, patch })),
     ship: deps?.ship ?? ((decision) => defaultShip(decision)), // 0011 → openPr via ship.ts
+    recallSimilarity: deps?.recallSimilarity ?? ((q) => recallSimilarity(createMemoirClient(), q)),
     now: deps?.now ?? (() => new Date().toISOString()),
   };
 }
