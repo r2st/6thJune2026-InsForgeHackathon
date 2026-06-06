@@ -28,6 +28,10 @@ gitleaks-report.json
 gitleaks-stderr.txt
 semgrep-report.json
 semgrep-stderr.txt
+
+# Editor swap files
+*.swp
+demo-live/*.swp
 grype-report.json
 grype-stderr.txt
 checkov-report.json
