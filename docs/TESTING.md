@@ -9,8 +9,9 @@ test against real data instead of mocks.
 |---|---|
 | Name | `hush` |
 | OSS Host | `https://w369egnp.us-east.insforge.app` |
+| Health check | `https://w369egnp.us-east.insforge.app/api/health` → `{"status":"ok",...}` (bare `/` returns `Cannot GET /` — API host, no homepage; not an outage) |
 | Region | us-east |
-| Backend version | **1.0.0** |
+| Backend version | **2.2.0** (per `/api/health` 2026-06-06) |
 
 > Not to be confused with `https://z739c3mi.insforge.site/` — that's **Authmatic**,
 > an unrelated prior project. It is not a Hush test surface.

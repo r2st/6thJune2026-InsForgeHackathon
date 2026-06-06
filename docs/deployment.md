@@ -39,6 +39,23 @@ This doc covers what it takes to stand up Hush end-to-end for the demo: backend 
 
 Six surfaces. Bring them up in this order: **InsForge → branch project → edge fns → Vercel demo → Vercel receipt → Devin webhook → GitHub PR loop**.
 
+## 1a. Live deployment status
+
+> Verified 2026-06-06. This table is the source of truth for "what can a judge click right now." Keep it honest — a ⏳ that says ✅ is worse than no table.
+
+| Surface | URL | Status |
+|---|---|---|
+| Backend API (InsForge `hush`) | `https://w369egnp.us-east.insforge.app` | ✅ live — **health: `/api/health`** → `{"status":"ok","version":"2.2.0"}`. Bare `/` returns `Cannot GET /` by design (API host, no homepage); that is **not** an outage. |
+| Receipt page | `https://w369egnp.insforge.site/` | ✅ live — renders "nothing captured yet"; opens individual runs at `/r/<runId>`. |
+| Receipt — demo mode | `https://w369egnp.insforge.site/r/demo?demo=1` | ✅ live — rehearses the full five-step arc with **no backend**. The safe stage path. |
+| Victim app (`apps/demo`) | _not deployed_ | ⏳ builds + runs locally (`pnpm --filter demo dev` → `http://localhost:3000/orders`). Deploy with `cd apps/demo && vercel --prod` (§6). |
+
+**Gotchas that read as "broken" but aren't:**
+
+- **Bare backend host 404** — `https://w369egnp.us-east.insforge.app/` → `Cannot GET /`. Expected. Test liveness with `/api/health`, not `/`.
+- **`/orders` 404 on the receipt host** — the receipt host serves `apps/receipt`, not `apps/demo`. The victim app is a separate deploy that hasn't shipped; `/orders` only exists on `localhost:3000` today.
+- **Not** `https://z739c3mi.insforge.site/` — that subdomain is **Authmatic**, an unrelated prior project. Not a Hush surface.
+
 ## 2. Prerequisites
 
 ### Accounts (sign in before the clock starts)
