@@ -1,0 +1,16 @@
+{
+  "_comment": "Ticket 0037. The diagnose() self-escalation output (prompt Example 2): a fix would require a schema change, so the model returns widensAccess:true with an empty tomlDiff.after. The orchestrator must route this straight to issue WITHOUT acquiring a fork. Mirrors the shape of diagnosis.schema.json.",
+  "summary": "schema change required — escalating",
+  "expectation": "User A expected to see their three orders on /orders.",
+  "observation": "The orders table has no column that scopes to this user's tenant_ids[] shape; a new column or migration is required, which Hush will not perform automatically.",
+  "failingPolicy": "orders.orders_select",
+  "failingJwtClaim": "auth.jwt() -> 'tenant_ids'",
+  "tomlDiff": {
+    "path": "tables.orders.rls",
+    "before": "tenant_id = (auth.jwt() ->> 'tenant')::uuid",
+    "after": ""
+  },
+  "widensAccess": true,
+  "confidenceInputs": { "diffLoc": 0, "tablesTouched": 1, "policyBlast": 1 },
+  "promptVersion": "diagnose-v1.0.0"
+}

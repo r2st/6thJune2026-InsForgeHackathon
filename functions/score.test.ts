@@ -117,15 +117,23 @@ describe('scoreConfidence — safety rail overrides model optimism', () => {
     expect(r.tier).toBe('issue');
   });
 
-  it('diff widens but the diagnosis declared intent → NOT capped (deliberate relaxation)', () => {
+  it('model self-escalation (widensAccess=true) is capped to issue regardless of safety (0037)', () => {
+    // Per the diagnose prompt (rule 1 / Example 2), widensAccess=true is the
+    // model declining a safe fix ("schema change required"), NOT a green-lit
+    // intentional widen. Hush never ships a widening diff — cap it to issue.
     const r = scoreConfidence(
       input({
         diagnosis: diagnosis({ widensAccess: true }),
         safety: { widens: true, reasons: ['new OR branch'] },
       }),
     );
-    expect(r.score).toBe(90); // composite stands
-    expect(r.tier).toBe('pr');
+    expect(r.score).toBe(59);
+    expect(r.tier).toBe('issue');
+  });
+
+  it('model self-escalation caps even when the deterministic safety rail is clean', () => {
+    const r = scoreConfidence(input({ diagnosis: diagnosis({ widensAccess: true }) }));
+    expect(r.tier).toBe('issue');
   });
 });
 

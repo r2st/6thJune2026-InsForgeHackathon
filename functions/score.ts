@@ -117,6 +117,14 @@ export function scoreConfidence(input: ScoreInput): ConfidenceResult {
     score = Math.min(score, CAP_UNINTENDED_WIDEN);
   }
 
+  // Hard cap 3 (ticket 0037) — the model's OWN escalation. widensAccess=true is
+  // the model saying "I can't fix this safely" (e.g. schema change required).
+  // Trust it: such a run can never reach pr/draft_pr, independent of the safety
+  // rail above (which only fires when the model did NOT self-flag).
+  if (diagnosis.widensAccess) {
+    score = Math.min(score, CAP_UNINTENDED_WIDEN);
+  }
+
   // Composite tier — what the (post-cap) score alone would dispatch to.
   const compositeTier = tierFromScore(score);
 

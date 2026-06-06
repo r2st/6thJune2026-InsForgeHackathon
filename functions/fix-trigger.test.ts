@@ -97,6 +97,28 @@ describe('fixTrigger orchestrator', () => {
     expect(shipped?.detail).toMatchObject({ mode: 'trace' });
   });
 
+  it('routes a model self-escalation (widensAccess) to issue without acquiring a fork', async () => {
+    let forkAsked = false;
+    const escalated: Diagnosis = { ...DIAGNOSIS, widensAccess: true, tomlDiff: { ...DIAGNOSIS.tomlDiff, after: '' } };
+    const { events, deps } = harness({
+      diagnose: async () => escalated,
+      acquireFork: () => { forkAsked = true; return null; },
+    });
+    const r = await fixTrigger('run_1', deps);
+    expect(r.tier).toBe('issue');
+    expect(forkAsked).toBe(false); // never spent a fork
+    expect(events.map((e) => e.step)).not.toContain('testing');
+    expect(events.find((e) => e.step === 'shipped')?.detail).toMatchObject({ reason: 'issue-from-escalation' });
+  });
+
+  it('routes a no-op diff (after === before) to issue as escalation', async () => {
+    const noop: Diagnosis = { ...DIAGNOSIS, tomlDiff: { ...DIAGNOSIS.tomlDiff, after: DIAGNOSIS.tomlDiff.before } };
+    const { events, deps } = harness({ diagnose: async () => noop });
+    const r = await fixTrigger('run_1', deps);
+    expect(r.tier).toBe('issue');
+    expect(events.find((e) => e.step === 'shipped')?.detail).toMatchObject({ reason: 'issue-from-escalation' });
+  });
+
   it('drops to an issue when the patch fails to apply on the branch', async () => {
     const { deps } = harness({ applyDiff: async () => ({ ok: false, lintError: 'insforge.toml:2 bad' }) });
     const r = await fixTrigger('run_1', deps);

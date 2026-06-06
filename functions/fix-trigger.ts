@@ -108,6 +108,13 @@ export async function fixTrigger(runId: string, deps?: Partial<OrchestratorDeps>
     });
     await emit('diagnosed', { summary: diagnosis.summary, failingPolicy: diagnosis.failingPolicy });
 
+    // 2b. model self-escalation (0037) — the model itself declined a safe fix
+    //     (widensAccess, empty or no-op diff). Trust it: route to issue WITHOUT
+    //     spending a fork. Distinct from the deterministic rails below.
+    if (isNonActionable(diagnosis)) {
+      return await dispatch(d, emit, runId, diagnosis, escalationVerdict(diagnosis), 'issue-from-escalation');
+    }
+
     // 3a. structural rail (0032) — a malformed diff (wrong column, bad cast,
     //     fabricated fn, widening sub-select) breaks at apply-time. Reject pre-apply.
     const structure = validateTomlPatch({
@@ -162,7 +169,8 @@ async function dispatch(
   runId: string,
   diagnosis: Diagnosis,
   verdict: Verdict,
-  _from: string,
+  /** Why we dispatched: 'ship' | 'issue-from-escalation' | '…-safety' | '…-lint' | '…-structure'. */
+  from: string,
   confidenceOverride?: ConfidenceResult & { tier: ConfidenceResult['tier'] },
 ): Promise<FixResult> {
   const confidence = confidenceOverride ?? forcedIssue(diagnosis);
@@ -183,6 +191,7 @@ async function dispatch(
     prUrl,
     mode: verdict.mode ?? 'fork',
     verified: verdict.bugConfirmed && verdict.fixVerified,
+    reason: from,
   });
   return { runId, tier: confidence.tier, prUrl, status: 'shipped' };
 }
@@ -203,6 +212,24 @@ async function fail(
 
 function capTrace(tier: ConfidenceResult['tier']): ConfidenceResult['tier'] {
   return tier === 'pr' ? 'draft_pr' : tier;
+}
+
+/** The model itself declined a safe fix: self-flagged widen, empty or no-op diff. */
+function isNonActionable(diagnosis: Diagnosis): boolean {
+  const after = (diagnosis.tomlDiff.after ?? '').trim();
+  const before = (diagnosis.tomlDiff.before ?? '').trim();
+  return diagnosis.widensAccess || after === '' || after === before;
+}
+
+function escalationVerdict(diagnosis: Diagnosis): Verdict {
+  const why = diagnosis.widensAccess
+    ? 'model self-escalated (widensAccess=true)'
+    : 'model returned an empty/no-op diff';
+  return {
+    prod: emptySide(), fork: emptySide(),
+    bugConfirmed: false, fixVerified: false,
+    rationale: `escalated to issue: ${why} — ${diagnosis.summary}`,
+  };
 }
 
 /** Safety veto / lint failure → an issue-tier confidence with a 0 score. */

@@ -7,6 +7,7 @@
 #   pnpm preflight
 
 set -euo pipefail
+shopt -s nullglob
 
 ok()   { printf "  \033[32m✓\033[0m %s\n" "$1"; }
 warn() { printf "  \033[33m!\033[0m %s\n" "$1"; }
@@ -20,15 +21,27 @@ echo
 echo "[env]"
 for v in INSFORGE_PROJECT_ID INSFORGE_SERVICE_KEY INSFORGE_ANON_KEY \
          INSFORGE_BRANCH_PROJECT_ID OPENROUTER_API_KEY \
-         DEVIN_API_KEY GITHUB_TOKEN; do
+         DEVIN_API_KEY DEVIN_TARGET_REPO GITHUB_TOKEN VERCEL_TOKEN; do
   if [[ -n "${!v:-}" ]]; then ok "$v set"; else fail "$v missing"; fi
 done
 
 echo
 echo "[clis]"
-for c in insforge vercel gh node pnpm; do
+if command -v npx >/dev/null 2>&1 && npx @insforge/cli --version >/dev/null 2>&1; then
+  ok "npx @insforge/cli"
+else
+  fail "npx @insforge/cli unavailable"
+fi
+
+for c in gh node pnpm; do
   if command -v "$c" >/dev/null 2>&1; then ok "$c"; else fail "$c missing"; fi
 done
+
+if command -v vercel >/dev/null 2>&1; then
+  ok "vercel"
+else
+  warn "vercel missing — use npx @insforge/cli deployments deploy or install Vercel CLI"
+fi
 
 echo
 echo "[pool]"
@@ -41,7 +54,8 @@ fi
 echo
 echo "[deck]"
 if [[ -s demo/slides/index.html ]]; then ok "deck present"; else fail "deck missing"; fi
-if [[ -s demo/recordings/*.mp4 2>/dev/null ]]; then ok "fallback recording present"; else warn "no fallback recording — record one"; fi
+recordings=(demo/recordings/*.mp4)
+if (( ${#recordings[@]} > 0 )); then ok "fallback recording present"; else warn "no fallback recording — record one"; fi
 
 echo
 if [[ "$FAILED" -eq 0 ]]; then
