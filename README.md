@@ -8,6 +8,11 @@ finishes writing the support ticket.
 
 ## Live demo
 
+**Click-path (the 90-second pitch):**
+[1) Acme Store — empty orders](https://hush-acme-store.vercel.app/orders?user=migrated) →
+[2) Receipt demo-mode — capture→ship](https://w369egnp.insforge.site/r/demo?demo=1) →
+[3) The fix PR](https://github.com/r2st/hush-victim-acme/pull/1)
+
 | Surface | URL | State |
 |---|---|---|
 | **Receipt page** (judge-facing live status) | https://w369egnp.insforge.site/ | ✅ deployed |
