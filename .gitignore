@@ -1,5 +1,11 @@
 .DS_Store
 
+# Environment / secrets — never commit any .env variant.
+# `.env.example` is the only exception (committed by name below).
+.env
+.env.*
+!.env.example
+
 # Local ticketing system DB
 tickets.db
 tickets.db-wal
