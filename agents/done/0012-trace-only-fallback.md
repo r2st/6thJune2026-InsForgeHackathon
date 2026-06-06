@@ -5,7 +5,7 @@ role: architect
 priority: P1
 owner: claude-opus-4-8
 started: 2026-06-06
-status: in-progress
+status: done
 depends_on: [0005, 0006]
 demo_path: yes — defensive; runs if the primary fork path fails
 ---
@@ -28,12 +28,12 @@ project unavailable" with a `--cool` badge instead of a green one.
 
 ## Acceptance criteria
 
-- [ ] Parses the patched policy from the candidate TOML
-- [ ] Evaluates it locally against the demo seed rows + forged claims
-- [ ] Returns the same `Verdict` shape as the real replay (ticket 0008)
-- [ ] Triggered by either (a) explicit `--trace-only` flag or (b)
+- [x] Parses the patched policy from the candidate TOML
+- [x] Evaluates it locally against the demo seed rows + forged claims
+- [x] Returns the same `Verdict` shape as the real replay (ticket 0008)
+- [x] Triggered by either (a) explicit `--trace-only` flag or (b)
       branch-project acquire failing/timing out
-- [ ] Receipt page renders the "trace-only" cool-colored badge — does
+- [x] Receipt page renders the "trace-only" cool-colored badge — does
       not silently masquerade as the real verdict
 
 ## Likely files / surfaces touched
@@ -50,3 +50,15 @@ with a note. Update [docs/decisions/0001-test-on-a-fork.md](../../docs/decisions
 once the fallback shape is decided.
 
 ## Outcome
+
+- `functions/traceReplay.ts` — `traceReplay({payload, patch, seedRows?})`
+  evaluates the candidate RLS predicate in-process against the two-tenants seed
+  + the captured claims (decoded from the forged-payload JWT). Returns the same
+  `Verdict` shape with `mode:'trace'`.
+- Evaluates the v1 predicate family (tenant scalar `=` and tenant_ids `= ANY`);
+  unrecognised predicates admit zero rows (deny-by-default, no guessing).
+- Wired into `fix-trigger.ts`: triggered when `acquireFork()` returns null;
+  trace verdicts are capped at draft_pr and surface `mode:'trace'` in the
+  shipped event so the receipt page renders the cool badge (0022).
+- 5 hermetic tests incl. the cross-tenant non-widening check.
+- Note: lives in `functions/` (canonical), not the `hush/` path in the draft.

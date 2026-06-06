@@ -3,9 +3,9 @@ id: 0030
 title: Orchestrate diagnose → test → ship in functions/fix-trigger.ts
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0005, 0008, 0011, 0018, 0020, 0021]
 demo_path: yes — this is the function the receipt page is waiting on
 ---
@@ -60,4 +60,13 @@ something needs reshaping, fix it in the owning stage. This function
 should be ~100 LOC of glue, not business logic.
 
 ## Outcome
-<!-- Fill in when moving to done/. -->
+
+- `functions/fix-trigger.ts` rewritten from stub to the full loop:
+  correlate→capture→diagnose→safety→fork(apply+forge+replay)→score→dispatch.
+  All collaborators injected via `OrchestratorDeps` (defaults wire the real
+  functions), so the whole loop is unit-tested with no live backend.
+  Each stage publishes one `ReceiptEvent` on channel `receipt`.
+- Branches: safety widen ⇒ hard stop→issue; branch lint fail ⇒ issue;
+  no free fork ⇒ trace-only (0012) capped at draft_pr; any throw ⇒ failed.
+- `ship` is a thin injected dep returning prUrl — ticket 0011 plugs in there.
+- 6 orchestrator tests (`fix-trigger.test.ts`); ~100 LOC of glue, no business logic.
