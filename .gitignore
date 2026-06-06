@@ -1,5 +1,14 @@
 .DS_Store
 
+# Local ticketing system DB
+tickets.db
+tickets.db-wal
+tickets.db-shm
+
+# Python
+__pycache__/
+*.pyc
+
 # Opsera security scan artifacts
 gitleaks-report.json
 gitleaks-stderr.txt

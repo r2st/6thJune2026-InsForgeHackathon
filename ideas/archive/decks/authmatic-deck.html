@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Authmatic — Pitch Deck</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --border: #e4e7eb;
+    --text: #0f1419;
+    --muted: #5b6470;
+    --orange: #b8410e;
+    --orange-hover: #9a360c;
+    --orange-light: #fde9d9;
+    --green: #1f6b3e;
+    --green-light: #e6f1ea;
+    --red: #b91c1c;
+    --red-light: #fef2f2;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+  }
+
+  .deck { width: 100%; height: 100%; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    transform: translateX(24px);
+    padding: 72px 72px 100px;
+    overflow: hidden;
+  }
+
+  .slide.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+  .slide.exit { opacity: 0; transform: translateX(-24px); }
+
+  /* Clinic console top bar */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    z-index: 99;
+    gap: 20px;
+  }
+
+  .topbar-brand {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--orange);
+  }
+
+  .topbar-title {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .topbar-link {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--orange);
+    text-decoration: none;
+  }
+
+  .topbar-link:hover { text-decoration: underline; }
+
+  .slide-content {
+    padding-top: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 1100px;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(40px, 5vw, 68px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(28px, 3.5vw, 42px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    line-height: 1.15;
+  }
+
+  h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+
+  .subtitle {
+    font-size: 17px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 620px;
+    margin-top: 14px;
+  }
+
+  .live-url {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 28px;
+    padding: 14px 22px;
+    background: var(--orange-light);
+    border: 1px solid #f5c4a8;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--orange);
+    text-decoration: none;
+  }
+
+  .live-url:hover { background: #fce0cc; }
+
+  .live-url small {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .meta-item label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .meta-item span { font-size: 14px; color: var(--text); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    box-shadow: 0 1px 2px rgba(15,20,25,0.04);
+  }
+
+  .card-grid { display: grid; gap: 14px; }
+  .card-grid-2 { grid-template-columns: 1fr 1fr; }
+  .card-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .big-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .big-num {
+    font-family: var(--serif);
+    font-size: clamp(56px, 8vw, 96px);
+    font-weight: 700;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  .big-unit { font-size: 20px; color: var(--muted); line-height: 1.3; }
+
+  .bullet-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bullet-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .bullet-list li::before {
+    content: '•';
+    color: var(--orange);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .bullet-list li strong { color: var(--text); }
+
+  /* Pipeline — matches dashboard sponsor strip */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 24px 0;
+  }
+
+  .pipe-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 12px;
+    text-align: center;
+    border-top: 3px solid var(--orange);
+  }
+
+  .pipe-num {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .pipe-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .pipe-sponsor {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    margin-bottom: 6px;
+  }
+
+  .pipe-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* Sponsor cards */
+  .sponsor-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sponsor-card .name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .sponsor-card .role {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .sponsor-card .desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    width: fit-content;
+  }
+
+  .badge-live {
+    background: var(--green-light);
+    color: var(--green);
+    border: 1px solid #b9d6c2;
+  }
+
+  .badge-demo {
+    background: var(--orange-light);
+    color: var(--orange);
+    border: 1px solid #f5c4a8;
+  }
+
+  .badge-mock {
+    background: #f1f5f9;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* Patient rows — match homepage */
+  .patient-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+  }
+
+  .patient-row.blue { border-left-color: #2563eb; }
+  .patient-row.purple { border-left-color: #9333ea; }
+  .patient-row.teal { border-left-color: #0d9488; }
+
+  .patient-name { font-weight: 600; font-size: 14px; }
+  .patient-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .btn-run {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    background: var(--orange-light);
+    border: 1px solid #f5c4a8;
+    padding: 6px 14px;
+    border-radius: 8px;
+  }
+
+  .batch-cta {
+    margin-top: 16px;
+    background: var(--surface);
+    border: 2px solid var(--orange);
+    border-radius: 12px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .batch-cta .primary {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .batch-cta .sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .batch-btn {
+    margin-left: auto;
+    background: var(--orange);
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  /* Audit steps */
+  .audit-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .audit-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--green-light);
+    border: 1px solid #b9d6c2;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .audit-icon.blocked {
+    background: var(--red-light);
+    border-color: #fecaca;
+    color: var(--red);
+  }
+
+  .audit-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .audit-detail { font-size: 14px; margin-top: 2px; line-height: 1.4; }
+  .audit-sponsor {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--orange);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .sponsor-strip {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: var(--green-light);
+    border: 1px solid #b9d6c2;
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 500;
+  }
+
+  code {
+    font-size: 12px;
+    background: #f1f5f9;
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--text);
+  }
+
+  /* Nav */
+  .nav {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(15,20,25,0.08);
+    padding: 10px 18px;
+    border-radius: 40px;
+    z-index: 100;
+  }
+
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .dot.active { background: var(--orange); width: 20px; border-radius: 4px; }
+
+  .nav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 5px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+  .slide-counter { font-size: 11px; color: var(--muted); min-width: 44px; text-align: center; }
+
+  .notes-panel {
+    position: fixed;
+    bottom: 76px;
+    right: 24px;
+    width: 300px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    display: none;
+    z-index: 90;
+    box-shadow: 0 4px 20px rgba(15,20,25,0.08);
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .notes-panel.visible { display: block; }
+
+  .notes-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--orange);
+    margin-bottom: 6px;
+  }
+
+  .notes-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    z-index: 100;
+  }
+
+  .notes-toggle.on, .notes-toggle:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+
+  .alert-red {
+    background: var(--red-light);
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--red);
+    font-weight: 500;
+    margin-top: 12px;
+  }
+
+  .link-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .link-list a {
+    font-size: 13px;
+    color: var(--orange);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .link-list a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-brand">Authmatic</span>
+  <span class="topbar-title">Clinic console</span>
+  <a class="topbar-link" href="https://z739c3mi.insforge.site/" target="_blank">z739c3mi.insforge.site ↗</a>
+</div>
+
+<div class="deck">
+
+  <!-- 1 TITLE -->
+  <div class="slide active" id="s1" data-notes="Open with the live URL on screen. Authmatic automates prior auth — pick a patient, agent runs in ~90 seconds, receipt on screen. Working product, not a mockup.">
+    <div class="slide-content" style="justify-content:center;">
+      <div class="eyebrow">Healthcare · Applied Intelligence Hackathon 2026</div>
+      <h1>Authmatic</h1>
+      <p class="subtitle">Autonomous prior authorization for clinic staff. Select a patient, the agent reads chart + Rx PDFs, verifies the packet, fills the insurer form, and returns a confirmation receipt — in about 90 seconds.</p>
+      <a class="live-url" href="https://z739c3mi.insforge.site/" target="_blank">
+        <span>
+          <small>Live demo — open on stage</small>
+          https://z739c3mi.insforge.site/
+        </span>
+      </a>
+      <div class="meta-row">
+        <div class="meta-item"><label>Team</label><span>Gulnoza Usmonova · Subhendu Das · Vidhi Kothari</span></div>
+        <div class="meta-item"><label>Repo</label><span>github.com/r2st/Authmatic</span></div>
+        <div class="meta-item"><label>Sponsors</label><span>Daytona · Opsera · Rtrvr · InsForge · Tigris</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 PROBLEM -->
+  <div class="slide" id="s2" data-notes="Prior auth is hours of manual re-typing into insurer portals. Different layout per payer. One typo can mean denial and delayed care.">
+    <div class="slide-content">
+      <div class="eyebrow">The problem</div>
+      <h2>Medical assistants lose hours<br>to insurer portals.</h2>
+      <div class="two-col" style="margin-top:8px;">
+        <div>
+          <div class="big-stat">
+            <span class="big-num">9h</span>
+            <span class="big-unit">per week<br>per staff member</span>
+          </div>
+          <ul class="bullet-list">
+            <li>Copy chart + prescription data <strong>by hand</strong> into each payer site</li>
+            <li>Different form for every insurer</li>
+            <li>One missing field → denial → patient waits longer</li>
+            <li><strong>16M+</strong> prior auths filed in the US every year</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Today's workflow</h3>
+          <ul class="bullet-list" style="margin-top:12px;font-size:14px;">
+            <li>Open chart → find diagnosis &amp; member ID</li>
+            <li>Open Rx → find drug &amp; dosage</li>
+            <li>Log into payer portal</li>
+            <li>Re-type every field manually</li>
+            <li>Save confirmation &amp; chase status</li>
+          </ul>
+          <p style="margin-top:16px;font-size:13px;font-weight:600;color:var(--orange);">→ Care delayed. Staff burned out.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 SOLUTION -->
+  <div class="slide" id="s3" data-notes="Authmatic: select patient on homepage, agent does the rest. Not a chatbot — real form fill, real submission, real receipt URL.">
+    <div class="slide-content">
+      <div class="eyebrow">The solution</div>
+      <h2>Select patient.<br>Receive receipt.</h2>
+      <div class="card-grid card-grid-3" style="margin-top:20px;">
+        <div class="card" style="text-align:center;">
+          <div style="font-size:32px;margin-bottom:8px;">📄</div>
+          <h3>Chart + Rx PDFs</h3>
+          <p style="font-size:13px;color:var(--muted);margin-top:4px;">One patient, two documents</p>
+        </div>
+        <div class="card" style="text-align:center;border-color:var(--orange);">
+          <div style="font-size:32px;margin-bottom:8px;">🤖</div>
+          <h3>Authmatic agent</h3>
+          <p style="font-size:13px;color:var(--muted);margin-top:4px;">5-step automated pipeline</p>
+        </div>
+        <div class="card" style="text-align:center;border-color:var(--green);background:var(--green-light);">
+          <div style="font-size:32px;margin-bottom:8px;">✅</div>
+          <h3>Receipt + audit</h3>
+          <p style="font-size:13px;color:var(--green);margin-top:4px;">Confirmation URL &amp; full trail</p>
+        </div>
+      </div>
+      <ul class="bullet-list" style="margin-top:24px;">
+        <li><strong>Not a chatbot</strong> — watches the payer form fill and submit live</li>
+        <li>Run <strong>one patient</strong> or <strong>four in parallel</strong> on the homepage</li>
+        <li>PHI checked <strong>before</strong> anything is sent to the payer</li>
+        <li>Every run stored in <strong>InsForge</strong> + documents in <strong>Tigris</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 4 PIPELINE -->
+  <div class="slide" id="s4" data-notes="Walk through the five steps. Each maps to a sponsor we integrated. Adjudication is our mock payer — not a sponsor.">
+    <div class="slide-content">
+      <div class="eyebrow">How it works</div>
+      <h2>Five steps. Five sponsors.</h2>
+      <div class="pipeline">
+        <div class="pipe-step">
+          <div class="pipe-num">Step 1</div>
+          <div class="pipe-name">Extract</div>
+          <div class="pipe-sponsor">Daytona</div>
+          <div class="pipe-desc">Read chart &amp; Rx PDFs into structured fields</div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-num">Step 2</div>
+          <div class="pipe-name">Verify</div>
+          <div class="pipe-sponsor">Opsera</div>
+          <div class="pipe-desc">PHI &amp; compliance scan before submit</div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-num">Step 3</div>
+          <div class="pipe-name">Submit</div>
+          <div class="pipe-sponsor">Rtrvr</div>
+          <div class="pipe-desc">Browser agent fills HealthFirst portal</div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-num">Step 4</div>
+          <div class="pipe-name">Adjudicate</div>
+          <div class="pipe-sponsor" style="color:var(--muted);">Mock payer</div>
+          <div class="pipe-desc">Simulated approve / deny review</div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-num">Step 5</div>
+          <div class="pipe-name">Persist</div>
+          <div class="pipe-sponsor">InsForge + Tigris</div>
+          <div class="pipe-desc">DB records + PDF &amp; receipt storage</div>
+        </div>
+      </div>
+      <div class="sponsor-strip">
+        Daytona extract · Opsera verify · Rtrvr submit · InsForge + Tigris persist
+      </div>
+      <p style="margin-top:14px;font-size:13px;color:var(--muted);">Built in <code>apps/web</code> — Next.js clinic console with in-process agent orchestrator. FastAPI ReAct agent also in repo (<code>apps/agent</code>).</p>
+    </div>
+  </div>
+
+  <!-- 5 SPONSORS -->
+  <div class="slide" id="s5" data-notes="Be honest with judges. All five sponsors are integrated. Opsera MCP is live in our stack — Subhendu's agent uses it; web demo uses the same VERIFY step. Daytona uses fixture mode on live deploy for reliability.">
+    <div class="slide-content">
+      <div class="eyebrow">Sponsors we used</div>
+      <h2>Integrated &amp; honest.</h2>
+      <div class="card-grid card-grid-2" style="margin-top:16px;">
+        <div class="sponsor-card">
+          <span class="badge badge-live">Live</span>
+          <div class="name">InsForge</div>
+          <div class="role">Persist · database</div>
+          <div class="desc">Every submission written to cloud Postgres. Visible on <code>/dashboard</code> during demo.</div>
+        </div>
+        <div class="sponsor-card">
+          <span class="badge badge-live">Live</span>
+          <div class="name">Tigris</div>
+          <div class="role">Store · object storage</div>
+          <div class="desc">Chart PDF, Rx PDF, and receipt JSON per run in <code>authmatic-demo</code> bucket.</div>
+        </div>
+        <div class="sponsor-card">
+          <span class="badge badge-live">Live</span>
+          <div class="name">Rtrvr</div>
+          <div class="role">Submit · browser automation</div>
+          <div class="desc">Real API call fills our HealthFirst portal. Judges watch the form fill in the iframe.</div>
+        </div>
+        <div class="sponsor-card">
+          <span class="badge badge-live">Live</span>
+          <div class="name">Opsera</div>
+          <div class="role">Verify · compliance gate</div>
+          <div class="desc">MCP integration at <code>agent.opsera.ai/mcp</code>. VERIFY step runs before every submit — blocks SSN &amp; over-disclosure. Used in production agent path.</div>
+        </div>
+        <div class="sponsor-card">
+          <span class="badge badge-demo">Demo mode</span>
+          <div class="name">Daytona</div>
+          <div class="role">Extract · sandbox</div>
+          <div class="desc">SDK wired (<code>@daytonaio/sdk</code>). Live deploy uses fixture extract for demo stability; sandbox runs when API key is set.</div>
+        </div>
+        <div class="sponsor-card">
+          <span class="badge badge-mock">Not a sponsor</span>
+          <div class="name">HealthFirst portal</div>
+          <div class="role">Mock payer UI</div>
+          <div class="desc">Portal we host — same field layout as real payers. Adjudication step simulates payer approve/deny.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 LIVE DEMO -->
+  <div class="slide" id="s6" data-notes="Switch to browser. Go to z739c3mi.insforge.site. Click Run 4 patients in parallel. Show batch page, then receipts — all approved.">
+    <div class="slide-content">
+      <div class="eyebrow">Live demo — matches the website</div>
+      <h2>Four patients. One click.</h2>
+      <p class="subtitle" style="margin-top:0;margin-bottom:16px;">Same screen judges see at <strong style="color:var(--orange);">z739c3mi.insforge.site</strong></p>
+
+      <div class="patient-row">
+        <div><div class="patient-name">Sarah Martinez</div><div class="patient-detail">Ozempic · Type 2 Diabetes · HealthFirst</div></div>
+        <span class="btn-run">Run →</span>
+      </div>
+      <div class="patient-row blue">
+        <div><div class="patient-name">James Wilson</div><div class="patient-detail">Lisinopril · Hypertension · HealthFirst</div></div>
+        <span class="btn-run">Run →</span>
+      </div>
+      <div class="patient-row purple">
+        <div><div class="patient-name">Robert Kim</div><div class="patient-detail">Humira · Rheumatoid Arthritis · HealthFirst</div></div>
+        <span class="btn-run">Run →</span>
+      </div>
+      <div class="patient-row teal">
+        <div><div class="patient-name">Lisa Patel</div><div class="patient-detail">Mounjaro · Type 2 Diabetes · HealthFirst</div></div>
+        <span class="btn-run">Run →</span>
+      </div>
+
+      <div class="batch-cta">
+        <div>
+          <div class="primary">Run 4 patients in parallel</div>
+          <div class="sub">One agent per patient · batch page · four receipts</div>
+        </div>
+        <div class="batch-btn">Run 4 patients in parallel</div>
+      </div>
+
+      <p style="margin-top:14px;font-size:13px;color:var(--muted);"><strong>Safety demo:</strong> Maria Santos — Opsera blocks SSN in notes (no submission issued).</p>
+    </div>
+  </div>
+
+  <!-- 7 AUDIT -->
+  <div class="slide" id="s7" data-notes="Show /run/{id} — every step logged with sponsor name and duration. Dashboard shows InsForge submissions. Tigris keys on audit page.">
+    <div class="slide-content">
+      <div class="eyebrow">Audit trail</div>
+      <h2>Every step logged.</h2>
+      <div class="two-col" style="margin-top:8px;">
+        <div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Example run — Sarah Martinez / Ozempic</p>
+          <div class="audit-step">
+            <div class="audit-icon">✓</div>
+            <div><div class="audit-label">Extract</div><div class="audit-detail">Chart + Rx → structured PA fields</div></div>
+            <div class="audit-sponsor">Daytona</div>
+          </div>
+          <div class="audit-step">
+            <div class="audit-icon">✓</div>
+            <div><div class="audit-label">Verify</div><div class="audit-detail">Opsera PHI scan passed</div></div>
+            <div class="audit-sponsor">Opsera</div>
+          </div>
+          <div class="audit-step">
+            <div class="audit-icon">✓</div>
+            <div><div class="audit-label">Submit</div><div class="audit-detail">Form filled &amp; submitted to portal</div></div>
+            <div class="audit-sponsor">Rtrvr</div>
+          </div>
+          <div class="audit-step">
+            <div class="audit-icon">✓</div>
+            <div><div class="audit-label">Persist</div><div class="audit-detail">Reference ID → InsForge + Tigris</div></div>
+            <div class="audit-sponsor">InsForge · Tigris</div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:12px;">
+            <h3>Where to look on stage</h3>
+            <div class="link-list">
+              <a href="https://z739c3mi.insforge.site/">/ — patient picker</a>
+              <a href="https://z739c3mi.insforge.site/dashboard">/dashboard — submissions</a>
+              <a href="https://z739c3mi.insforge.site/security">/security — Opsera log</a>
+            </div>
+          </div>
+          <div class="card" style="background:var(--green-light);border-color:#b9d6c2;">
+            <p style="font-size:14px;color:var(--green);font-weight:500;">~90 seconds end-to-end → durable receipt + immutable audit chain</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8 SAFETY -->
+  <div class="slide" id="s8" data-notes="Maria Santos case: SSN in notes. Opsera VERIFY blocks before submit. No form filled, no receipt. This is the compliance story.">
+    <div class="slide-content">
+      <div class="eyebrow" style="color:var(--red);">Safety · PHI protection</div>
+      <h2>Opsera stops bad data<br>before it leaves.</h2>
+      <div class="two-col" style="margin-top:8px;">
+        <div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Maria Santos — safety demo</p>
+          <div class="audit-step">
+            <div class="audit-icon">✓</div>
+            <div><div class="audit-label">Extract</div><div class="audit-detail">SSN found in clinical notes</div></div>
+            <div class="audit-sponsor">Daytona</div>
+          </div>
+          <div class="audit-step">
+            <div class="audit-icon blocked">✗</div>
+            <div><div class="audit-label" style="color:var(--red);">Verify blocked</div><div class="audit-detail">Opsera flagged SSN — submission halted</div></div>
+            <div class="audit-sponsor" style="color:var(--red);">Opsera</div>
+          </div>
+          <div class="alert-red">No form filled · No data sent · No receipt · Full stop.</div>
+        </div>
+        <div>
+          <ul class="bullet-list">
+            <li><strong>Opsera VERIFY</strong> runs on every patient before submit</li>
+            <li>Blocks SSN patterns and fields not allowed on the payer form</li>
+            <li>Blocked runs logged on <code>/security</code></li>
+            <li>Same MCP integration used in our FastAPI agent stack</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 NEXT -->
+  <div class="slide" id="s9" data-notes="New payers = new Rtrvr template. Historical InsForge + Tigris data for denial ML. Doctor SMS approval for borderline cases.">
+    <div class="slide-content">
+      <div class="eyebrow">What's next</div>
+      <h2>Path to production.</h2>
+      <div class="card-grid card-grid-3" style="margin-top:16px;">
+        <div class="card"><h3>More payers</h3><p style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;">New portal template per insurer — same 5-step pipeline, different form.</p></div>
+        <div class="card"><h3>Doctor approval</h3><p style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;">Agent drafts; physician approves borderline cases via SMS.</p></div>
+        <div class="card"><h3>Denial intelligence</h3><p style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;">InsForge history trains models on denial patterns.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 THANK YOU -->
+  <div class="slide" id="s10" data-notes="Leave this slide up during Q&A. Live URL and repo visible. Offer to run one patient live if time.">
+    <div class="slide-content" style="justify-content:center;">
+      <div class="eyebrow">Thank you</div>
+      <h1>Authmatic</h1>
+      <p class="subtitle">Prior authorization, automated.</p>
+      <a class="live-url" href="https://z739c3mi.insforge.site/" target="_blank">
+        <span>
+          <small>Run the demo now</small>
+          https://z739c3mi.insforge.site/
+        </span>
+      </a>
+      <div class="meta-row">
+        <div class="meta-item"><label>Repository</label><span>github.com/r2st/Authmatic</span></div>
+        <div class="meta-item"><label>Team</label><span>Gulnoza · Subhendu · Vidhi</span></div>
+      </div>
+      <div class="sponsor-strip" style="margin-top:24px;">
+        Sponsors: Daytona · Opsera · Rtrvr · InsForge · Tigris
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="notes-panel" id="notesPanel">
+  <div class="notes-title">Speaker notes</div>
+  <div id="notesText"></div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prevBtn">← prev</button>
+  <div id="dotContainer" style="display:flex;gap:6px;"></div>
+  <button class="nav-btn" id="nextBtn">next →</button>
+  <span class="slide-counter" id="counter">1 / 10</span>
+</div>
+
+<button class="notes-toggle" id="notesToggle">notes</button>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  let notesVisible = false;
+  const dotContainer = document.getElementById('dotContainer');
+  const counter = document.getElementById('counter');
+  const notesPanel = document.getElementById('notesPanel');
+  const notesText = document.getElementById('notesText');
+  const notesToggle = document.getElementById('notesToggle');
+  const dots = [];
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotContainer.appendChild(d);
+    dots.push(d);
+  });
+
+  function goTo(n) {
+    if (n === current) return;
+    const prev = current;
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[prev].classList.remove('active');
+    slides[prev].classList.add('exit');
+    setTimeout(() => slides[prev].classList.remove('exit'), 350);
+    slides[current].classList.add('active');
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    counter.textContent = (current + 1) + ' / ' + slides.length;
+    if (notesVisible) notesText.textContent = slides[current].dataset.notes || '';
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+  notesToggle.addEventListener('click', () => {
+    notesVisible = !notesVisible;
+    notesPanel.classList.toggle('visible', notesVisible);
+    notesToggle.classList.toggle('on', notesVisible);
+    if (notesVisible) notesText.textContent = slides[current].dataset.notes || '';
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+    if (e.key === 'n' || e.key === 'N') notesToggle.click();
+  });
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) goTo(dx < 0 ? current + 1 : current - 1);
+  });
+</script>
+</body>
+</html>

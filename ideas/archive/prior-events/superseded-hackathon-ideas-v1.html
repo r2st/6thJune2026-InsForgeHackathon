@@ -216,13 +216,28 @@
   <!-- IDEAS -->
   <section>
     <div class="section-head">
-      <h2>Eight ideas, ranked</h2>
+      <h2>Ten ideas, ranked</h2>
       <span class="tag">// pick one, kill the rest</span>
     </div>
 
     <div class="ideas">
 
       <article class="idea" data-num="01">
+        <div class="pitch">★★★ Strongest pick · existing deck</div>
+        <h3>Bellwether → DepWatch</h3>
+        <p>The Bellwether pattern, retargeted at the one supplier list every engineer already has: <code style="background:rgba(255,107,53,0.1);padding:1px 6px;border-radius:4px;font-size:12px">package.json</code>. A morning agent watches your lockfile + transitive tree, pulls signals from npm/PyPI metadata, GitHub ownership transfers, CVE feeds, OFAC, maintainer email-domain churn — files one cited "dependency review" ticket per repo, audit-grade.</p>
+        <ul>
+          <li>Reuses Bellwether's entire architecture (multi-source watcher → cited ticket → receipt) — only the input list changes.</li>
+          <li>Supply-chain security is the hottest dev-tools category right now. Six sponsors already wired.</li>
+          <li>Demo: "your repo had 12 risk events overnight, here's the one that matters and why" — with hyperlinked citations.</li>
+        </ul>
+        <div class="stack">
+          <span>Vercel cron</span><span>InsForge</span><span class="alt">Devin</span><span class="alt2">Limrun</span>
+        </div>
+        <div class="rank"><b>Build risk</b> low (deck exists) · <b>Demo wow</b> high · <b>Sponsor delight</b> max · <b>Theme fit</b> ✓ after reframe</div>
+      </article>
+
+      <article class="idea" data-num="02">
         <div class="pitch">★★★ Strongest pick</div>
         <h3>Replay → Repro</h3>
         <p>Production bug reports become deterministic local repros. A user hits an error in your app; an agent watches the Replicas session, reconstructs the request path + state, spins up a Limrun sandbox with that exact branch + seed data, and hands the developer a one-click "reproduce now" environment.</p>
@@ -237,7 +252,7 @@
         <div class="rank"><b>Build risk</b> medium · <b>Demo wow</b> high · <b>Sponsor delight</b> max</div>
       </article>
 
-      <article class="idea" data-num="02">
+      <article class="idea" data-num="03">
         <div class="pitch">★★★ Strongest pick</div>
         <h3>Migration Pilot</h3>
         <p>Schema migrations you can trust. Point it at an InsForge project; it forks a branch project, runs the migration against production-shaped data, simulates rollback, surfaces a "blast radius" report (which RLS policies break, which queries get slower, which columns become unused), and only then files the PR.</p>
@@ -252,7 +267,7 @@
         <div class="rank"><b>Build risk</b> medium · <b>Demo wow</b> medium · <b>Sponsor delight</b> max</div>
       </article>
 
-      <article class="idea" data-num="03">
+      <article class="idea" data-num="04">
         <div class="pitch">★★ Strong contender</div>
         <h3>PR Diplomat</h3>
         <p>Multi-agent code review with adversarial verification. A panel of cheap specialist agents (security, perf, correctness, "does this match the spec") reviews each PR; a tiebreaker agent only fires when they disagree. Posts a single, high-signal review — never 47 nitpick comments.</p>
@@ -267,7 +282,7 @@
         <div class="rank"><b>Build risk</b> low · <b>Demo wow</b> medium · <b>Sponsor delight</b> high</div>
       </article>
 
-      <article class="idea" data-num="04">
+      <article class="idea" data-num="05">
         <div class="pitch">★★ Strong contender</div>
         <h3>Drift Sentinel</h3>
         <p>An agent that lives in your Vercel logs. It learns the baseline shape of your traffic (latency percentiles per route, error fingerprints, log volume), and when something drifts, it correlates with the last 10 deploys, identifies the suspect commit, and opens a "rollback or investigate" thread in Slack with the diff annotated.</p>
@@ -281,7 +296,7 @@
         <div class="rank"><b>Build risk</b> medium · <b>Demo wow</b> medium · <b>Sponsor delight</b> high</div>
       </article>
 
-      <article class="idea" data-num="05">
+      <article class="idea" data-num="06">
         <div class="pitch">★★ Creative angle</div>
         <h3>Doc Twin</h3>
         <p>Docs that watch the code. Every time a PR lands, an agent re-verifies each documented code snippet against the live repo — runs it in a Limrun sandbox, checks function signatures, flags drift, and opens a single "your docs lie now" PR with the minimal fix.</p>
@@ -295,7 +310,7 @@
         <div class="rank"><b>Build risk</b> low · <b>Demo wow</b> medium · <b>Sponsor delight</b> high</div>
       </article>
 
-      <article class="idea" data-num="06">
+      <article class="idea" data-num="07">
         <div class="pitch">★★ Creative angle</div>
         <h3>Spec → Stack</h3>
         <p>One paragraph of product spec → a working full-stack app deployed to a preview URL in &lt;90 seconds. InsForge provisions auth + DB + storage + RLS from the spec; Vercel scaffolds the Next.js front-end; a Devin-style agent loops on the build until preview is green.</p>
@@ -309,7 +324,7 @@
         <div class="rank"><b>Build risk</b> high · <b>Demo wow</b> very high · <b>Sponsor delight</b> max</div>
       </article>
 
-      <article class="idea" data-num="07">
+      <article class="idea" data-num="08">
         <div class="pitch">★ Sleeper</div>
         <h3>Onboarding Compiler</h3>
         <p>Point it at a repo; it ships back a personalized day-one playbook — narrated codebase tour, sandboxed exercises in Limrun, a "fix this real (closed) issue from git history" challenge, and a final repo-shaped quiz. Cuts new-hire ramp from weeks to hours.</p>
@@ -323,7 +338,7 @@
         <div class="rank"><b>Build risk</b> low · <b>Demo wow</b> medium · <b>Sponsor delight</b> high</div>
       </article>
 
-      <article class="idea" data-num="08">
+      <article class="idea" data-num="09">
         <div class="pitch">★ Sleeper</div>
         <h3>Flake Court</h3>
         <p>Watches your CI for flaky tests, automatically opens a sandbox, reruns the failure 200 times with controlled jitter, classifies the flake (timing / network / shared state / true bug), and either quarantines, fixes, or escalates. Closes the case with a one-paragraph verdict.</p>
@@ -335,6 +350,21 @@
           <span>Limrun</span><span class="alt">Vercel</span><span class="alt2">Devin</span>
         </div>
         <div class="rank"><b>Build risk</b> low · <b>Demo wow</b> high · <b>Sponsor delight</b> medium</div>
+      </article>
+
+      <article class="idea" data-num="10">
+        <div class="pitch">○ Off-theme · existing deck</div>
+        <h3>Authmatic <span style="font-size:14px;color:var(--ink-dim);">→ SOC2 Pilot?</span></h3>
+        <p>The Authmatic deck (autonomous prior-auth: read PDFs → fill insurer form → return receipt) is beautifully built — 5 sponsors, 90-second demo, audit trail — but the room is dev-tools founders, not healthcare admins. As-is, it loses on theme fit.</p>
+        <ul>
+          <li><b>Honest call:</b> don't submit a healthcare agent at an agentic-dev-tools hackathon. The judges' "would I install this Monday?" question fails.</li>
+          <li><b>If you must reuse the bones:</b> retarget at <em>SOC2 / vendor security questionnaires</em> — the dev-tools-team equivalent of prior auth. Same "read messy inputs → fill structured form → cited receipt" loop, with engineering as the buyer. Every B2B SaaS startup hates this; some pay $50k/yr to outsource it.</li>
+          <li>Don't ship Authmatic as-is. Pivot the form, keep the architecture, or shelve.</li>
+        </ul>
+        <div class="stack">
+          <span>InsForge</span><span class="alt">Vercel</span><span class="alt2">Devin</span>
+        </div>
+        <div class="rank"><b>Build risk</b> low (deck exists) · <b>Demo wow</b> high · <b>Sponsor delight</b> high · <b>Theme fit</b> ✗ unless reframed</div>
       </article>
 
     </div>
@@ -369,33 +399,33 @@
   <!-- GAMEPLAN -->
   <section>
     <div class="section-head">
-      <h2>If we ship #1 (Replay → Repro)</h2>
-      <span class="tag">// rough day plan</span>
+      <h2>If we ship #1 (Bellwether → DepWatch)</h2>
+      <span class="tag">// rough day plan · reuses existing deck</span>
     </div>
     <div class="plan">
       <div class="row" style="display:contents">
         <div class="t">T+0h</div>
-        <div class="b">Kick off. Lock scope: one error type, one sample app, one beautiful demo path. No general-case.</div>
+        <div class="b">Lock scope: one sample repo, one <code style="background:rgba(110,231,183,0.1);padding:1px 5px;border-radius:4px;font-size:12px">package.json</code>, three risk signals end-to-end (CVE feed, GitHub ownership transfer, OFAC). Reuse Bellwether's existing pipeline + receipt UI.</div>
       </div>
       <div class="row" style="display:contents">
         <div class="t">T+1h</div>
-        <div class="b">Sample app on Vercel. InsForge backend with two tables and one RLS policy that breaks deliberately. Replicas SDK piped to a webhook.</div>
+        <div class="b">Swap Bellwether's "supplier list" input for a lockfile parser. Map each dependency → maintainer GitHub org + npm publisher email domain.</div>
       </div>
       <div class="row" style="display:contents">
         <div class="t">T+3h</div>
-        <div class="b">Trigger path: error in app → Replicas captures session → agent extracts request + state diff → Limrun sandbox spins up with prefilled fixture.</div>
+        <div class="b">Three watchers wired: GitHub events (ownership/transfer), CVE/GHSA RSS, OFAC daily download. Cite every signal with a stable URL — judges click links live.</div>
       </div>
       <div class="row" style="display:contents">
         <div class="t">T+6h</div>
-        <div class="b">"Open in IDE" handoff. Devin SDK call attempts the fix. PR gets opened against the sample repo with a green build.</div>
+        <div class="b">"Morning ticket" generator: Devin synthesizes the cited review, opens an InsForge-backed ticket, Vercel cron fires it daily. One demo repo seeded with a known-bad dependency.</div>
       </div>
       <div class="row" style="display:contents">
         <div class="t">T+8h</div>
-        <div class="b">Polish: one-screen control room UI, narrator voiceover for the recorded fallback, 90-second pitch rehearsed three times.</div>
+        <div class="b">Polish receipt page (reuse Bellwether's hyperlinked-citation pattern). 90-second pitch: "your lockfile had 12 events overnight — here's the one that matters."</div>
       </div>
       <div class="row" style="display:contents">
         <div class="t">T+9h</div>
-        <div class="b">Demo. Open with the error, end with the green PR. Don't explain the architecture — show the loop closing.</div>
+        <div class="b">Demo. Show the ticket landing live, click two citations, close on the "filed itself" line. Architecture stays implicit.</div>
       </div>
     </div>
   </section>

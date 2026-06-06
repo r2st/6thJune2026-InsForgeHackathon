@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>InsForge Hackathon — Guidelines & Playbook (6 June)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg-elev: #131418;
+    --bg-elev2: #181a20;
+    --ink: #ecedef;
+    --ink-dim: #9097a3;
+    --line: #25272e;
+    --accent: #ff6b35;
+    --good: #6ee7b7;
+    --cool: #a78bfa;
+    --warn: #fde68a;
+    --bad: #fca5a5;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.92em; background: rgba(255,107,53,0.1); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+  a { color: var(--good); text-decoration: none; border-bottom: 1px dotted rgba(110,231,183,0.4); }
+  a:hover { border-bottom-style: solid; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 32px 96px; }
+
+  /* HERO */
+  header.hero {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 44px;
+    margin-bottom: 48px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 56px;
+    align-items: end;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent);
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: clamp(48px, 7vw, 88px);
+    line-height: 0.95;
+    margin: 0 0 18px;
+    letter-spacing: -0.02em;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .lede { font-size: 17px; line-height: 1.55; color: var(--ink-dim); max-width: 58ch; margin: 0; }
+
+  .meta-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+  .meta-card .row { display: flex; justify-content: space-between; gap: 16px; }
+  .meta-card .k { color: var(--ink-dim); }
+  .meta-card .v { color: var(--ink); text-align: right; }
+
+  /* WARNING BAND */
+  .warn-band {
+    background: rgba(253,230,138,0.05);
+    border: 1px solid rgba(253,230,138,0.25);
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 48px;
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+  .warn-band .ic {
+    color: var(--warn); font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; font-weight: 700; line-height: 1.3;
+  }
+  .warn-band p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink); }
+  .warn-band b { color: var(--warn); }
+
+  /* SECTION HEADS */
+  .section-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    border-top: 1px solid var(--line); padding-top: 36px; margin-top: 48px; margin-bottom: 28px;
+    gap: 16px;
+  }
+  .section-head h2 {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400; font-size: 36px; margin: 0; letter-spacing: -0.01em;
+  }
+  .section-head .tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--ink-dim); letter-spacing: 0.12em; text-transform: uppercase;
+  }
+
+  /* CONFIRMED / INFERRED */
+  .fact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .fact {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 20px 22px;
+  }
+  .fact .lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .fact .lbl .src { color: var(--good); font-weight: 500; }
+  .fact .lbl .src.inferred { color: var(--warn); }
+  .fact .lbl .src.tba { color: var(--bad); }
+  .fact .val {
+    font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1.25;
+    color: var(--ink); margin-top: 2px;
+  }
+  .fact .note { font-size: 13px; color: var(--ink-dim); margin-top: 8px; line-height: 1.5; }
+
+  /* SPONSOR GRID */
+  .sponsors { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .sponsor {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 24px;
+  }
+  .sponsor h3 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 26px; margin: 0 0 4px;
+  }
+  .sponsor .verb {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .sponsor p { font-size: 13.5px; line-height: 1.55; margin: 0 0 12px; color: var(--ink); }
+  .sponsor .rows { display: grid; gap: 6px; font-size: 12.5px; line-height: 1.5; }
+  .sponsor .rows .r { display: grid; grid-template-columns: 100px 1fr; gap: 12px; }
+  .sponsor .rows .k { color: var(--ink-dim); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding-top: 1px; }
+  .sponsor .rows .v { color: var(--ink); }
+
+  /* CHECKLIST */
+  .checklist {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 28px;
+  }
+  .check-item {
+    display: grid; grid-template-columns: 24px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px dashed var(--line);
+    align-items: start;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item .box {
+    width: 18px; height: 18px; border: 1.5px solid var(--ink-dim);
+    border-radius: 4px; margin-top: 2px;
+  }
+  .check-item .label {
+    font-family: 'Instrument Serif', serif; font-size: 17px; color: var(--ink);
+    line-height: 1.35;
+  }
+  .check-item .detail {
+    font-size: 13px; color: var(--ink-dim); line-height: 1.5;
+    margin-top: 4px;
+  }
+  .check-item.crit .box { border-color: var(--accent); }
+  .check-item.crit .label::after {
+    content: " · critical"; font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; color: var(--accent); letter-spacing: 0.1em;
+    text-transform: uppercase; font-style: normal;
+  }
+
+  /* CRITERIA */
+  .crit-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .crit-card {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 20px 24px;
+  }
+  .crit-card .pct {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--cool); letter-spacing: 0.12em;
+  }
+  .crit-card h4 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 22px; margin: 4px 0 8px;
+  }
+  .crit-card p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-dim); }
+  .crit-card p b { color: var(--ink); }
+
+  /* RULES TABLE */
+  .rules {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden;
+  }
+  .rule {
+    display: grid; grid-template-columns: 1fr 2fr;
+    padding: 16px 24px; border-bottom: 1px solid var(--line); gap: 18px;
+    align-items: start;
+  }
+  .rule:last-child { border-bottom: none; }
+  .rule .k {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--ink-dim); letter-spacing: 0.1em; text-transform: uppercase;
+    padding-top: 2px;
+  }
+  .rule .v { font-size: 14px; line-height: 1.55; color: var(--ink); }
+  .rule .v .src {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; padding: 2px 7px; border-radius: 999px;
+    margin-left: 6px; letter-spacing: 0.08em; vertical-align: 1px;
+    background: rgba(110,231,183,0.1); color: var(--good); border: 1px solid rgba(110,231,183,0.3);
+  }
+  .rule .v .src.inferred { background: rgba(253,230,138,0.08); color: var(--warn); border-color: rgba(253,230,138,0.25); }
+  .rule .v .src.tba { background: rgba(252,165,165,0.08); color: var(--bad); border-color: rgba(252,165,165,0.25); }
+
+  /* TIMELINE */
+  .timeline { display: grid; grid-template-columns: 110px 1fr; gap: 14px 24px; }
+  .timeline .t {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--good); padding-top: 2px;
+  }
+  .timeline .b {
+    color: var(--ink); border-bottom: 1px solid var(--line);
+    padding-bottom: 14px; font-size: 14.5px; line-height: 1.55;
+  }
+  .timeline .b small { display: block; color: var(--ink-dim); font-size: 12px; margin-top: 4px; }
+  .timeline .row:last-child .b { border-bottom: none; }
+
+  footer {
+    margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    color: var(--ink-dim); font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+  }
+
+  @media (max-width: 900px) {
+    header.hero { grid-template-columns: 1fr; gap: 32px; }
+    .fact-grid, .sponsors, .crit-grid { grid-template-columns: 1fr; }
+    .rule { grid-template-columns: 1fr; gap: 4px; }
+    .timeline { grid-template-columns: 80px 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Playbook · operating manual · 6 June</div>
+      <h1>Guidelines<br/><em>for the day.</em></h1>
+      <p class="lede">Everything we know about the InsForge Hackathon — and everything we're inferring. Sourced from the Luma listing, sponsor docs, and standard hackathon convention. Each fact is marked <span style="color:var(--good)">confirmed</span> / <span style="color:var(--warn)">inferred</span> / <span style="color:var(--bad)">TBA</span> so we know what to verify on the ground.</p>
+    </div>
+    <aside class="meta-card">
+      <div class="row"><span class="k">event</span><span class="v">InsForge Hackathon</span></div>
+      <div class="row"><span class="k">presenter</span><span class="v">AI Nexus</span></div>
+      <div class="row"><span class="k">date</span><span class="v">Saturday 6 June</span></div>
+      <div class="row"><span class="k">venue</span><span class="v">EF · 501 Folsom</span></div>
+      <div class="row"><span class="k">attendees</span><span class="v">553 registered</span></div>
+      <div class="row"><span class="k">our pick</span><span class="v">Hush — see <a href="FINAL.html">FINAL.html</a></span></div>
+    </aside>
+  </header>
+
+  <div class="warn-band">
+    <div class="ic">!</div>
+    <p>The Luma listing is sparse. <b>Tracks, exact times, judging criteria, demo format, and submission rules are not published</b> as of drafting. Anything marked TBA below needs to be confirmed at check-in — bring this doc up on your phone and tick boxes as the host clarifies.</p>
+  </div>
+
+  <!-- THE FACTS -->
+  <section>
+    <div class="section-head">
+      <h2>The facts</h2>
+      <span class="tag">// from Luma + sponsor pages</span>
+    </div>
+    <div class="fact-grid">
+      <div class="fact">
+        <div class="lbl"><span>Date</span><span class="src">confirmed</span></div>
+        <div class="val">Saturday, 6 June 2026</div>
+        <div class="note">Single-day event. Start time TBA — assume morning check-in.</div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Venue</span><span class="src">confirmed</span></div>
+        <div class="val">Entrepreneur First<br/>501 Folsom St, SF</div>
+        <div class="note">SoMa. Caltrain ~10 min walk; Embarcadero BART ~15 min walk.</div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Hosts</span><span class="src">confirmed</span></div>
+        <div class="val">AI Nexus team</div>
+        <div class="note">James Unsworth, Alex B, Andrei Rizea, Tony Chang, Hang Huang.</div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Theme</span><span class="src">confirmed</span></div>
+        <div class="val">Agentic Dev Tools</div>
+        <div class="note">Coding agents, dev infra, autonomous workflows, AI-native engineering systems.</div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Registration check-in</span><span class="src">confirmed</span></div>
+        <div class="val">Wallet token verification</div>
+        <div class="note">Approval-gated event. Bring a phone with the wallet that received your token.</div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Prize · 1st</span><span class="src">confirmed</span></div>
+        <div class="val">Mac mini or $800 cash<br/><span style="font-size:14px;color:var(--ink-dim);">+ $1,000 Limrun credits + YC P26 founder dinner</span></div>
+        <div class="note">Founder dinner is arguably the prize. The Mac is the prop.</div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Prize · 2nd</span><span class="src">confirmed</span></div>
+        <div class="val">Mac mini or $800<br/><span style="font-size:14px;color:var(--ink-dim);">+ $750 InsForge + $500 Limrun</span></div>
+        <div class="note"></div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Prize · 3rd</span><span class="src">confirmed</span></div>
+        <div class="val">Mac mini or $800<br/><span style="font-size:14px;color:var(--ink-dim);">+ $250 InsForge + $200 Limrun</span></div>
+        <div class="note"></div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Tracks</span><span class="src tba">TBA on day</span></div>
+        <div class="val">Announced at kickoff</div>
+        <div class="note">Plan for a generic dev-tools idea; be ready to angle it toward a specific track if one matches.</div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Schedule</span><span class="src tba">TBA</span></div>
+        <div class="val">Single day; details on day</div>
+        <div class="note">Confirm at check-in. Typical AI-Nexus pattern is 10/10/2 — see Timeline below.</div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Team size</span><span class="src tba">TBA</span></div>
+        <div class="val">Typical: solo or up to 4</div>
+        <div class="note">Confirm at check-in. Default plan for 3-4 (storyteller + 2 builders + 1 demo-engineer).</div>
+      </div>
+      <div class="fact">
+        <div class="lbl"><span>Judging criteria</span><span class="src tba">TBA</span></div>
+        <div class="val">See inferred rubric →</div>
+        <div class="note">Sponsor mix + judge roster (YC P26, dev-tools founders) point heavily at a specific shape — covered below.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INFERRED JUDGING -->
+  <section>
+    <div class="section-head">
+      <h2>Inferred judging rubric</h2>
+      <span class="tag">// from sponsor mix + judge profile</span>
+    </div>
+    <p style="max-width:78ch;color:var(--ink-dim);font-size:14.5px;line-height:1.6;margin:0 0 24px;">
+      The room is dev-tools founders and YC P26 partners. The sponsor stack is InsForge / Vercel / Cognition / Replicas / Limrun — all execution-layer infra. That points at one outcome: judges reward agents that <em>do something visible</em>, on real infra, that another engineer would want to install. Below is the four-axis rubric we should optimize for. Adjust if the host announces a different one.
+    </p>
+    <div class="crit-grid">
+      <div class="crit-card">
+        <div class="pct">~30%</div>
+        <h4>Live demo lands</h4>
+        <p>Does it work end-to-end, on stage, on flaky wifi? <b>Open with the wow moment in the first 30 seconds.</b> Pre-record a fallback. Never blame the network.</p>
+      </div>
+      <div class="crit-card">
+        <div class="pct">~25%</div>
+        <h4>Agentic core</h4>
+        <p>Is the agent doing something <b>only an agent could do</b> — multi-step, stateful, self-correcting — or is it a prompt with a UI? Single LLM calls lose.</p>
+      </div>
+      <div class="crit-card">
+        <div class="pct">~25%</div>
+        <h4>Sponsor depth</h4>
+        <p>Did you use the sponsor stack in a way the sponsor would <b>brag about</b>? Lighting up 3+ of the five verbs (CAPTURE/EXECUTE/FIX/SURFACE/PERSIST) is the safe bar.</p>
+      </div>
+      <div class="crit-card">
+        <div class="pct">~20%</div>
+        <h4>Engineer-real</h4>
+        <p>Would a working engineer install this on Monday? The room is dev-tools founders — they'll smell a toy. <b>Pain has to be specific and recognized.</b></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPONSOR TOOLBOX -->
+  <section>
+    <div class="section-head">
+      <h2>Sponsor toolbox — what each one gives you</h2>
+      <span class="tag">// quick reference</span>
+    </div>
+    <div class="sponsors">
+      <div class="sponsor">
+        <h3>InsForge</h3>
+        <div class="verb">verb · PERSIST</div>
+        <p>Postgres + pgvector + auth + RLS + storage + edge functions. The full backend. Branch projects let you fork prod-shaped data for safe experiments.</p>
+        <div class="rows">
+          <div class="r"><span class="k">SDK</span><span class="v"><code>@insforge/sdk</code> — see <code>insforge</code> skill</span></div>
+          <div class="r"><span class="k">CLI</span><span class="v"><code>insforge</code> — provisioning, migrations, branches</span></div>
+          <div class="r"><span class="k">Credits</span><span class="v">$250–$750 in prize tiers</span></div>
+          <div class="r"><span class="k">Killer move</span><span class="v">Branch project for prod-data testing</span></div>
+        </div>
+      </div>
+      <div class="sponsor">
+        <h3>Vercel</h3>
+        <div class="verb">verb · SURFACE</div>
+        <p>Functions (Fluid Compute, Node.js 24), Edge Middleware, AI Gateway (unified model access), cron, preview URLs. The deploy surface judges will click.</p>
+        <div class="rows">
+          <div class="r"><span class="k">CLI</span><span class="v"><code>npm i -g vercel</code> then <code>vercel deploy</code></span></div>
+          <div class="r"><span class="k">AI</span><span class="v">AI Gateway: <code>"provider/model"</code> strings, no SDK churn</span></div>
+          <div class="r"><span class="k">Default</span><span class="v">Next.js App Router; Fluid Compute (not Edge)</span></div>
+          <div class="r"><span class="k">Killer move</span><span class="v">Preview URL = your demo link</span></div>
+        </div>
+      </div>
+      <div class="sponsor">
+        <h3>Cognition Devin</h3>
+        <div class="verb">verb · REASON / FIX</div>
+        <p>The coding agent. Multi-step planning, edit-and-test loop, PR creation. The "agent that writes code" your demo is named after.</p>
+        <div class="rows">
+          <div class="r"><span class="k">Access</span><span class="v">API token via sponsor table at check-in</span></div>
+          <div class="r"><span class="k">Pattern</span><span class="v">Start a session with a goal → poll → consume PR</span></div>
+          <div class="r"><span class="k">Killer move</span><span class="v">"Devin opens a PR" is the most visual agent outcome there is</span></div>
+        </div>
+      </div>
+      <div class="sponsor">
+        <h3>Limrun</h3>
+        <div class="verb">verb · EXECUTE</div>
+        <p>Sandboxed code execution. Boot a clean env, run agent-written code, observe the result. The substrate that lets agents actually <em>do</em> rather than describe.</p>
+        <div class="rows">
+          <div class="r"><span class="k">Credits</span><span class="v">$200–$1,000 in prize tiers — biggest credit pool</span></div>
+          <div class="r"><span class="k">Pattern</span><span class="v">REST: create sandbox → exec → fetch logs → destroy</span></div>
+          <div class="r"><span class="k">Killer move</span><span class="v">"It re-ran the failing test 200×" — only sandboxes can</span></div>
+        </div>
+      </div>
+      <div class="sponsor">
+        <h3>Replicas</h3>
+        <div class="verb">verb · CAPTURE</div>
+        <p>Session replay / synthetic user capture. The no-API source of truth for what real users did. Plug into a sample app and you can replay any error path.</p>
+        <div class="rows">
+          <div class="r"><span class="k">Pattern</span><span class="v">SDK in client → session URL → fetch as JSON</span></div>
+          <div class="r"><span class="k">Killer move</span><span class="v">Embedded clip in a PR description = visceral demo</span></div>
+        </div>
+      </div>
+      <div class="sponsor">
+        <h3>Entrepreneur First</h3>
+        <div class="verb">verb · VENUE + JUDGE</div>
+        <p>Host. The dinner is with P26 YC founders, not EF — but the EF partners may be in the judging mix. Treat them like investor judges: clear pain, clear customer, clear next step.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RULES & ASSUMPTIONS -->
+  <section>
+    <div class="section-head">
+      <h2>Rules of the road</h2>
+      <span class="tag">// confirm at check-in</span>
+    </div>
+    <div class="rules">
+      <div class="rule">
+        <div class="k">Code ownership</div>
+        <div class="v">You retain IP. <span class="src inferred">inferred · standard hackathon</span></div>
+      </div>
+      <div class="rule">
+        <div class="k">Pre-existing code</div>
+        <div class="v">Building on a personal repo is usually allowed but the <em>new</em> work must be done on the day. Reusing UI components or sponsor SDK boilerplate is fine; pre-built business logic is not. <span class="src inferred">inferred</span></div>
+      </div>
+      <div class="rule">
+        <div class="k">Submission format</div>
+        <div class="v">Likely a Notion / form link given out at kickoff. Plan to submit: live preview URL, repo URL, 60–90 sec demo video, one-paragraph pitch. <span class="src inferred">inferred</span></div>
+      </div>
+      <div class="rule">
+        <div class="k">Demo format</div>
+        <div class="v">Expect 2–3 minute live demo + Q&A, or a 60-second pitch followed by judge tables. <span class="src tba">TBA</span></div>
+      </div>
+      <div class="rule">
+        <div class="k">Team formation</div>
+        <div class="v">Typically allowed at kickoff — bring an idea, find collaborators, lock by 11:00. <span class="src inferred">inferred</span></div>
+      </div>
+      <div class="rule">
+        <div class="k">Use of paid APIs</div>
+        <div class="v">Use sponsor credits first (you have $1,000+ Limrun, $750+ InsForge). Vercel/Cognition credits handed out at check-in. <span class="src confirmed">confirmed credits</span></div>
+      </div>
+      <div class="rule">
+        <div class="k">Code of conduct</div>
+        <div class="v">Standard SF-tech-event CoC: be respectful, no harassment, no plagiarism. EF venue rules apply. <span class="src inferred">inferred</span></div>
+      </div>
+      <div class="rule">
+        <div class="k">Network demos</div>
+        <div class="v">Wifi at hackathons fails. Cache or pre-record any live web step. Have a local fallback. Never blame the network on stage. <span class="src confirmed">universal truth</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASSUMED TIMELINE -->
+  <section>
+    <div class="section-head">
+      <h2>Assumed timeline</h2>
+      <span class="tag">// confirm at kickoff · adjust live</span>
+    </div>
+    <div class="timeline">
+      <div class="row" style="display:contents">
+        <div class="t">09:00</div>
+        <div class="b">Doors open. Check-in via wallet token. Coffee, sponsor tables, team formation.
+          <small>Bring: charged phone with wallet, charged laptop, charger, water bottle.</small></div>
+      </div>
+      <div class="row" style="display:contents">
+        <div class="t">10:00</div>
+        <div class="b">Kickoff. Tracks announced. Sponsor intros. Rules confirmed.
+          <small>This is when we lock the idea — compare announced tracks against FINAL.html ranking, pick or pivot.</small></div>
+      </div>
+      <div class="row" style="display:contents">
+        <div class="t">10:30</div>
+        <div class="b">Build window begins. Storyteller writes the pitch v0 <em>before</em> code ships.
+          <small>From the Applied-Intelligence playbook: writing the demo script first prevents architecture-first overscope.</small></div>
+      </div>
+      <div class="row" style="display:contents">
+        <div class="t">13:00</div>
+        <div class="b">Midway check. Loop end-to-end with toy data, even if ugly.
+          <small>If T+3h has slipped, trigger the hot-swap rules in FINAL.html. Don't fall in love with sunk cost.</small></div>
+      </div>
+      <div class="row" style="display:contents">
+        <div class="t">16:00</div>
+        <div class="b">Polish + pre-record fallback demo video. Pitch rehearsal: three takes, hard 90-second cap.
+          <small>Submission is usually 1–2 hours before judging starts.</small></div>
+      </div>
+      <div class="row" style="display:contents">
+        <div class="t">17:00</div>
+        <div class="b">Submission deadline (assumed). Code freeze. Submit form with preview URL, repo, video, pitch.
+          <small>Two-hour buffer between code-freeze and demo per playbook.</small></div>
+      </div>
+      <div class="row" style="display:contents">
+        <div class="t">18:00</div>
+        <div class="b">Demo to judges or table-walk format.
+          <small>Open on the pain ("a user just hit this error") · close on the green PR · don't explain architecture.</small></div>
+      </div>
+      <div class="row" style="display:contents">
+        <div class="t">19:30</div>
+        <div class="b">Awards. P26 YC dinner for winners. Network if not on the podium.
+          <small>The dinner is the actual prize. The Mac mini is the prop on the table.</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREFLIGHT -->
+  <section>
+    <div class="section-head">
+      <h2>Preflight checklist</h2>
+      <span class="tag">// before 9 AM Saturday</span>
+    </div>
+    <div class="checklist">
+      <div class="check-item crit">
+        <div class="box"></div>
+        <div>
+          <div class="label">All five sponsors return a "hello world" 200</div>
+          <div class="detail">InsForge: provision a project, create one table, query it. Vercel: deploy a hello-world function. Devin: trigger a session, get a PR URL back. Limrun: create a sandbox, exec <code>echo hi</code>, fetch output. Replicas: capture a session, fetch as JSON. If any one fails, you'll burn build hours debugging auth on the day.</div>
+        </div>
+      </div>
+      <div class="check-item crit">
+        <div class="box"></div>
+        <div>
+          <div class="label">Wallet ready on phone</div>
+          <div class="detail">Check-in requires wallet token verification. Confirm the wallet that received your registration token is unlocked and accessible <em>before</em> you arrive — venue wifi at 9 AM is unreliable for first-time wallet auth.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box"></div>
+        <div>
+          <div class="label">Hush pitch (FINAL.html) reviewed by every teammate</div>
+          <div class="detail">Make sure everyone agrees on Hush as the build, with DepWatch as the hot-swap backup. Disagreement at 10:30 burns the first hour of the build.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box"></div>
+        <div>
+          <div class="label">Local dev env: Node 24, pnpm, Vercel CLI, git, gh</div>
+          <div class="detail">Vercel default runtime is Node 24 LTS. Match locally to avoid prod-only failures. Vercel CLI: <code>npm i -g vercel</code>.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box"></div>
+        <div>
+          <div class="label">Sponsor credits redeemed where possible</div>
+          <div class="detail">Some sponsors hand out credits at check-in; some require pre-redemption via a code on the Luma page or sponsor dashboard. Check your inbox now.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box"></div>
+        <div>
+          <div class="label">Toy repo + sample app skeleton committed</div>
+          <div class="detail">For Replay → PR: a Next.js app with a broken endpoint, a passing test suite, and an empty <code>main</code> branch ready to receive PRs. Two hours saved on the day.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box"></div>
+        <div>
+          <div class="label">Pre-recorded fallback demo video shell</div>
+          <div class="detail">Open OBS or QuickTime, frame the screen, test mic. You'll record the real fallback at T+8h but the rig should already work.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box"></div>
+        <div>
+          <div class="label">Snacks, water, layers, charger, hotspot</div>
+          <div class="detail">SF June is foggy AM, warm PM. EF venue is air-conditioned aggressively. A hotspot is your insurance against demo-time wifi failure.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box"></div>
+        <div>
+          <div class="label">Day-of contacts saved to phone</div>
+          <div class="detail">Teammates, AI Nexus host (James Unsworth — Luma DM), sponsor reps (introduce yourself early), Uber/Lyft installed.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT GOOD LOOKS LIKE -->
+  <section>
+    <div class="section-head">
+      <h2>What good looks like, on stage</h2>
+      <span class="tag">// from prior-event playbook</span>
+    </div>
+    <div class="checklist">
+      <div class="check-item">
+        <div class="box" style="border-color:var(--good)"></div>
+        <div>
+          <div class="label">Open on the pain, not the architecture</div>
+          <div class="detail">First 10 seconds: show a real user hitting a real error. No "we built…" — let the failure speak.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box" style="border-color:var(--good)"></div>
+        <div>
+          <div class="label">Money shot has a clickable artifact</div>
+          <div class="detail">A receipt URL, a PR link, a green check in CI. Judges can click during Q&A.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box" style="border-color:var(--good)"></div>
+        <div>
+          <div class="label">Sponsor logos are visible without you naming them</div>
+          <div class="detail">"Deployed on Vercel," "powered by InsForge" — bake into the UI. Judges scan for stack coverage; make it free.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box" style="border-color:var(--good)"></div>
+        <div>
+          <div class="label">90 seconds, hard cap</div>
+          <div class="detail">Most demos run long and lose. Pitch v0 written before code; rehearsed 3× before stage.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="box" style="border-color:var(--good)"></div>
+        <div>
+          <div class="label">Close on "would I install this Monday?"</div>
+          <div class="detail">End on the customer + the install link, not on a thank-you slide. Judges decide in the last 10 seconds.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>// guidelines · v1 · drafted 2026-06-06</span>
+    <span>see also: <a href="FINAL.html">FINAL.html</a> · <a href="archive/">archive/</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

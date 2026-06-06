@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Thin wrapper so agents can invoke `./tickets ...` from the repo root.
+exec python3 -m ticketing "$@"

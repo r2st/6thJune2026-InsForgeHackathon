@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hush — the bugs that don't make a sound</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg-elev: #131418;
+    --bg-elev2: #181a20;
+    --ink: #ecedef;
+    --ink-dim: #9097a3;
+    --line: #25272e;
+    --accent: #ff6b35;
+    --good: #6ee7b7;
+    --cool: #a78bfa;
+    --warn: #fde68a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; background: rgba(255,107,53,0.1); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+  a { color: var(--good); text-decoration: none; border-bottom: 1px dotted rgba(110,231,183,0.4); }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 64px 32px 96px; }
+
+  /* HERO */
+  header.hero { border-bottom: 1px solid var(--line); padding-bottom: 48px; margin-bottom: 56px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .eyebrow::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent);
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: clamp(60px, 9vw, 120px);
+    line-height: 0.9;
+    margin: 0 0 24px;
+    letter-spacing: -0.03em;
+  }
+  .one-line {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(22px, 2.6vw, 28px);
+    line-height: 1.4;
+    color: var(--ink);
+    max-width: 32ch;
+    margin: 0;
+  }
+  .one-line .hi { color: var(--good); font-style: italic; }
+  .built-on {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.08em;
+    color: var(--ink-dim); margin-top: 32px;
+  }
+  .built-on .key { color: var(--good); }
+
+  /* SECTIONS */
+  section { margin-bottom: 64px; }
+  .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(36px, 5vw, 52px); line-height: 1;
+    margin: 0 0 24px; letter-spacing: -0.02em;
+  }
+
+  p { font-size: 17px; line-height: 1.6; color: var(--ink); max-width: 62ch; margin: 0 0 18px; }
+  p.muted { color: var(--ink-dim); }
+  p b { color: var(--ink); font-weight: 600; }
+  p em { color: var(--accent); font-style: italic; font-weight: 500; }
+
+  /* BIG STAT */
+  .stat-card {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 16px; padding: 28px 32px; margin: 24px 0;
+    display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center;
+  }
+  .stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(64px, 9vw, 96px);
+    line-height: 1; color: var(--accent); letter-spacing: -0.02em;
+  }
+  .stat-card p { margin: 0; font-size: 16px; max-width: none; }
+  .stat-card p b { color: var(--accent); }
+
+  /* TWO-UP */
+  .twoup { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+  .card {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 24px;
+  }
+  .card.win { border-color: rgba(110,231,183,0.35); background: linear-gradient(180deg, rgba(110,231,183,0.05), transparent 70%); }
+  .card .tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 10px;
+  }
+  .card.win .tag { color: var(--good); }
+  .card h3 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 22px; margin: 0 0 8px;
+  }
+  .card p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-dim); max-width: none; }
+  .card p b { color: var(--ink); }
+
+  /* LOOP */
+  .loop { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0 12px; }
+  .step {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 10px; padding: 16px 14px;
+  }
+  .step .n {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--accent); letter-spacing: 0.12em;
+  }
+  .step .v { font-family: 'Instrument Serif', serif; font-size: 22px; margin-top: 4px; }
+  .step .s { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); margin-top: 4px; }
+  .step .d { font-size: 13px; line-height: 1.45; color: var(--ink); margin-top: 10px; }
+
+  .platform {
+    background: linear-gradient(180deg, rgba(110,231,183,0.08), transparent 80%);
+    border: 1px solid rgba(110,231,183,0.3); border-radius: 12px;
+    padding: 18px 22px; margin-top: 4px;
+    display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center;
+  }
+  .platform .label-platform {
+    font-family: 'Instrument Serif', serif; font-size: 22px;
+    color: var(--good); font-style: italic;
+  }
+  .platform .label-platform small {
+    display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.14em; color: var(--good); margin-top: 4px; font-style: normal;
+  }
+  .platform p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink); max-width: none; }
+  .platform p b { color: var(--good); font-weight: 600; }
+
+  /* TIER CARDS for confidence */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+  .tier {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 18px 20px;
+    border-left: 3px solid var(--ink-dim);
+  }
+  .tier.hi { border-left-color: var(--good); }
+  .tier.mid { border-left-color: var(--warn); }
+  .tier.lo { border-left-color: var(--cool); }
+  .tier .pct {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; color: var(--ink-dim);
+  }
+  .tier.hi .pct { color: var(--good); }
+  .tier.mid .pct { color: var(--warn); }
+  .tier.lo .pct { color: var(--cool); }
+  .tier h4 {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 20px; margin: 4px 0 8px;
+  }
+  .tier p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-dim); max-width: none; }
+
+  /* INSFORGE FEATURES — simpler version */
+  .feats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .feat {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 10px; padding: 16px 20px;
+    display: grid; grid-template-columns: 130px 1fr; gap: 18px; align-items: baseline;
+  }
+  .feat .name {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; color: var(--good); text-transform: uppercase;
+  }
+  .feat .does { font-size: 14px; line-height: 1.5; color: var(--ink); }
+
+  /* STORYBOARD */
+  .beats { margin: 20px 0; }
+  .beat {
+    display: grid; grid-template-columns: 70px 1fr; gap: 24px;
+    align-items: start; padding: 14px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .beat:last-child { border-bottom: none; }
+  .beat .t { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); padding-top: 4px; }
+  .beat .w {
+    font-family: 'Instrument Serif', serif; font-size: 19px;
+    line-height: 1.35; color: var(--ink);
+  }
+  .beat .w small {
+    display: block; font-family: 'Inter', sans-serif; font-size: 13.5px;
+    color: var(--ink-dim); margin-top: 4px; font-style: normal; line-height: 1.55;
+  }
+
+  /* DAY PLAN */
+  .plan { display: grid; grid-template-columns: 70px 1fr; gap: 12px 24px; }
+  .plan .t { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--good); padding-top: 3px; }
+  .plan .b { border-bottom: 1px solid var(--line); padding-bottom: 14px; font-size: 14.5px; line-height: 1.55; }
+  .plan .row:last-child .b { border-bottom: none; }
+  .plan b { font-weight: 600; }
+
+  /* DETAILS */
+  details {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 12px; padding: 0; margin-bottom: 10px;
+  }
+  details summary {
+    list-style: none; cursor: pointer; padding: 16px 22px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--ink-dim); }
+  details[open] summary::after { content: "−"; }
+  details summary h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 20px; margin: 0; }
+  details summary .one { font-size: 13px; color: var(--ink-dim); max-width: 38ch; text-align: right; }
+  details .inner { padding: 0 22px 18px; font-size: 13.5px; line-height: 1.55; color: var(--ink-dim); border-top: 1px dashed var(--line); padding-top: 14px; }
+  details .inner b { color: var(--ink); }
+
+  footer {
+    margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    color: var(--ink-dim); font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+  }
+
+  @media (max-width: 780px) {
+    .twoup, .tiers, .feats { grid-template-columns: 1fr; }
+    .loop { grid-template-columns: 1fr 1fr; }
+    .feat { grid-template-columns: 1fr; gap: 4px; }
+    .stat-card { grid-template-columns: 1fr; gap: 8px; }
+    details summary { flex-direction: column; align-items: flex-start; gap: 8px; }
+    details summary .one { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="eyebrow">InsForge Hackathon · 6 June · Final pitch · v6 · Hush</div>
+    <h1>Hush.</h1>
+    <p class="one-line">Catches the bugs that <span class="hi">don't make a sound.</span></p>
+    <div class="built-on">Built on <span class="key">InsForge</span> · powered by Replicas, Limrun, Devin, Vercel</div>
+  </header>
+
+  <!-- 1 — THE PROBLEM -->
+  <section>
+    <div class="label">01 · The problem</div>
+    <h2>Most bugs don't crash. They just frustrate.</h2>
+    <p>A button that does nothing when you click it. A form that says "saved" but doesn't save. A dropdown that opens behind the modal. <b>None of these throw an error.</b> Sentry sees nothing. The dev sees nothing. The user just leaves.</p>
+    <div class="stat-card">
+      <div class="stat-num">~70%</div>
+      <p>of user-reported bugs in modern web apps <b>never throw a server error.</b> They fail at the screen, not in the code path your error tracker watches. (Industry estimate from FullStory and LogRocket behavioural-bug studies.)</p>
+    </div>
+    <p class="muted">Today, finding these bugs means a customer emails support. Support pings engineering. Engineering asks for a repro. The user can't repro it. The ticket dies. Meanwhile the bug keeps shipping.</p>
+  </section>
+
+  <!-- 2 — THE INSIGHT -->
+  <section>
+    <div class="label">02 · The shift</div>
+    <h2>Watch the user, not the stack trace.</h2>
+    <p>Every silent bug leaves a trail in the <b>user's session</b>: rage-clicks, abandoned forms, repeated taps, fast back-button presses. Session replay tools already capture this — they just show the recording to humans. Hush lets an <em>agent</em> watch it, run the bug again on its own, and ship the fix.</p>
+    <div class="twoup">
+      <div class="card">
+        <div class="tag">// the current way</div>
+        <h3>Sentry · Seer · Autofix</h3>
+        <p>Starts from a <b>stack trace.</b> Great at fixing the bug that already broke production. Blind to every bug that didn't throw.</p>
+      </div>
+      <div class="card win">
+        <div class="tag">// hush</div>
+        <h3>Hush</h3>
+        <p>Starts from a <b>session.</b> Catches the broken button, the silent form, the dropdown nobody can click. <b>The 70% Sentry can't see.</b></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 — HOW IT WORKS -->
+  <section>
+    <div class="label">03 · How it works</div>
+    <h2>Four steps. One platform.</h2>
+    <p>A user gets stuck. Sixty seconds later, a fix lands in the repo with a video of the original bug attached.</p>
+
+    <div class="loop">
+      <div class="step">
+        <div class="n">01</div>
+        <div class="v">Watch</div>
+        <div class="s">Replicas</div>
+        <div class="d">Spots a user getting stuck — rage clicks, abandons, or a "report bug" tap.</div>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <div class="v">Run it again</div>
+        <div class="s">Limrun</div>
+        <div class="d">Boots a clean browser sandbox and replays the session as a test. If the bug is real, the test fails.</div>
+      </div>
+      <div class="step">
+        <div class="n">03</div>
+        <div class="v">Diagnose</div>
+        <div class="s">InsForge AI</div>
+        <div class="d">Writes a plain-English bug report: what the user expected, what happened, what's likely broken.</div>
+      </div>
+      <div class="step">
+        <div class="n">04</div>
+        <div class="v">Fix &amp; ship</div>
+        <div class="s">Devin → GitHub</div>
+        <div class="d">Edits the code until the test passes. Opens a PR with the session clip inside.</div>
+      </div>
+    </div>
+
+    <div class="platform">
+      <div class="label-platform">InsForge<small>the platform underneath all four</small></div>
+      <p>Holds the memory of every bug, the live status of every run, the safe test data, and the multi-tenant access rules. <b>Without InsForge, the loop is four tools shouting at each other.</b> With it, they share state.</p>
+    </div>
+  </section>
+
+  <!-- 4 — IMPROVEMENT: CONFIDENCE TIERS -->
+  <section>
+    <div class="label">04 · What's new — confidence tiers</div>
+    <h2>Don't always open a PR. Match the action to the certainty.</h2>
+    <p>Every engineer's first objection to bug-fixing agents: "what if it opens a bunch of bad PRs?" Hush handles this directly. Before acting, it scores its own confidence using pgvector similarity to past, human-confirmed fixes. Then it picks the right output.</p>
+    <div class="tiers">
+      <div class="tier hi">
+        <div class="pct">High · 85%+</div>
+        <h4>Open a PR with the fix</h4>
+        <p>The fix passed the test. Similar bugs in the past got merged unchanged. Ship it for review.</p>
+      </div>
+      <div class="tier mid">
+        <div class="pct">Medium · 60–85%</div>
+        <h4>Open a draft PR — test only, no fix</h4>
+        <p>The bug is real and we can prove it. We're not sure of the fix. Hand the failing test and the diagnosis to a human.</p>
+      </div>
+      <div class="tier lo">
+        <div class="pct">Low · &lt;60%</div>
+        <h4>Open a GitHub issue with the clip</h4>
+        <p>Something looks wrong but it's not certain. File it, attach the session video, let someone decide.</p>
+      </div>
+    </div>
+    <p class="muted">This is the difference between a hackathon toy and a tool a real engineering team would install. It also gives us three different demos in one — depending on the audience, lead with whichever moment they react to.</p>
+  </section>
+
+  <!-- 5 — IMPROVEMENT: LEARNS FROM YOU -->
+  <section>
+    <div class="label">05 · What's new — it gets smarter</div>
+    <h2>Closing a PR teaches Hush.</h2>
+    <p>When a dev closes a Hush PR as "not a bug, by design" or "duplicate," that signal goes back into pgvector. The next time a similar session fires, Hush recognises the shape and skips it — or drops it from PR straight to issue. <b>Every rejection makes the next one quieter.</b></p>
+    <p>Sentry Seer can't do this. It doesn't have memory of <em>this team's taste</em>. Hush does, because InsForge gives it a vector store and an RLS-scoped data model out of the box.</p>
+  </section>
+
+  <!-- 6 — WHY INSFORGE -->
+  <section>
+    <div class="label">06 · Why InsForge sits at the center</div>
+    <h2>Five things, each load-bearing.</h2>
+    <p>It would be easy to use InsForge as just a database. We don't. Hush leans on five distinct features — each earns its place because the loop genuinely needs it.</p>
+    <div class="feats">
+      <div class="feat">
+        <div class="name">pgvector</div>
+        <div class="does">Powers dedup, confidence tiers, and the "learns from rejection" loop. Bugs become embeddings; memory becomes the moat.</div>
+      </div>
+      <div class="feat">
+        <div class="name">Branch projects</div>
+        <div class="does">Devin tests the fix against a fork of the customer's real data. Safe. The kind of detail judges nod at.</div>
+      </div>
+      <div class="feat">
+        <div class="name">Realtime</div>
+        <div class="does">The receipt page streams every step live: captured → testing → fixing → shipped. This is the demo wow.</div>
+      </div>
+      <div class="feat">
+        <div class="name">Auth + RLS</div>
+        <div class="does">Multi-tenant from day one. Customer A never sees Customer B's bug stream. A real product, not a demo.</div>
+      </div>
+      <div class="feat">
+        <div class="name">Storage + edge fns</div>
+        <div class="does">Session clips with signed URLs (so PRs can embed them) and the whole backend as one <code>insforge.toml</code>.</div>
+      </div>
+      <div class="feat">
+        <div class="name">InsForge AI</div>
+        <div class="does">The diagnosis step calls InsForge's built-in AI gateway. The whole brain runs on one platform.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 — DEMO -->
+  <section>
+    <div class="label">07 · What the judges see</div>
+    <h2>A 60-second story.</h2>
+    <div class="beats">
+      <div class="beat">
+        <div class="t">0:00</div>
+        <div class="w">A user clicks "Add to cart." Nothing happens.
+          <small>Split screen: their cursor on the left, the empty cart on the right. They rage-click. No error in the console. Sentry sees nothing.</small></div>
+      </div>
+      <div class="beat">
+        <div class="t">0:10</div>
+        <div class="w">The receipt page lights up.
+          <small>InsForge gets the Replicas webhook. pgvector checks: new bug. Realtime broadcasts <b>"Session captured ✓ · Booting sandbox…"</b> The user (and the judge) can see Hush is on it.</small></div>
+      </div>
+      <div class="beat">
+        <div class="t">0:25</div>
+        <div class="w">A test runs and fails.
+          <small>Limrun replays the session against an InsForge branch project. It clicks the button. The cart doesn't update. Red. Receipt updates: <b>"Test failing · Diagnosing…"</b></small></div>
+      </div>
+      <div class="beat">
+        <div class="t">0:40</div>
+        <div class="w">Devin opens a PR. Green CI.
+          <small>InsForge AI writes the bug report. Devin edits a one-line CSS regression, reruns the test, passes. The PR description embeds the session clip from InsForge Storage. <b>Confidence: 91% → open PR with fix.</b></small></div>
+      </div>
+      <div class="beat">
+        <div class="t">0:55</div>
+        <div class="w">"Sentry would still be silent. Hush shipped the fix in under a minute."
+          <small>Close on the GitHub PR. Judges can click through. The InsForge dashboard behind shows the audit row for the run.</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 — DAY PLAN -->
+  <section>
+    <div class="label">08 · Build plan</div>
+    <h2>Nine hours, seven checkpoints.</h2>
+    <div class="plan">
+      <div class="row" style="display:contents"><div class="t">T+0h</div><div class="b"><b>Lock the demo bug.</b> A toy e-commerce app with a broken "Add to cart" button (CSS regression). Pre-record one Replicas session as a fallback.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+1h</div><div class="b"><b>InsForge backend up.</b> One <code>insforge.toml</code>: schema with pgvector, RLS, Storage bucket, Realtime channel. Branch project forked. Demo app on Vercel points at it.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+3h</div><div class="b"><b>Signal end-to-end.</b> Replicas → edge fn → pgvector dedup → Storage clip → Realtime "session captured." Limrun boots, runs Playwright against the branch project. Test fails.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+5h</div><div class="b"><b>Devin closes the loop.</b> InsForge AI writes the diagnosis. Devin edits, reruns, passes. Edge fn opens the GitHub PR with the embedded clip.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+6h</div><div class="b"><b>Confidence tiers.</b> Score each run via pgvector similarity. Switch behaviour: high → PR, medium → draft PR, low → issue. Three demo paths, one loop.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+7h</div><div class="b"><b>Receipt page.</b> Next.js on Vercel subscribed to the Realtime channel. Status lines stream in live. Click-through to the PR works.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+8h</div><div class="b"><b>Pitch + fallback.</b> Pre-record the 60-second demo video for wifi failure. Rehearse 3×. 90-second cap.</div></div>
+      <div class="row" style="display:contents"><div class="t">T+9h</div><div class="b"><b>Demo.</b> Open on the broken button. Close on the green PR with the InsForge dashboard behind it. Don't narrate architecture — let the loop close.</div></div>
+    </div>
+  </section>
+
+  <!-- 9 — BACKUPS -->
+  <section>
+    <div class="label">09 · If we have to pivot</div>
+    <h2>Backups, collapsed.</h2>
+    <p class="muted">Hot-swap order: Hush → DepWatch → SOC2 Pilot. Click to expand.</p>
+
+    <details>
+      <summary>
+        <h3>DepWatch</h3>
+        <span class="one">A morning agent that watches your lockfile for supply-chain risk. Same downstream stack as Hush — just swap session capture for lockfile parse.</span>
+      </summary>
+      <div class="inner">Reuses the Bellwether deck architecture. Lower build risk; saves ~3 hours of design work. <b>Use if Replicas blocks.</b></div>
+    </details>
+
+    <details>
+      <summary>
+        <h3>Migration Pilot</h3>
+        <span class="one">InsForge branch projects + blast-radius report before any migration PR opens.</span>
+      </summary>
+      <div class="inner">Hits the InsForge sponsor head-on. Lower demo wow than Hush but unmistakably native to the primary sponsor.</div>
+    </details>
+
+    <details>
+      <summary>
+        <h3>SOC2 Pilot</h3>
+        <span class="one">Drop a security questionnaire URL; the agent fills it overnight with cited answers.</span>
+      </summary>
+      <div class="inner">Same loop shape as Hush, different buyer. Use if the room reads less dev-focused than we expect.</div>
+    </details>
+
+    <details>
+      <summary>
+        <h3>The other six</h3>
+        <span class="one">PR Diplomat · Doc Twin · Flake Court · Drift Sentinel · Onboarding Compiler · Spec → Stack</span>
+      </summary>
+      <div class="inner">Full scoring matrix lives in <code>archive/prior-events/</code>. None outscored Hush or DepWatch. Pull only if both top picks fail.</div>
+    </details>
+  </section>
+
+  <footer>
+    <span>// hush · idea doc · v6 · drafted 2026-06-06</span>
+    <span>see also: <a href="guidelines.html">guidelines.html</a> · <a href="archive/">archive/</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
