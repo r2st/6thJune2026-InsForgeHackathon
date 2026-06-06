@@ -1,0 +1,24 @@
+{
+  "name": "hush",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Hush — the bug-fixer for the bugs that don't crash.",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:demo": "pnpm -F demo dev",
+    "dev:receipt": "pnpm -F receipt dev",
+    "dev": "pnpm -r --parallel --stream dev",
+    "build": "pnpm -r --stream build",
+    "lint": "pnpm -r --stream lint",
+    "typecheck": "pnpm -r --stream typecheck",
+    "test": "pnpm -r --stream test",
+    "preflight": "bash scripts/preflight.sh"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hush.dev/schemas/diagnosis.v1.json",
+  "title": "Hush diagnose() output",
+  "description": "Contract for the InsForge AI call in functions/diagnose.ts. Versioned via promptVersion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "expectation",
+    "observation",
+    "failingPolicy",
+    "failingJwtClaim",
+    "tomlDiff",
+    "widensAccess",
+    "confidenceInputs",
+    "promptVersion"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Plain English, present tense. This is what the receipt page renders."
+    },
+    "expectation": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "What the user expected to see."
+    },
+    "observation": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "What actually happened."
+    },
+    "failingPolicy": {
+      "type": "string",
+      "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*\\.[a-zA-Z_][a-zA-Z0-9_]*$",
+      "description": "Fully-qualified policy name. Format: <table>.<policy>."
+    },
+    "failingJwtClaim": {
+      "type": "string",
+      "maxLength": 120,
+      "description": "The JWT claim path the policy reads, e.g. \"auth.jwt() -> 'tenant'\"."
+    },
+    "tomlDiff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "before", "after"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Dotted path into insforge.toml, e.g. \"tables.orders.rls\"."
+        },
+        "before": { "type": "string" },
+        "after":  { "type": "string" }
+      }
+    },
+    "widensAccess": {
+      "type": "boolean",
+      "description": "Model's self-report. functions/safety.ts may override with the deterministic check."
+    },
+    "confidenceInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["diffLoc", "tablesTouched", "policyBlast"],
+      "properties": {
+        "diffLoc":       { "type": "integer", "minimum": 0 },
+        "tablesTouched": { "type": "integer", "minimum": 0 },
+        "policyBlast":   {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of routes / tables gated by the changed policy."
+        }
+      }
+    },
+    "promptVersion": {
+      "type": "string",
+      "pattern": "^diagnose-v[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Tracks which prompt produced this output. Bump on prompt changes."
+    }
+  }
+}

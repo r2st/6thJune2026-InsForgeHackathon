@@ -5,6 +5,10 @@
 .env
 .env.*
 !.env.example
+
+# Branch-project pool state — contains per-fork signing secrets.
+.hush/
+
 ticketing/__pycache__/
 tickets.db
 tickets.db-shm

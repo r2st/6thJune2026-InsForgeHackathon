@@ -22,6 +22,11 @@ every kind of context, so you don't have to grep.
 | Role definitions                   | `agents/roles.md`                        |
 | Pitch script, slides, demo plan    | `demo/`                                  |
 | Brand kit (wordmark, mark, colors) | `assets/brand/`                          |
+| **Implementation map (start here)** | `IMPLEMENTATION.md`                     |
+| Canonical InsForge config          | `infra/insforge.toml`                    |
+| Edge functions (TypeScript)        | `functions/`                             |
+| Toy storefront (Next.js + rrweb)   | `apps/demo/`                             |
+| Live receipt page (Next.js)        | `apps/receipt/`                          |
 | Dev / build / deploy scripts       | `scripts/`                               |
 | Local ticket CLI (optional, infra) | `ticketing/` · `./tickets`               |
 
