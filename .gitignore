@@ -1,5 +1,14 @@
 .DS_Store
 
+# Node / pnpm
+node_modules/
+.pnpm-store/
+*.tsbuildinfo
+.next/
+dist/
+build/
+out/
+
 # Environment / secrets — never commit any .env variant.
 # `.env.example` is the only exception (committed by name below).
 .env
