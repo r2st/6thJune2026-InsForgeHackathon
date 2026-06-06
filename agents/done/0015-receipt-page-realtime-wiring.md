@@ -5,7 +5,7 @@ role: builder
 priority: P1
 owner: claude-app-layer
 started: 2026-06-06T13:00Z
-status: in_progress
+status: done
 depends_on: [0013]
 demo_path: yes — the screen the judges watch light up
 ---
@@ -40,3 +40,6 @@ moment.
 
 Receipt page can live in the same toy app on a separate route (`/receipt`)
 or as a sibling app. Same-app is simpler for the demo split-screen.
+
+## Outcome
+Built apps/receipt from scratch: app/r/[runId]/page.tsx subscribes to the 'receipt' channel, lights up the status feed, idle state at 30s, polling fallback, snapshot-on-poll for refresh survival. tsc + next build pass.

@@ -5,7 +5,7 @@ role: builder
 priority: P1
 owner: claude-app-layer
 started: 2026-06-06T13:00Z
-status: in_progress
+status: done
 depends_on: [0018, 0015]
 demo_path: yes — the on-stage moment between "diagnosing…" and "shipping…"
 ---
@@ -60,3 +60,6 @@ week."* That sentence is what makes a judge nod.
 
 ## Outcome
 <!-- Fill in when moving to done/. 2-3 lines max. -->
+
+## Outcome
+DiagnosisCard.tsx renders summary/expectation/observation/failingPolicy/failingJwtClaim from the 'diagnosed' event with brand styling (bg-elev2, accent left-border, mono eyebrow, 200ms fade). Degrades on partial payloads.

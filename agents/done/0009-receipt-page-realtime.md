@@ -5,7 +5,7 @@ role: builder
 priority: P0
 owner: claude-app-layer
 started: 2026-06-06T13:00Z
-status: in_progress
+status: done
 depends_on: [0008]
 demo_path: yes — slide 5 → 6 transition is driven by these events
 ---
@@ -50,3 +50,6 @@ deck CSS already — match the look in [demo/slides/index.html](../../demo/slide
 slide 5.
 
 ## Outcome
+
+## Outcome
+Publisher already shipped inside fix-trigger.ts (ReceiptEvent on channel 'receipt'). Built the subscriber half: lib/realtime.ts (WebSocket + polling fallback + scripted demo mode), feed renders out-of-order events last-write-wins per step.
