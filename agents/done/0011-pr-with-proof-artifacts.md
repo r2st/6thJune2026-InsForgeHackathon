@@ -54,3 +54,15 @@ Match the visual treatment to slide 7 in
 must be signed with an expiry well after the pitch slot.
 
 ## Outcome
+
+- `functions/openPr.ts` + `functions/prTemplate.md` — `openPr(input, client)`
+  with an injected `GitHubClient`. Title `policy(<table>): <one-liner>`; body in
+  fixed order (what broke · fix diff · proof/RLS trace · clip · fork link ·
+  confidence breakdown) with bold one-liner headers. Idempotent via the
+  deterministic head branch `hush/fix-<runId>` (edits existing PR, no dupes).
+- Three commit-status checks (branch-project-replay / existing-tests /
+  no-policy-blast) derived from the verdict + confidence; badge colour
+  green≥85 / amber 60–84 / purple<60.
+- Plugs into the orchestrator via its injected `ship` seam (0030).
+- 13 tests (pure builders + create + idempotent update + statuses).
+- Note: canonical path `functions/openPr.ts` (not `hush/`).
