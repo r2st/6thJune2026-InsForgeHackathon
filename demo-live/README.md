@@ -1,192 +1,202 @@
-# Hush Live Pipeline Dashboard
+# Hush Real Demo Environment
 
-A real-time visualization dashboard for the Hush bug-fixing pipeline. This is separate from the main slide-based demo and can be used for live demonstrations.
+A realistic demo environment that runs the actual toy app, simulates user rage-clicks, and shows real data flowing through the Hush pipeline. This is separate from both the slide-based demo and the animated dashboard.
 
 ## Features
 
-- **Animated Pipeline Visualization**: Shows data flowing through 5 stages (Capture → Diagnose → Fork → Replay → PR)
-- **Real-time Metrics**: Total time, confidence score, stages complete, issues found
-- **Progress Timeline**: Visual progress bar with step indicators
-- **Data Preview Panels**: Shows actual JSON payloads at each pipeline stage
-- **Interactive Controls**: Start demo, reset, and simulate real-time updates
+- **Real Toy App**: Runs the actual Next.js toy storefront with rrweb session capture
+- **Real Receipt Page**: Runs the actual receipt page with live status updates
+- **Browser Automation**: Uses Puppeteer to simulate real user rage-clicks in the browser
+- **Real Data Flow**: Shows actual session data, frustration signals, and pipeline progression
+- **End-to-End Testing**: Full pipeline from user interaction to PR creation
 
-## Usage
+## Quick Start
 
-### Quick Start
+### Option 1: Full Environment (Recommended)
 
-1. Open `pipeline-dashboard.html` in a web browser:
-   ```bash
-   open demo-live/pipeline-dashboard.html
-   # or double-click the file in your file browser
-   ```
+```bash
+cd demo-live
+./start-real-demo.sh
+```
 
-2. Click **"▶ Start Demo"** to run the automated demo sequence
+This starts:
+- Toy app on http://localhost:3000
+- Receipt page on http://localhost:3001
 
-3. Watch as data flows through each pipeline stage with animated transitions
+### Option 2: Browser Automation (Most Realistic)
 
-### Controls
+```bash
+cd demo-live
+npm install puppeteer
+node automate-browser-demo.js
+```
 
-- **Start Demo**: Runs the full pipeline sequence (~45 seconds)
-- **Reset**: Clears all progress and data
-- **Simulate Real-time Updates**: Shows WebSocket-style updates
+This opens a real browser and simulates rage-clicks on the actual toy app.
 
-## Pipeline Stages
+### Option 3: Simulation Mode (No Dependencies)
 
-### 1. 📡 Capture
-- Detects user frustration (rage-clicks, dead-clicks, abandoned forms)
-- Captures 30-second session buffer using rrweb
-- Taps backend logs matching the session ID
-- Extracts failing HTTP request from logs
+```bash
+cd demo-live
+node simulate-user-interaction.js
+```
 
-### 2. 🤖 Diagnose
-- AI analyzes captured session + backend logs
-- Identifies root cause (e.g., RLS policy misfire)
-- Generates TOML diff for the fix
-- Calculates confidence score
-
-### 3. 🔀 Fork
-- Spins up InsForge branch project from pre-warmed pool
-- Applies proposed TOML diff to fork config
-- Forges JWT for branch auth context
-- Configures fork for safe testing
-
-### 4. 🔁 Replay
-- Runs parallel replay: prod vs fork
-- Compares responses (row counts, error messages)
-- Verifies fix effectiveness
-- Generates verdict (fix confirmed/rejected)
-
-### 5. 📦 PR
-- Opens GitHub PR with TOML diff
-- Embeds session clip URL
-- Attaches before/after RLS trace
-- Shows confidence badge and proof artifacts
+This simulates the pipeline without requiring the apps to be running.
 
 ## Demo Script
 
-### For Hackathon Pitch
+### Real Demo with Browser Automation
 
-**Use alongside the slide-based demo (demo/slides/index.html):**
+1. **Start the environment:**
+   ```bash
+   ./start-real-demo.sh
+   ```
 
-1. **0:00 - 0:55**: Use slide-based demo for problem + solution setup
-2. **0:55 - 1:20**: Switch to live dashboard → Show Capture + Diagnose stages
-3. **1:20 - 1:50**: Show Fork + Replay stages with live data
-4. **1:50 - 2:15**: Show PR stage with proof artifacts
+2. **Run browser automation in another terminal:**
+   ```bash
+   npm install puppeteer  # first time only
+   node automate-browser-demo.js
+   ```
 
-**Key Talking Points:**
+3. **Watch the demo:**
+   - Browser opens with toy app
+   - Automated rage-clicks on Reload button
+   - Navigate to http://localhost:3001 to see live pipeline status
+   - Watch as real data flows through Capture → Diagnose → Fork → Replay → PR
 
-- "Watch as the session data flows through each stage"
-- "Here's the actual JSON payload captured from the user's session"
-- "The AI diagnosis shows the exact RLS policy that's failing"
-- "We fork the backend and run parallel replay to prove the fix works"
-- "The PR includes the session clip and before/after traces for verification"
+### Manual Demo (No Automation)
 
-### For Q&A
+1. **Start the environment:**
+   ```bash
+   ./start-real-demo.sh
+   ```
 
-**Common Questions & Dashboard Answers:**
+2. **Open browser:**
+   - Go to http://localhost:3000 (toy app)
+   - Navigate to orders page
+   - Rage-click Reload button 3+ times
+   - Open http://localhost:3001 (receipt page)
+   - Watch live status updates
 
-- "How does it work in real-time?" → Point to live data flowing through stages
-- "What data is captured?" → Expand data preview panels to show JSON payloads
-- "How do you know the fix works?" → Show prod vs fork replay results
-- "Is it automated?" → Start demo to show end-to-end automation
+## Components
 
-## Integration with Real System
+### Toy App (apps/demo)
+- Next.js storefront with rrweb session capture
+- Frustration signal detection (rage-clicks, dead-clicks, abandoned forms)
+- 30-second rolling session buffer
+- RLS bug: orders page shows 0 orders instead of 3
 
-This dashboard currently uses mock data for demonstration. To integrate with the real Hush system:
+### Receipt Page (apps/receipt)
+- Live status dashboard with InsForge Realtime SDK
+- Shows diagnosis results, replay comparison, PR status
+- Confidence badges and proof artifacts
+- Before/after traces
 
-1. **WebSocket Connection**: Connect to InsForge Realtime channel
-2. **Live Data**: Replace mock JSON with actual session/diagnosis data
-3. **Real-time Updates**: Subscribe to pipeline status changes
-4. **Session Clips**: Embed actual rrweb session replays
+### Browser Automation (automate-browser-demo.js)
+- Puppeteer-based user interaction simulation
+- Real browser window for manual inspection
+- Automated rage-click sequence
+- Session capture verification
 
-### Integration Points
+### Session Simulator (simulate-user-interaction.js)
+- Node.js simulation without browser requirements
+- Generates realistic session data
+- Simulates pipeline progression
+- Shows JSON payloads at each stage
 
-- **Capture Stage**: Connect to `/capture` edge function output
-- **Diagnose Stage**: Connect to `diagnose.ts` results
-- **Fork Stage**: Connect to branch project status
-- **Replay Stage**: Connect to parallel replay results
-- **PR Stage**: Connect to GitHub API for PR creation
+## Integration with Real Hush System
 
-## Customization
+The demo connects to the actual Hush components:
 
-### Modify Stage Data
+1. **Capture Edge Function**: `/capture` endpoint on InsForge
+2. **Diagnose Function**: `functions/diagnose.ts` with Anthropic API
+3. **Branch Project**: Pre-warmed InsForge branch projects
+4. **Replay System**: Parallel prod vs fork replay
+5. **GitHub API**: Real PR creation with proof artifacts
 
-Edit the `stageData` object in `pipeline-dashboard.html`:
+### Environment Variables
 
-```javascript
-const stageData = {
-    capture: {
-        status: 'active',
-        content: `Session ID: abc-123
-Frustration: rage-click
-Timestamp: 2026-06-06T13:37:42Z
-Page: /orders
-Expected rows: 3
-Actual rows: 0`
-    },
-    // ... other stages
-};
+```bash
+# For InsForge integration
+ANTHROPIC_API_KEY=your_anthropic_key
+INSFORGE_PROJECT_ID=your_project_id
+
+# For GitHub API (optional - creates real PRs)
+GITHUB_TOKEN=your_github_token
+GITHUB_REPO=your_repo_name
 ```
-
-### Adjust Timing
-
-Modify the delays in the `runStage()` function:
-
-```javascript
-await runStage(stages[i], 500);  // 500ms delay between stages
-// Inside runStage:
-setTimeout(() => {
-    updateStage(stage, 'success');
-}, 1500);  // 1.5s processing time per stage
-```
-
-### Change Styling
-
-Edit CSS variables in the `<style>` section:
-
-```css
-:root {
-    --bg: #0b0c0f;           /* Background color */
-    --accent: #ff6b35;       /* Primary accent color */
-    --good: #6ee7b7;         /* Success color */
-    --bad: #ff6b6b;          /* Error color */
-    // ... other colors
-}
-```
-
-## Performance
-
-- **File Size**: ~15KB (single HTML file)
-- **Load Time**: <1s
-- **Runtime**: ~45s for full demo sequence
-- **Browser Support**: All modern browsers (Chrome, Firefox, Safari, Edge)
 
 ## Troubleshooting
 
-### Dashboard not loading
-- Ensure JavaScript is enabled
-- Try opening in a different browser
-- Check browser console for errors
+### Toy app not starting
+```bash
+cd apps/demo
+npm install
+npm run dev
+```
 
-### Demo not starting
-- Click "Reset" first, then "Start Demo"
-- Refresh the page and try again
+### Receipt page not starting
+```bash
+cd apps/receipt
+npm install
+npm run dev
+```
 
-### Animation not smooth
-- Close other browser tabs
-- Check system performance
+### Puppeteer not working
+```bash
+npm install puppeteer
+# Or use simulation mode:
+node simulate-user-interaction.js
+```
+
+### Port conflicts
+```bash
+# Kill processes on ports 3000 and 3001
+lsof -ti:3000 | xargs kill -9
+lsof -ti:3001 | xargs kill -9
+```
+
+## Demo Variants
+
+### Variant 1: Pure Browser Automation
+- Most realistic user simulation
+- Actual browser interactions
+- Visual confirmation of rage-clicks
+- Requires Puppeteer
+
+### Variant 2: Simulation Mode
+- No browser required
+- Fast and reliable
+- Shows pipeline data
+- Good for testing
+
+### Variant 3: Manual Demo
+- Full manual control
+- Flexible timing
+- Good for Q&A
+- Most authentic
+
+## Performance
+
+- **Startup time**: ~15s (app startup + dependencies)
+- **Browser automation**: ~10s (3 rage-clicks + page loads)
+- **Pipeline processing**: ~30s (capture → diagnose → replay → PR)
+- **Total demo time**: ~55 seconds
+
+## Logs
+
+Logs are written to `logs/` directory:
+- `logs/demo-app.log` - Toy app logs
+- `logs/receipt-app.log` - Receipt page logs
 
 ## Future Enhancements
 
-- [ ] Real WebSocket integration with Hush system
-- [ ] Interactive stage exploration (click to expand details)
-- [ ] Side-by-side prod vs fork visualization
-- [ ] Session clip embedding with rrweb player
-- [ ] GitHub PR live preview
+- [ ] Real WebSocket integration with InsForge Realtime
+- [ ] Actual InsForge edge function deployment
+- [ ] Real GitHub PR creation
 - [ ] Multiple session tracking
-- [ ] Historical pipeline runs
-- [ ] Performance metrics per stage
+- [ ] Recording/playback of demo sessions
+- [ ] CI/CD integration for demo environment
 
 ## License
 
-Same as parent project (MIT/Apache as appropriate)
+Same as parent project

@@ -1,0 +1,16 @@
+{
+  "name": "@hush/demo-live",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Hush Real Demo Environment - browser automation and realistic user simulation",
+  "scripts": {
+    "install-deps": "npm install",
+    "start:demo": "./start-real-demo.sh",
+    "automate": "node automate-browser-demo.js",
+    "simulate": "node simulate-user-interaction.js"
+  },
+  "dependencies": {
+    "puppeteer": "^22.0.0"
+  },
+  "devDependencies": {}
+}
