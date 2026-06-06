@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bellwether — pitch deck</title>
+<style>
+  :root{
+    --bg:#0b0d10;
+    --panel:#12161b;
+    --panel2:#161b22;
+    --ink:#e7ecf3;
+    --mute:#8a94a6;
+    --line:#1f2630;
+    --accent:#7dd3fc;
+    --accent2:#a78bfa;
+    --good:#34d399;
+    --warn:#fbbf24;
+    --bad:#f87171;
+    --bell:#fbbf24;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Inter","SF Pro Text",sans-serif;
+    line-height:1.5;overflow:hidden}
+
+  /* deck */
+  .deck{position:relative;width:100vw;height:100vh}
+  .slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
+    padding:6vh 7vw;opacity:0;transition:opacity .35s ease;pointer-events:none}
+  .slide.active{opacity:1;pointer-events:auto}
+
+  /* type */
+  h1{font-size:clamp(48px,7vw,96px);font-weight:800;letter-spacing:-.025em;line-height:.95}
+  h1 .grad{background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(28px,3.4vw,44px);font-weight:700;letter-spacing:-.015em;margin-bottom:.4em}
+  h3{font-size:clamp(15px,1.4vw,18px);color:var(--mute);font-weight:500;letter-spacing:.01em}
+  .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--mute);margin-bottom:18px}
+  .tag{display:inline-block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--mute)}
+
+  /* chrome */
+  .nav{position:fixed;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:10}
+  .dot{width:7px;height:7px;border-radius:50%;background:#2a313c;cursor:pointer;transition:all .2s}
+  .dot.on{background:var(--accent);transform:scale(1.4)}
+  .counter{position:fixed;top:18px;right:24px;font-size:11px;color:var(--mute);letter-spacing:.14em;z-index:10}
+  .brand{position:fixed;top:18px;left:24px;font-size:11px;color:var(--mute);letter-spacing:.18em;text-transform:uppercase;z-index:10;display:flex;align-items:center;gap:8px}
+  .brand .bell{color:var(--bell)}
+  .hint{position:fixed;bottom:18px;right:24px;font-size:10px;color:var(--mute);letter-spacing:.14em;z-index:10}
+
+  /* slide 1 — title */
+  .s-title{justify-content:center;align-items:flex-start}
+  .s-title .lede{font-size:clamp(18px,1.8vw,22px);color:var(--mute);margin-top:22px;max-width:60ch}
+  .s-title .meta{margin-top:28px;display:flex;gap:14px;flex-wrap:wrap}
+
+  /* sponsor flow strip on title */
+  .sponsor-flow{margin-top:28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:linear-gradient(90deg,rgba(125,211,252,.05),rgba(167,139,250,.05));
+    border:1px solid var(--line);border-radius:14px;padding:14px 18px;max-width:1100px}
+  .sponsor-flow .sf-step{font-size:13px;color:var(--ink);line-height:1.4;flex:1;min-width:180px}
+  .sponsor-flow .sf-arrow{color:var(--mute);font-size:18px;font-weight:600}
+  .bell-mark{display:inline-block;font-size:clamp(48px,7vw,96px);color:var(--bell);
+    text-shadow:0 0 40px rgba(251,191,36,.35);margin-right:.2em;vertical-align:-.05em}
+
+  /* generic layout helpers */
+  .grid{display:grid;gap:20px}
+  .g-2{grid-template-columns:repeat(2,1fr)}
+  .g-3{grid-template-columns:repeat(3,1fr)}
+  .g-4{grid-template-columns:repeat(4,1fr)}
+  .g-5{grid-template-columns:repeat(5,1fr)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card.warn{border-color:rgba(251,191,36,.35);background:linear-gradient(180deg,rgba(251,191,36,.05),transparent)}
+  .card.good{border-color:rgba(52,211,153,.35);background:linear-gradient(180deg,rgba(52,211,153,.05),transparent)}
+  .card.bad{border-color:rgba(248,113,113,.35);background:linear-gradient(180deg,rgba(248,113,113,.05),transparent)}
+  .card h4{font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;font-weight:600}
+  .card .v{font-size:clamp(28px,3.2vw,40px);font-weight:700;letter-spacing:-.015em;line-height:1.1}
+  .card .l{font-size:13px;color:var(--mute);margin-top:6px}
+
+  /* slide 2 — timeline */
+  .timeline{position:relative;margin-top:50px;height:160px}
+  .tl-line{position:absolute;left:0;right:0;top:78px;height:2px;background:var(--line)}
+  .tl-tick{position:absolute;top:64px;width:2px;height:30px;background:var(--line)}
+  .tl-label{position:absolute;top:104px;font-size:11px;color:var(--mute);letter-spacing:.12em;text-transform:uppercase;transform:translateX(-50%)}
+  .tl-event{position:absolute;top:38px;transform:translateX(-50%);text-align:center}
+  .tl-event .ring{width:30px;height:30px;border-radius:50%;border:2px solid var(--bad);background:rgba(248,113,113,.1);margin:0 auto 6px;
+    box-shadow:0 0 24px rgba(248,113,113,.3)}
+  .tl-event .lab{font-size:12px;color:var(--bad);font-weight:600}
+
+  /* slide 3 — KPIs */
+  .kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:30px}
+
+  /* arch SVG container */
+  .arch-wrap{margin-top:24px;flex:1;display:flex;align-items:center;justify-content:center}
+  svg.arch{width:100%;max-width:1100px;height:auto}
+
+  /* risk dims */
+  .risk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:30px}
+  .risk{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;position:relative}
+  .risk .ico{width:36px;height:36px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:18px}
+  .risk h4{font-size:14px;font-weight:700;margin-bottom:6px}
+  .risk p{font-size:12px;color:var(--mute);line-height:1.45}
+
+  /* pipeline */
+  .pipe{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:30px;position:relative}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 12px;text-align:center;position:relative}
+  .step .num{font-size:11px;color:var(--accent);letter-spacing:.18em;font-weight:700;margin-bottom:6px}
+  .step .name{font-size:13px;font-weight:600;margin-bottom:4px}
+  .step .t{font-size:11px;color:var(--mute);font-family:ui-monospace,monospace}
+  .step::after{content:"→";position:absolute;right:-12px;top:50%;transform:translateY(-50%);
+    color:var(--mute);font-size:14px;z-index:2}
+  .step:last-child::after{content:""}
+
+  /* memo mockup */
+  .memo{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin-top:24px;max-width:760px}
+  .memo-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:14px}
+  .memo-head .name{font-size:18px;font-weight:700}
+  .memo-head .sub{font-size:12px;color:var(--mute);margin-top:2px}
+  .score{text-align:right}
+  .score .v{font-size:32px;font-weight:800;color:var(--bad);line-height:1}
+  .score .d{font-size:12px;color:var(--warn);margin-top:2px}
+  .spark{display:inline-flex;align-items:flex-end;gap:3px;height:34px;margin-top:8px}
+  .spark span{display:block;width:8px;background:#2a313c;border-radius:2px 2px 0 0}
+  .spark span.bump{background:linear-gradient(180deg,#f87171,#fbbf24)}
+  .spark-lab{font-size:10px;color:var(--mute);letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+  .signal{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .signal:last-child{border:0}
+  .signal .sev{flex:0 0 28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:ui-monospace,monospace}
+  .signal .sev.hi{background:rgba(248,113,113,.15);color:var(--bad);border:1px solid rgba(248,113,113,.3)}
+  .signal .sev.md{background:rgba(251,191,36,.15);color:var(--warn);border:1px solid rgba(251,191,36,.3)}
+  .signal .sev.lo{background:rgba(125,211,252,.12);color:var(--accent);border:1px solid rgba(125,211,252,.25)}
+  .signal .body{flex:1}
+  .signal .txt{font-size:13px}
+  .signal .src{font-size:11px;color:var(--accent);text-decoration:underline;margin-top:2px;display:inline-block}
+
+  /* stack */
+  .stack-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
+  .tool{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .tool .role{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+  .tool .name{font-size:18px;font-weight:700;margin-bottom:4px}
+  .tool .why{font-size:12px;color:var(--mute);line-height:1.5}
+  .tool.brightdata .name{color:#fbbf24}
+  .tool.amd .name{color:#fca5a5}
+  .tool.granite .name{color:#a5f3fc}
+  .tool.crew .name{color:#86efac}
+  .tool.comet .name{color:#7dd3fc}
+  .tool.hubspot .name{color:#f0abfc}
+
+  /* close */
+  .closer{display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+  .closer blockquote{font-size:clamp(24px,3vw,38px);font-weight:600;line-height:1.25;letter-spacing:-.01em;
+    border-left:4px solid var(--accent2);padding:8px 22px;max-width:24ch}
+  .closer .a{font-size:clamp(60px,9vw,120px);font-weight:800;color:var(--good);margin-top:30px;letter-spacing:-.02em}
+
+  /* bar chart */
+  .bars{margin-top:30px;max-width:720px}
+  .bar-row{display:grid;grid-template-columns:200px 1fr 110px;gap:16px;align-items:center;margin:14px 0;font-size:13px}
+  .bar-row .lab{color:var(--mute)}
+  .bar-track{height:32px;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative}
+  .bar-fill{height:100%;border-radius:8px 0 0 8px;display:flex;align-items:center;padding-left:12px;font-size:12px;font-weight:600;color:#0b0d10}
+  .bar-row .v{font-weight:700;font-family:ui-monospace,monospace;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="brand"><span class="bell">🔔</span> BELLWETHER</div>
+<div class="counter"><span id="cur">01</span> / <span id="total">12</span></div>
+<div class="hint">← → arrows · space</div>
+
+<div class="deck" id="deck">
+
+  <!-- ─── 1 · TITLE ─────────────────────────────────────── -->
+  <section class="slide s-title active">
+    <div class="eyebrow">Web Data UNLOCKED · lablab.ai</div>
+    <h1><span class="bell-mark">🔔</span><span class="grad">Bellwether</span></h1>
+    <p class="lede">A morning agent that watches your supplier list, surfaces risk from the live web, and files an audit-grade review ticket — autonomously, with every claim cited.</p>
+
+    <div class="sponsor-flow">
+      <span class="sf-step"><strong style="color:#86efac">CrewAI</strong> swarm watches the supplier list</span>
+      <span class="sf-arrow">→</span>
+      <span class="sf-step"><strong style="color:#fbbf24">Bright Data</strong> scrapes LinkedIn / news / SERP daily</span>
+      <span class="sf-arrow">→</span>
+      <span class="sf-step"><strong style="color:#a5f3fc">Granite</strong> on <strong style="color:#fca5a5">MI300X</strong> extracts risk signals<br><span style="color:var(--mute);font-size:11px">layoffs · lawsuits · leadership churn · sanctions hits</span></span>
+      <span class="sf-arrow">→</span>
+      <span class="sf-step"><strong style="color:#7dd3fc">Perplexity Comet</strong> drives the CRM in-browser to file the supplier-review ticket</span>
+    </div>
+
+    <div class="meta">
+      <span class="tag">Solo build · Subhendu Das</span>
+      <span class="tag">3-hour build</span>
+      <span class="tag">SF finale · May 30–31</span>
+      <span class="tag">B2B procurement</span>
+    </div>
+  </section>
+
+  <!-- ─── 2 · THE PROBLEM (TIMELINE) ────────────────────── -->
+  <section class="slide">
+    <div class="eyebrow">The problem</div>
+    <h2>Reviews are annual. <span style="color:var(--bad)">Problems aren't.</span></h2>
+    <div class="timeline">
+      <div class="tl-line"></div>
+      <!-- ticks -->
+      <div class="tl-tick" style="left:5%"></div>
+      <div class="tl-tick" style="left:25%"></div>
+      <div class="tl-tick" style="left:45%"></div>
+      <div class="tl-tick" style="left:65%"></div>
+      <div class="tl-tick" style="left:85%"></div>
+      <div class="tl-label" style="left:5%">Q1</div>
+      <div class="tl-label" style="left:25%">Q2</div>
+      <div class="tl-label" style="left:45%">Q3</div>
+      <div class="tl-label" style="left:65%">Q4</div>
+      <div class="tl-label" style="left:85%">Annual review</div>
+      <!-- events -->
+      <div class="tl-event" style="left:18%"><div class="ring"></div><div class="lab">CFO leaves</div></div>
+      <div class="tl-event" style="left:38%"><div class="ring"></div><div class="lab">Lawsuit filed</div></div>
+      <div class="tl-event" style="left:58%"><div class="ring"></div><div class="lab">Layoffs −15%</div></div>
+      <div class="tl-event" style="left:72%"><div class="ring"></div><div class="lab">Delivery slips</div></div>
+    </div>
+    <p style="margin-top:60px;color:var(--mute);font-size:16px;max-width:60ch">By the time the PO is reviewed, the supplier has already been bleeding for three quarters.</p>
+  </section>
+
+  <!-- ─── 3 · THE MATH ──────────────────────────────────── -->
+  <section class="slide">
+    <div class="eyebrow">Why nobody catches it</div>
+    <h2>The math doesn't add up.</h2>
+    <div class="kpi-row">
+      <div class="card">
+        <div class="v" style="color:var(--accent)">200<span style="color:var(--mute)">–</span>2,000</div>
+        <div class="l">Active suppliers per mid-market team</div>
+      </div>
+      <div class="card">
+        <div class="v" style="color:var(--warn)">1×/yr</div>
+        <div class="l">Standard review cadence (often less)</div>
+      </div>
+      <div class="card">
+        <div class="v" style="color:var(--bad)">$50M<span style="color:var(--mute)">–</span>$500M</div>
+        <div class="l">Annual spend riding on those reviews</div>
+      </div>
+    </div>
+    <p style="margin-top:36px;color:var(--mute);font-size:16px;max-width:60ch">A four-person procurement team can't manually read the web on 800 suppliers every week. So they don't.</p>
+    <div style="margin-top:24px;padding:14px 18px;border:1px solid rgba(52,211,153,.35);border-radius:12px;background:linear-gradient(90deg,rgba(52,211,153,.06),transparent);max-width:780px;font-size:14px">
+      <span style="color:var(--good);font-weight:700">One avoided supplier blowup</span>
+      <span style="color:var(--mute)"> · typical contract-renegotiation cost </span>
+      <strong style="color:var(--ink)">$250K–$2M</strong>
+      <span style="color:var(--mute)"> · pays for </span>
+      <strong style="color:var(--ink)">35+ years</strong>
+      <span style="color:var(--mute)"> of Bellwether on a 200-supplier list.</span>
+    </div>
+  </section>
+
+  <!-- ─── 4 · WHY NOW ───────────────────────────────────── -->
+  <section class="slide">
+    <div class="eyebrow">What changed</div>
+    <h2>Three pieces, finally composable.</h2>
+    <div class="grid g-3" style="margin-top:30px">
+      <div class="card">
+        <div style="font-size:32px;margin-bottom:10px">🌐</div>
+        <h4>Live web</h4>
+        <p style="font-size:14px;color:var(--mute);line-height:1.55">Bright Data made the open web an API surface — SERP, LinkedIn, sanctions lists, hundreds of pre-built scrapers.</p>
+      </div>
+      <div class="card">
+        <div style="font-size:32px;margin-bottom:10px">🧠</div>
+        <h4>Open models</h4>
+        <p style="font-size:14px;color:var(--mute);line-height:1.55">IBM Granite on AMD MI300X — self-hosted JSON-mode extraction, no token meter.</p>
+      </div>
+      <div class="card">
+        <div style="font-size:32px;margin-bottom:10px">🖱️</div>
+        <h4>Agentic browser</h4>
+        <p style="font-size:14px;color:var(--mute);line-height:1.55">Perplexity Comet drives the CRM the way a human would — last-mile action solved.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 5 · ARCHITECTURE ──────────────────────────────── -->
+  <section class="slide">
+    <div class="eyebrow">Architecture</div>
+    <h2>One pipeline, one supplier at a time.</h2>
+    <div class="arch-wrap">
+      <svg class="arch" viewBox="0 0 1100 460" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#5a6470"/>
+          </marker>
+          <linearGradient id="g1" x1="0" x2="1">
+            <stop offset="0" stop-color="#7dd3fc" stop-opacity=".15"/>
+            <stop offset="1" stop-color="#a78bfa" stop-opacity=".15"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Scheduler -->
+        <g>
+          <rect x="20" y="20" width="160" height="56" rx="10" fill="#161b22" stroke="#1f2630"/>
+          <text x="100" y="46" text-anchor="middle" fill="#8a94a6" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">06:00 LOCAL</text>
+          <text x="100" y="64" text-anchor="middle" fill="#e7ecf3" font-size="13" font-weight="600">Scheduler</text>
+        </g>
+        <path d="M 100 76 L 100 110" stroke="#5a6470" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- CrewAI -->
+        <g>
+          <rect x="20" y="118" width="160" height="68" rx="10" fill="url(#g1)" stroke="#86efac" stroke-opacity=".5"/>
+          <text x="100" y="142" text-anchor="middle" fill="#86efac" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">CREWAI</text>
+          <text x="100" y="160" text-anchor="middle" fill="#e7ecf3" font-size="13" font-weight="600">Crew of 4</text>
+          <text x="100" y="176" text-anchor="middle" fill="#8a94a6" font-size="11">per supplier</text>
+        </g>
+        <path d="M 180 152 L 240 152" stroke="#5a6470" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Bright Data -->
+        <g>
+          <rect x="240" y="118" width="180" height="68" rx="10" fill="#161b22" stroke="#3b3a1f"/>
+          <text x="330" y="142" text-anchor="middle" fill="#fbbf24" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">BRIGHT DATA</text>
+          <text x="330" y="160" text-anchor="middle" fill="#e7ecf3" font-size="13" font-weight="600">Live web evidence</text>
+          <text x="330" y="176" text-anchor="middle" fill="#8a94a6" font-size="11">SERP · LinkedIn · scrapers</text>
+        </g>
+
+        <!-- Sanctions registries (direct, never via Bright Data) -->
+        <g>
+          <rect x="740" y="20" width="180" height="56" rx="10" fill="#161b22" stroke="#3a2222"/>
+          <text x="830" y="42" text-anchor="middle" fill="#f87171" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">SANCTIONS</text>
+          <text x="830" y="60" text-anchor="middle" fill="#e7ecf3" font-size="12" font-weight="600">OFAC · EU · UK HMT</text>
+        </g>
+        <path d="M 830 76 L 830 118" stroke="#f87171" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="858" y="100" fill="#f87171" font-size="10" font-family="ui-monospace,monospace" letter-spacing="1">DIRECT</text>
+        <path d="M 420 152 L 480 152" stroke="#5a6470" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Granite -->
+        <g>
+          <rect x="480" y="118" width="200" height="68" rx="10" fill="#161b22" stroke="#22323a"/>
+          <text x="580" y="142" text-anchor="middle" fill="#a5f3fc" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">GRANITE · MI300X</text>
+          <text x="580" y="160" text-anchor="middle" fill="#e7ecf3" font-size="13" font-weight="600">JSON-mode extraction</text>
+          <text x="580" y="176" text-anchor="middle" fill="#8a94a6" font-size="11">evidence → RiskSignal[]</text>
+        </g>
+        <path d="M 680 152 L 740 152" stroke="#5a6470" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Scorer -->
+        <g>
+          <rect x="740" y="118" width="180" height="68" rx="10" fill="#161b22" stroke="#1f2630"/>
+          <text x="830" y="142" text-anchor="middle" fill="#8a94a6" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">DETERMINISTIC</text>
+          <text x="830" y="160" text-anchor="middle" fill="#e7ecf3" font-size="13" font-weight="600">Risk scorer (Python)</text>
+          <text x="830" y="176" text-anchor="middle" fill="#8a94a6" font-size="11">weighted sum · 7-day delta</text>
+        </g>
+        <path d="M 830 186 L 830 220" stroke="#5a6470" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Writer -->
+        <g>
+          <rect x="740" y="228" width="180" height="68" rx="10" fill="#161b22" stroke="#22323a"/>
+          <text x="830" y="252" text-anchor="middle" fill="#a5f3fc" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">GRANITE</text>
+          <text x="830" y="270" text-anchor="middle" fill="#e7ecf3" font-size="13" font-weight="600">Writer agent</text>
+          <text x="830" y="286" text-anchor="middle" fill="#8a94a6" font-size="11">one-page memo, cited</text>
+        </g>
+        <path d="M 740 262 L 680 262" stroke="#5a6470" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Comet -->
+        <g>
+          <rect x="480" y="228" width="200" height="68" rx="10" fill="#161b22" stroke="#1f3a3a"/>
+          <text x="580" y="252" text-anchor="middle" fill="#7dd3fc" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">PERPLEXITY COMET</text>
+          <text x="580" y="270" text-anchor="middle" fill="#e7ecf3" font-size="13" font-weight="600">Drives the browser</text>
+          <text x="580" y="286" text-anchor="middle" fill="#8a94a6" font-size="11">opens · attaches · assigns</text>
+        </g>
+        <path d="M 480 262 L 420 262" stroke="#5a6470" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- HubSpot -->
+        <g>
+          <rect x="240" y="228" width="180" height="68" rx="10" fill="url(#g1)" stroke="#a78bfa" stroke-opacity=".4"/>
+          <text x="330" y="252" text-anchor="middle" fill="#f0abfc" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">HUBSPOT</text>
+          <text x="330" y="270" text-anchor="middle" fill="#e7ecf3" font-size="13" font-weight="600">Supplier Review ticket</text>
+          <text x="330" y="286" text-anchor="middle" fill="#8a94a6" font-size="11">assigned to account owner</text>
+        </g>
+
+        <!-- Auditor view label -->
+        <g>
+          <rect x="480" y="340" width="440" height="48" rx="10" fill="#0e1318" stroke="#22322a" stroke-dasharray="4 3"/>
+          <text x="700" y="362" text-anchor="middle" fill="#86efac" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">AUDIT TRAIL</text>
+          <text x="700" y="378" text-anchor="middle" fill="#8a94a6" font-size="11">every score → source_url, fetched_at, scraper_id</text>
+        </g>
+        <path d="M 830 296 L 830 340" stroke="#5a6470" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <path d="M 580 296 L 580 340" stroke="#5a6470" stroke-width="1.5" stroke-dasharray="3 3"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ─── 6 · 5 RISK DIMENSIONS ─────────────────────────── -->
+  <section class="slide">
+    <div class="eyebrow">What gets watched</div>
+    <h2>Five risk dimensions. <span style="color:var(--mute);font-weight:500;font-size:.7em">One pipeline.</span></h2>
+    <div class="risk-grid">
+      <div class="risk">
+        <div class="ico">📉</div>
+        <h4>Financial distress</h4>
+        <p>News SERP, LinkedIn headcount, SEC filings if public.</p>
+      </div>
+      <div class="risk">
+        <div class="ico">👤</div>
+        <h4>Leadership churn</h4>
+        <p>C-suite + your counterpart's LinkedIn role changes.</p>
+      </div>
+      <div class="risk">
+        <div class="ico">⚖️</div>
+        <h4>Legal exposure</h4>
+        <p>Court records (PACER, state dockets, Companies House), regulator press.</p>
+      </div>
+      <div class="risk">
+        <div class="ico" style="color:var(--bad)">🛑</div>
+        <h4>Sanctions</h4>
+        <p>OFAC · EU · UK HMT — daily downloads. Hard stop.</p>
+      </div>
+      <div class="risk">
+        <div class="ico">💬</div>
+        <h4>Operational chatter</h4>
+        <p>Niche forums, Glassdoor, customer complaints.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 7 · PIPELINE ──────────────────────────────────── -->
+  <section class="slide">
+    <div class="eyebrow">Per supplier, every morning</div>
+    <h2>~14 seconds, end to end.</h2>
+    <div class="pipe">
+      <div class="step"><div class="num">01</div><div class="name">Wake</div><div class="t">06:00</div></div>
+      <div class="step"><div class="num">02</div><div class="name">Fan out</div><div class="t">crew × 4</div></div>
+      <div class="step"><div class="num">03</div><div class="name">Scrape</div><div class="t">Bright Data</div></div>
+      <div class="step"><div class="num">04</div><div class="name">Extract</div><div class="t">Granite</div></div>
+      <div class="step"><div class="num">05</div><div class="name">Score</div><div class="t">Python</div></div>
+      <div class="step"><div class="num">06</div><div class="name">File</div><div class="t">Comet → CRM</div></div>
+    </div>
+    <p style="margin-top:50px;color:var(--mute);font-size:15px;max-width:64ch">
+      Scoring is <em style="color:var(--ink)">deterministic code</em>, not an LLM call. The model extracts; the math is auditable. Sanctions hits are exact string matches against the official lists — Granite is never allowed to <em style="color:var(--ink)">decide</em> a regulatory verdict.
+    </p>
+  </section>
+
+  <!-- ─── 8 · MEMO MOCKUP ───────────────────────────────── -->
+  <section class="slide">
+    <div class="eyebrow">The audit moment</div>
+    <h2>Every score, hyperlinked.</h2>
+    <div class="memo">
+      <div class="memo-head">
+        <div>
+          <div class="name">Acme Electronics Ltd</div>
+          <div class="sub">Supplier Review · 2026-05-30 · Account: Priya Shah</div>
+        </div>
+        <div class="score">
+          <div class="v">7.4</div>
+          <div class="d">▲ +4.3 vs last week</div>
+          <div class="spark" aria-label="7-day score trend">
+            <span style="height:28%"></span>
+            <span style="height:30%"></span>
+            <span style="height:31%"></span>
+            <span style="height:31%"></span>
+            <span style="height:58%" class="bump"></span>
+            <span style="height:69%" class="bump"></span>
+            <span style="height:74%" class="bump"></span>
+          </div>
+          <div class="spark-lab">7 days · daily score</div>
+        </div>
+      </div>
+      <div class="signal">
+        <div class="sev hi">9</div>
+        <div class="body">
+          <div class="txt"><strong>CFO departed</strong> last Tuesday after 6 years.</div>
+          <a class="src" href="#">linkedin.com/in/cfo-acme · fetched 06:02</a>
+        </div>
+      </div>
+      <div class="signal">
+        <div class="sev hi">8</div>
+        <div class="body">
+          <div class="txt"><strong>Federal court docket</strong> filed three days ago — wage-and-hour class action.</div>
+          <a class="src" href="#">pacer.uscourts.gov/.../1:26-cv-04321 · fetched 06:02</a>
+        </div>
+      </div>
+      <div class="signal">
+        <div class="sev md">5</div>
+        <div class="body">
+          <div class="txt"><strong>Headcount −12%</strong> over the last quarter (LinkedIn).</div>
+          <a class="src" href="#">brightdata · linkedin/headcount · fetched 06:03</a>
+        </div>
+      </div>
+      <div class="signal">
+        <div class="sev lo">2</div>
+        <div class="body">
+          <div class="txt">No sanctions, litigation, or chatter signals this week.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 9 · CLOSE THE LOOP ────────────────────────────── -->
+  <section class="slide">
+    <div class="eyebrow">The agent moment</div>
+    <h2>Bellwether files its own ticket.</h2>
+    <div class="arch-wrap">
+      <svg class="arch" viewBox="0 0 1100 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#7dd3fc"/>
+          </marker>
+        </defs>
+
+        <!-- Memo card -->
+        <g>
+          <rect x="40" y="100" width="200" height="80" rx="12" fill="#161b22" stroke="#22323a"/>
+          <text x="140" y="124" text-anchor="middle" fill="#a5f3fc" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">MEMO.MD</text>
+          <text x="140" y="148" text-anchor="middle" fill="#e7ecf3" font-size="14" font-weight="600">Score 7.4 · cited</text>
+          <text x="140" y="166" text-anchor="middle" fill="#8a94a6" font-size="11">3 signals, all linked</text>
+        </g>
+
+        <!-- arrow 1 -->
+        <path d="M 240 140 L 410 140" stroke="#7dd3fc" stroke-width="2" marker-end="url(#arr2)"/>
+        <text x="325" y="128" text-anchor="middle" fill="#7dd3fc" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">HANDOFF</text>
+
+        <!-- Comet -->
+        <g>
+          <rect x="410" y="80" width="280" height="120" rx="12" fill="url(#g1)" stroke="#7dd3fc" stroke-opacity=".5"/>
+          <text x="550" y="108" text-anchor="middle" fill="#7dd3fc" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">PERPLEXITY COMET</text>
+          <text x="550" y="134" text-anchor="middle" fill="#e7ecf3" font-size="16" font-weight="700">Drives the CRM</text>
+          <line x1="430" y1="150" x2="670" y2="150" stroke="#1f2630"/>
+          <text x="440" y="170" fill="#8a94a6" font-size="12">1. Open HubSpot</text>
+          <text x="440" y="186" fill="#8a94a6" font-size="12">2. Navigate to supplier · attach memo · assign owner</text>
+        </g>
+
+        <!-- arrow 2 -->
+        <path d="M 690 140 L 860 140" stroke="#7dd3fc" stroke-width="2" marker-end="url(#arr2)"/>
+        <text x="775" y="128" text-anchor="middle" fill="#7dd3fc" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">FILE</text>
+
+        <!-- HubSpot ticket -->
+        <g>
+          <rect x="860" y="80" width="200" height="120" rx="12" fill="#161b22" stroke="#a78bfa" stroke-opacity=".4"/>
+          <text x="960" y="108" text-anchor="middle" fill="#f0abfc" font-size="11" font-family="ui-monospace,monospace" letter-spacing="2">HUBSPOT</text>
+          <text x="960" y="134" text-anchor="middle" fill="#e7ecf3" font-size="14" font-weight="700">Supplier Review</text>
+          <text x="960" y="154" text-anchor="middle" fill="#fbbf24" font-size="12">severity-1 · Priya Shah</text>
+          <text x="960" y="174" text-anchor="middle" fill="#8a94a6" font-size="11">memo.md attached</text>
+        </g>
+
+        <!-- Bottom annotation -->
+        <text x="550" y="248" text-anchor="middle" fill="#8a94a6" font-size="14" font-style="italic">No human in the loop on the open-and-file step — and there shouldn't be.</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ─── 10 · STACK ────────────────────────────────────── -->
+  <section class="slide">
+    <div class="eyebrow">The stack</div>
+    <h2>Six sponsor tools, one demo.</h2>
+    <div class="stack-row">
+      <div class="tool brightdata"><div class="role">Live web</div><div class="name">Bright Data</div><div class="why">SERP · LinkedIn · hundreds of scrapers · sanctions lists. Fresh evidence, not stale DBs.</div></div>
+      <div class="tool amd"><div class="role">Hosting</div><div class="name">AMD MI300X</div><div class="why">ROCm + vLLM. The VRAM to serve granite-3.1-8b-instruct at low latency on one node.</div></div>
+      <div class="tool granite"><div class="role">Extraction</div><div class="name">IBM Granite</div><div class="why">JSON-mode extraction. Cheap, deterministic, never decides regulatory verdicts.</div></div>
+      <div class="tool crew"><div class="role">Orchestration</div><div class="name">CrewAI</div><div class="why">One crew of 4 per supplier. Researcher · Compliance · Analyst · Writer.</div></div>
+      <div class="tool comet"><div class="role">Last mile</div><div class="name">Perplexity Comet</div><div class="why">Drives the CRM the way a human would. Opens, attaches, assigns — autonomously.</div></div>
+      <div class="tool hubspot"><div class="role">Demo surface</div><div class="name">HubSpot</div><div class="why">Free CRM tier. Lowest-friction enterprise surface for the close-the-loop beat.</div></div>
+    </div>
+    <div style="margin-top:24px;padding:14px 18px;border:1px solid rgba(167,139,250,.3);border-radius:12px;background:linear-gradient(90deg,rgba(167,139,250,.06),transparent)">
+      <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);margin-bottom:6px">Why Coupa / SAP Ariba can't just ship this</div>
+      <p style="font-size:13.5px;color:var(--ink);line-height:1.55">
+        <strong>Live-web licensing</strong> incumbents have ERP feeds, not Bright Data access · <strong>model economics</strong> Granite on MI300X is ~$0.02/supplier/day, GPT-4-class pricing would price them out of the mid-market · <strong>deterministic scoring</strong> the model is pinned to extraction; the math is auditable Python — incumbents ship LLM-judged scores their compliance teams already reject.
+      </p>
+    </div>
+    <div style="margin-top:14px;padding:14px 18px;border:1px dashed var(--line);border-radius:12px;background:#0e1318">
+      <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin-bottom:8px">Every layer has a live + fallback path</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;font-size:12px">
+        <div><span style="color:#fbbf24;font-weight:600">Bright Data</span><br><span style="color:var(--mute)">live API · disk-cached replay</span></div>
+        <div><span style="color:#a5f3fc;font-weight:600">Granite/MI300X</span><br><span style="color:var(--mute)">vLLM · regex MockExtractor</span></div>
+        <div><span style="color:#86efac;font-weight:600">CrewAI</span><br><span style="color:var(--mute)">4-agent crew · sequential fallback</span></div>
+        <div><span style="color:#7dd3fc;font-weight:600">Comet</span><br><span style="color:var(--mute)">browser drive · HubSpot REST</span></div>
+        <div><span style="color:#f0abfc;font-weight:600">HubSpot</span><br><span style="color:var(--mute)">live tenant · recorded screencast</span></div>
+      </div>
+      <p style="margin-top:10px;color:var(--mute);font-size:12px;font-style:italic">The demo can't fail mid-stage — every dependency has a deterministic fallback already shipping in <code style="font-family:ui-monospace,monospace;color:var(--ink)">--mock</code> mode.</p>
+    </div>
+  </section>
+
+  <!-- ─── 11 · COST ─────────────────────────────────────── -->
+  <section class="slide">
+    <div class="eyebrow">Cost envelope</div>
+    <h2>$6/mo per supplier. <span style="color:var(--mute);font-weight:500;font-size:.7em">vs. one hour of an analyst.</span></h2>
+    <div class="bars">
+      <div class="bar-row">
+        <div class="lab">Bright Data</div>
+        <div class="bar-track"><div class="bar-fill" style="width:18%;background:linear-gradient(90deg,#fbbf24,#f59e0b)">$0.18/day</div></div>
+        <div class="v">~$5.40</div>
+      </div>
+      <div class="bar-row">
+        <div class="lab">MI300X (Granite)</div>
+        <div class="bar-track"><div class="bar-fill" style="width:2%;background:linear-gradient(90deg,#fca5a5,#f87171)"></div></div>
+        <div class="v">~$0.60</div>
+      </div>
+      <div class="bar-row">
+        <div class="lab" style="color:var(--ink);font-weight:700">Total infra</div>
+        <div class="bar-track"><div class="bar-fill" style="width:20%;background:linear-gradient(90deg,#7dd3fc,#a78bfa)">$6 / supplier / month</div></div>
+        <div class="v" style="color:var(--good)">$6</div>
+      </div>
+      <div class="bar-row" style="margin-top:24px;opacity:.55">
+        <div class="lab">1 analyst-hour</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#2a313c">$75–$120</div></div>
+        <div class="v">~$95</div>
+      </div>
+    </div>
+    <p style="margin-top:24px;color:var(--mute);font-size:13px;max-width:60ch">Back-of-envelope: Bright Data list pricing, MI300X at sponsor credit rate, ~14s pipeline. Excludes CRM seats and engineering.</p>
+  </section>
+
+  <!-- ─── 12 · MONDAY TEST ──────────────────────────────── -->
+  <section class="slide closer">
+    <div class="eyebrow">The Monday test</div>
+    <blockquote>"Could I plug my actual supplier list into this tomorrow?"</blockquote>
+    <div class="a">YES.</div>
+    <p style="color:var(--mute);font-size:16px;margin-top:24px;max-width:60ch">
+      The only tenant-specific pieces are the CRM credentials and the supplier CSV. Everything else — the audit trail, the deterministic scorer, the cached evidence, the explicit non-goals — is in service of that single question.
+    </p>
+
+    <div style="margin-top:32px;padding:16px 20px;border:1px solid rgba(125,211,252,.3);border-radius:12px;background:linear-gradient(90deg,rgba(125,211,252,.06),rgba(167,139,250,.04));max-width:760px">
+      <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:8px">The ask</div>
+      <p style="font-size:15px;color:var(--ink);line-height:1.5">
+        <strong>Sponsor credits to run the first 30 days against a real buyer's list</strong> — a 200-supplier pilot with one of the design-partner CFOs we're already talking to. That is the 30-day path from this stage to a paying customer.
+      </p>
+    </div>
+
+    <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin-right:6px">All six sponsors, one demo</span>
+      <span class="tag" style="color:#fbbf24;border-color:#3b3a1f">Bright Data</span>
+      <span class="tag" style="color:#fca5a5;border-color:#3a2222">AMD MI300X</span>
+      <span class="tag" style="color:#a5f3fc;border-color:#22323a">IBM Granite</span>
+      <span class="tag" style="color:#86efac;border-color:#22322a">CrewAI</span>
+      <span class="tag" style="color:#7dd3fc;border-color:#1f3a3a">Perplexity Comet</span>
+      <span class="tag" style="color:#f0abfc;border-color:rgba(240,171,252,.3)">HubSpot</span>
+    </div>
+
+    <div style="margin-top:28px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+      <span class="tag">🔔 BELLWETHER</span>
+      <span class="tag">Subhendu Das · solo build</span>
+      <span class="tag">github.com/r2st/bellwether</span>
+      <span class="tag">Web Data UNLOCKED 2026</span>
+      <span class="tag" style="color:#a78bfa;border-color:rgba(167,139,250,.3)">MCP-native · query from Claude Desktop</span>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav" id="nav"></div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const nav = document.getElementById('nav');
+  const cur = document.getElementById('cur');
+  const total = document.getElementById('total');
+  total.textContent = String(slides.length).padStart(2,'0');
+
+  let i = 0;
+  slides.forEach((_, idx) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (idx === 0 ? ' on' : '');
+    d.onclick = () => go(idx);
+    nav.appendChild(d);
+  });
+  const dots = nav.querySelectorAll('.dot');
+
+  function go(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[i].classList.remove('active');
+    dots[i].classList.remove('on');
+    i = n;
+    slides[i].classList.add('active');
+    dots[i].classList.add('on');
+    cur.textContent = String(i + 1).padStart(2,'0');
+  }
+
+  // URL-hash navigation: deep-link to a slide with #slide-7
+  function fromHash() {
+    const m = location.hash.match(/^#slide-(\d+)$/);
+    if (m) go(Math.max(0, Math.min(slides.length - 1, parseInt(m[1], 10) - 1)));
+  }
+  fromHash();
+  window.addEventListener('hashchange', fromHash);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(i - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(slides.length - 1);
+  });
+
+  // touch
+  let tx = 0;
+  document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) go(i + (dx < 0 ? 1 : -1));
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+.DS_Store
+
+# Opsera security scan artifacts
+gitleaks-report.json
+gitleaks-stderr.txt
+semgrep-report.json
+semgrep-stderr.txt
+grype-report.json
+grype-stderr.txt
+checkov-report.json
+checkov-stderr.txt
+hadolint-report.json
+hadolint-stderr.txt
+npm-audit.json
+npm-audit-stderr.txt
+package-leakage-report.json
