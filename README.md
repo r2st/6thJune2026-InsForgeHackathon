@@ -93,6 +93,14 @@ Next.js.
 | **Victim app** (`apps/demo` — "Acme Store / My Orders") | https://hush-acme-store.vercel.app/orders | ✅ deployed (Vercel) · migrated user → empty page; legacy → 3 orders |
 | **PR target** (`hush-victim-acme` — where Hush opens the fix PR) | https://github.com/r2st/hush-victim-acme/pull/1 | ✅ live PR (4-line `insforge.toml` diff) |
 
+> **Live backend, verified end-to-end.** The diagnose → fork-test → ship loop
+> runs on the deployed InsForge edge functions and produces the exact policy fix
+> for the demo bug — the diagnosis is a **real LLM call** (**Gemini** by default,
+> **Anthropic** one env-flip away via `HUSH_LLM_PROVIDER`). A clean run ships a
+> 90-confidence diagnosis with the correct `insforge.toml` diff. 263 tests pass.
+> *(The Gemini key is free-tier, so rapid repeated invocations get rate-limited —
+> drive the on-stage demo from demo-mode below, which can't flake.)*
+
 > The **demo-mode receipt** (`/r/demo?demo=1`) rehearses the whole five-step
 > arc — capture → correlate → diagnose → fork-test → ship — with no backend,
 > so it can't flake on stage. The victim app is the left-screen "Acme Store"
