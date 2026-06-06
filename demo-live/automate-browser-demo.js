@@ -49,7 +49,7 @@ async function runBrowserDemo() {
         console.log('✅ Page loaded');
         
         // Wait a moment for the user to see the initial state
-        await page.waitForTimeout(2000);
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         console.log('');
         console.log('🎬 Simulating user experiencing the bug...');
@@ -61,7 +61,7 @@ async function runBrowserDemo() {
         console.log('   User sees empty orders page (the bug!)');
         
         // Wait to observe the bug
-        await page.waitForTimeout(3000);
+        await new Promise(resolve => setTimeout(resolve, 3000));
         
         console.log('');
         console.log('😤 Simulating user frustration...');
@@ -83,7 +83,7 @@ async function runBrowserDemo() {
             await page.reload({ waitUntil: 'networkidle2' });
         }
         
-        await page.waitForTimeout(1000);
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         console.log('   Rage-click #2...');
         try {
@@ -96,7 +96,7 @@ async function runBrowserDemo() {
             await page.reload({ waitUntil: 'networkidle2' });
         }
         
-        await page.waitForTimeout(1000);
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         console.log('   Rage-click #3...');
         try {
@@ -109,7 +109,7 @@ async function runBrowserDemo() {
             await page.reload({ waitUntil: 'networkidle2' });
         }
         
-        await page.waitForTimeout(2000);
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         console.log('');
         console.log('✅ Frustration signals captured by rrweb!');
