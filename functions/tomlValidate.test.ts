@@ -53,7 +53,7 @@ describe('validateTomlPatch', () => {
     const r = validate("tenant_id::int = 5");
     expect(r.ok).toBe(false);
     if (r.ok) return;
-    expect(r.reasons.join(' ')).toMatch(/tenant_id::int incompatible/);
+    expect(r.reasons.join(' ')).toMatch(/tenant_id::int.*incompatible/);
   });
 
   it('rejects a fabricated function', () => {

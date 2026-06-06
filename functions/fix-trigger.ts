@@ -29,6 +29,7 @@ import { toReplayPayload } from './capture.js';
 import { extractTomlContext } from './toml.js';
 import { diagnose as realDiagnose } from './diagnose.js';
 import { validateDiff } from './safety.js';
+import { validateTomlPatch, tableSchemaFromToml } from './tomlValidate.js';
 import { applyTomlDiff, type ApplyResult } from './applyDiff.js';
 import { forgeForkJwt } from './forgeJwt.js';
 import { replayBoth } from './replay.js';
@@ -107,7 +108,16 @@ export async function fixTrigger(runId: string, deps?: Partial<OrchestratorDeps>
     });
     await emit('diagnosed', { summary: diagnosis.summary, failingPolicy: diagnosis.failingPolicy });
 
-    // 3. safety rail — a widening diff the model didn't flag is a hard stop → issue.
+    // 3a. structural rail (0032) — a malformed diff (wrong column, bad cast,
+    //     fabricated fn, widening sub-select) breaks at apply-time. Reject pre-apply.
+    const structure = validateTomlPatch({
+      patch: diagnosis.tomlDiff, tomlContext, tableSchema: tableSchemaFromToml(tomlContext, table),
+    });
+    if (!structure.ok) {
+      return await dispatch(d, emit, runId, diagnosis, structureVerdict(structure.reasons), 'issue-from-structure');
+    }
+
+    // 3b. safety rail (0021) — a widening diff the model didn't flag is a hard stop → issue.
     const safety = validateDiff({ patch: diagnosis.tomlDiff, tableColumns: d.tableColumns(table) });
     if (safety.widens && !diagnosis.widensAccess) {
       return await dispatch(d, emit, runId, diagnosis, vetoVerdict(safety), 'issue-from-safety');
@@ -211,6 +221,14 @@ function vetoVerdict(safety: SafetyResult): Verdict {
     prod: emptySide(), fork: emptySide(),
     bugConfirmed: false, fixVerified: false,
     rationale: `safety rail: diff widens access — ${safety.reasons.join('; ')}`,
+  };
+}
+
+function structureVerdict(reasons: string[]): Verdict {
+  return {
+    prod: emptySide(), fork: emptySide(),
+    bugConfirmed: false, fixVerified: false,
+    rationale: `structural validation failed: ${reasons.join('; ')}`,
   };
 }
 

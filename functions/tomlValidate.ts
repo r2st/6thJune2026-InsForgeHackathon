@@ -110,7 +110,10 @@ function pathResolves(path: string, tomlContext: string): boolean {
 /** Names immediately followed by `(` — both simple (`coalesce`) and dotted (`auth.jwt`). */
 function functionCalls(s: string): string[] {
   const stripped = stripStrings(s);
-  return [...stripped.matchAll(/([a-z_][a-z0-9_]*(?:\.[a-z_][a-z0-9_]*)?)\s*\(/gi)].map((m) => m[1]!);
+  return [...stripped.matchAll(/([a-z_][a-z0-9_]*(?:\.[a-z_][a-z0-9_]*)?)\s*\(/gi)]
+    .map((m) => m[1]!)
+    // `IN (`, `EXISTS (`, `ANY (` are SQL keywords/operators, not user functions.
+    .filter((name) => !KEYWORDS.has(name.toLowerCase()));
 }
 
 /** The inner text of each `IN (SELECT …)` / `EXISTS ( … )`. */

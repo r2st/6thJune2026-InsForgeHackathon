@@ -3,9 +3,9 @@ id: 0032
 title: Deterministic TOML AST + identifier validation
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8
+started: 2026-06-06
+status: done
 depends_on: [0018, 0019, 0021]
 demo_path: yes — answers "what stops the LLM from hallucinating?"
 ---
@@ -83,4 +83,12 @@ deterministically pre-apply is the discipline judges notice.
   schema) — deeper."
 
 ## Outcome
-<!-- Fill in when moving to done/. 2-3 lines max. -->
+
+- `functions/tomlValidate.ts` — `validateTomlPatch({patch,tomlContext,tableSchema})`:
+  path-resolves check, function whitelist, column-exists, cast-compatibility,
+  and sub-select scoping. Hand-written tokenizer (no SQL parser). Plus
+  `tableSchemaFromToml()` to derive the schema from the same TOML slice.
+- Wired into `fix-trigger.ts` BEFORE applyDiff (stage 3a); a reject drops to
+  issue, same as the safety rail (3b). The two rails compose.
+- 8 tests covering every acceptance case (demo ok / wrong-table / uuid::int /
+  fabricated fn / widening sub-select / benign scoped sub-select / bad path).
