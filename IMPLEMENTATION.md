@@ -51,6 +51,17 @@ hush/
 | [0020 confidence scorer + tier routing](agents/inbox/0020-confidence-scorer-and-tier-routing.md) | `functions/score.ts` · `functions/fix-trigger.ts` (call site) | Replay verdict is the strongest signal |
 | [0021 diff safety rail](agents/inbox/0021-diff-safety-rail.md) | `functions/safety.ts` | Deterministic post-LLM check |
 | [0022 diagnosis card on receipt](agents/inbox/0022-diagnosis-card-on-receipt-page.md) | `apps/receipt/components/DiagnosisCard.tsx` | Brand-aligned styling per `assets/brand/brand-guide.md` |
+| [0030 fix-trigger orchestrator](agents/inbox/0030-fix-trigger-orchestrator.md) | `functions/fix-trigger.ts` · `functions/ingest.ts` | The glue. Drives diagnose → test → ship in ~100 LOC |
+
+### Scaffolds (done — see `agents/done/`)
+
+| Ticket | Lives in | Notes |
+|---|---|---|
+| [0025 toy storefront scaffold](agents/done/0025-monorepo-and-toy-app-scaffold.md) | `apps/demo/` | Next.js + rrweb skeleton — unblocks 0016 / 0023 / 0024 |
+| [0026 receipt page scaffold](agents/done/0026-receipt-page-scaffold.md) | `apps/receipt/` | Next.js skeleton — unblocks 0009 / 0015 / 0022 |
+| [0027 insforge.toml (buggy canonical)](agents/done/0027-insforge-toml-buggy-canonical.md) | `infra/insforge.toml` · `infra/seed/` | The file Hush patches — unblocks every backend ticket |
+| [0028 functions package scaffold](agents/done/0028-functions-package-scaffold.md) | `functions/types.ts` · stubs · `schemas/` · `prompts/` | Read `types.ts` first — every backend ticket uses it |
+| [0029 prewarm + preflight scripts](agents/done/0029-prewarm-and-preflight-scripts.md) | `scripts/prewarm.sh` · `scripts/preflight.sh` | Skeleton only; 0004 matures prewarm to full feature set |
 
 ## First time? Run
 

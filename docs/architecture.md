@@ -3,16 +3,17 @@
 > Living doc. Update as the design firms up. Keep it skimmable. Ticket
 > numbers reference `agents/inbox/`.
 
-## One-paragraph elevator
+## What Hush does
 
-Hush watches a user's session in an InsForge-hosted SaaS, detects
-frustration (rage / dead / abandoned), pulls the matching backend request
-log, asks InsForge AI which RLS policy or JWT claim caused the symptom,
-spins up a branch project, applies the proposed `insforge.toml` diff,
-replays the failing request against prod **and** fork in parallel, and
-— if the fork returns the expected rows and the diff doesn't widen
-access — opens a GitHub PR with the clip, the trace, and a confidence
-badge. End-to-end target on stage: ≤45 seconds.
+A user gets frustrated in an InsForge-hosted app. Hush sees it. It pulls
+the matching backend log, asks InsForge AI which RLS policy or JWT claim
+caused the empty page, and writes a small `insforge.toml` patch. It forks
+the backend, applies the patch, and replays the failing request against
+both prod and fork. If the fork returns the right rows and the patch
+doesn't widen access, Hush opens a GitHub PR with the clip, the trace,
+and a confidence score.
+
+Target on stage: under 45 seconds, end to end.
 
 ## End-to-end pipeline
 
@@ -84,111 +85,106 @@ renders five step rows in real time — this is the demo's narrator.
 
 ### Stage 1 — Capture
 
-**Job:** when a user shows a frustration signal, ship a small, replayable,
-PII-safe bundle.
+**Job:** when a user gets frustrated, send a small safe bundle for the
+next stages to use.
 
 | Layer | Source | Why |
 |---|---|---|
-| DOM trail | rrweb ring buffer (30s) | Receipt-page replay + evidence for PR. |
-| Signal | Client detector (rage / dead / abandoned / report) | Triggers `/capture`. |
-| Backend log slice | `request_log` table, ±10s window keyed by `session_id` | The pivot — links symptom to policy. |
-| Auth context | `auth.uid()` + `tenant_id` (set server-side) | RLS-aware correlation. |
-| App context | url, route, viewport, build SHA | Diagnose needs the minimum. |
+| DOM trail | rrweb 30s ring buffer | Replay on the receipt page; evidence in the PR. |
+| Signal | Client detector (rage / dead / abandoned / report) | Decides when to call `/capture`. |
+| Backend log slice | `request_log` table, ±10s around `session_id` | Links the symptom to the policy that caused it. |
+| Auth context | `auth.uid()` + `tenant_id` (set server-side) | Needed for RLS-scoped queries. |
+| App context | url, route, viewport, build SHA | Minimum the diagnose stage needs. |
 
 **Frustration signals — priority order**
 
-1. **Rage-click** — ≥3 clicks within 1s on the same target (or within 30px).
-   *Easiest signal, highest demo value. This is what fires on stage.*
-2. **Dead-click** — click with no DOM mutation **and** no network request
-   within 400ms. *Best for the RLS-misfire bug class — the click does
-   nothing because the policy silently filters.*
-3. **Abandoned-form** — `input` events ≥1, then route change or tab close
-   without `submit`. *Safe second demo.*
-4. **Explicit report** — tap on a "report a bug" affordance. *Manual override.*
+1. **Rage-click** — ≥3 clicks within 1s on the same target (or 30px).
+   *Easy to fire. This is the on-stage trigger.*
+2. **Dead-click** — click with no DOM change and no network call within
+   400ms. *Fits the RLS-misfire bug: the click does nothing because the
+   policy silently filters.*
+3. **Abandoned-form** — typed in a field, then left without submitting.
+   *Safe backup demo.*
+4. **Explicit report** — user taps a "report a bug" button. *Manual override.*
 
-**Buffering / transport / storage**
+**Buffer, transport, storage**
 
-- Buffer: rrweb `record` mode, 30s rolling ring in memory.
-- Transport: one `POST /capture` JSON body `{ session_id, signal, events, ctx }`.
+- Buffer: rrweb in `record` mode, last 30s held in memory.
+- Transport: one `POST /capture` with `{ session_id, signal, events, ctx }`.
 - Storage: `tenants/{tenant_id}/sessions/{session_id}.json.gz` in InsForge
-  Storage. Signed URL, TTL well past pitch slot.
-- Metadata: `sessions` table (see Data model).
+  Storage. Signed URL, expires well after the pitch.
+- Metadata: one row in `sessions` (see Data model).
 
 **Privacy**
 
-- rrweb `maskAllInputs: true`; `data-hush="mask"` hard-masks.
-- Edge fn strips `Authorization`, `Cookie`, `Set-Cookie` before write.
-- Storage objects + `sessions` row are tenant-scoped via RLS.
+- rrweb masks all inputs by default. `data-hush="mask"` hard-masks anything else.
+- The edge fn strips `Authorization`, `Cookie`, and `Set-Cookie` before writing.
+- Storage objects and `sessions` rows are scoped to the tenant via RLS.
 
 **Sampling**
 
-- 100% capture of frustration-signal sessions only.
-- 0% of happy paths. No background streaming. No DB writes for happy paths.
+- Capture only when a frustration signal fires.
+- Happy paths: no DB writes, no Storage writes, nothing streamed.
 
 ### Stage 2 — Correlate
 
-**Job:** turn the captured session into one ReplayPayload — the single
-failing HTTP request that downstream stages reason about.
+**Job:** find the one failing request that caused the symptom.
 
-1. Toy-app fetch wrapper sets `x-hush-session-id` on every InsForge
-   call. Every edge fn logs `{ ts, route, session_id, user_id, tenant_id,
-   rls_decisions, returned_rows }` to `request_log`. (Ticket 0014.)
-2. After capture lands, populate `sessions.request_log_window` (JSONB)
-   with rows where `session_id = ? AND ts ∈ [captured_at − 10s,
-   captured_at]`. (Ticket 0014.)
-3. `correlateSessionToRequest(...)` picks the single failing request
-   from the window: *latest request before frustration_at whose
-   response was empty array or 4xx for this tenant.* Ambiguous → drop
-   to issue. (Ticket 0005.)
+1. The toy-app fetch wrapper sets `x-hush-session-id` on every InsForge
+   call. Every edge fn logs the request to `request_log` with
+   `session_id`, RLS decisions, and returned row count. (Ticket 0014.)
+2. After capture lands, copy the ±10s window of `request_log` rows for
+   that session into `sessions.request_log_window`. (Ticket 0014.)
+3. `correlateSessionToRequest(...)` picks the failing request: the last
+   one before `frustration_at` that returned an empty array or a 4xx.
+   If there's no clear winner, drop to issue. (Ticket 0005.)
 
-Output: `ReplayPayload = { method, path, headers, body, query, ts }` —
-headers include the user's verbatim JWT, needed for forge in stage 4.
+Output: a `ReplayPayload` — `{ method, path, headers, body, query, ts }`.
+Headers include the user's JWT, which Stage 4 needs for forge.
 
 ### Stage 3 — Diagnose
 
-**Job:** produce a structured `Diagnosis` from `(ReplayPayload + TOML
-context)`. This is the receipt page's plain-English line and the seed
-for the PR body.
+**Job:** given the failing request and the current policy, produce a
+`Diagnosis` — what broke and the patch that fixes it.
 
-- Extract the relevant `insforge.toml` slice for the target table
-  (ticket 0019) — gives the model exactly the policies it can edit.
-- Call InsForge AI with a versioned prompt + JSON-Schema-forced
-  structured output (ticket 0018).
-- `Diagnosis.summary` *is* the receipt-page copy. The model treats it as
-  user-facing.
-- `Diagnosis.widens_access` is the model's intent — the deterministic
-  safety rail in stage 5 trumps it.
+- Pull the relevant slice of `insforge.toml` for the target table
+  (ticket 0019). The model sees only the policies it can edit.
+- Call InsForge AI with a versioned prompt and a JSON-Schema-forced
+  output (ticket 0018).
+- `Diagnosis.summary` shows up on the receipt page. Write the prompt so
+  the model treats it as user-facing copy.
+- `Diagnosis.widens_access` is what the model claims. Stage 5's safety
+  rail checks the patch deterministically and overrides if needed.
 
 ### Stage 4 — Branch test
 
-See [ADR 0001 — Test on a fork](decisions/0001-test-on-a-fork.md) for
-mechanics. Summary:
+Full mechanics in [ADR 0001](decisions/0001-test-on-a-fork.md). In short:
 
 - Two forks pre-warmed at demo start, 1h TTL each (ticket 0004).
-- Single canonical seed applied at both prod and fork bootstrap
-  (tickets 0010 + 0016, **see Critical analysis §C**).
-- Apply diff with `insforge config apply --env <branch-id>` (ticket 0006).
-- Forge fork-signed JWT with captured claims (ticket 0007).
-- Parallel replay prod vs fork; diff response (ticket 0008).
-- Verdict: `prod_rows < fork_rows` → bug confirmed, fix verified.
-- Fallback if branch pool is empty: trace-only static policy eval
-  (ticket 0012). Loses InsForge "wow" but keeps the demo honest.
+- Same seed in prod and every fork (tickets 0010 and 0016 — **see
+  Critical analysis §C**).
+- Apply the patch with `insforge config apply --env <branch-id>` (ticket 0006).
+- Sign a new JWT with the fork's key, carrying the user's claims (ticket 0007).
+- Replay the same request against prod and fork in parallel (ticket 0008).
+- Verdict: `prod_rows < fork_rows` means bug confirmed and fix verified.
+- If the fork pool is empty, fall back to a local policy check
+  (ticket 0012). Less impressive, still honest.
 
 ### Stage 5 — Ship
 
-- **Safety rail** (ticket 0021): deterministic widening check on the
-  diff. Overrides `Diagnosis.widens_access` if the model under-reported.
-- **Confidence score** (ticket 0020): 0–100 from
-  (diff_size × policy_blast × past-merged similarity × verdict). Tier
-  routes:
-  - `≥85` → open PR
-  - `60–84` → draft PR with the failing trace
-  - `<60` → GitHub issue, no diff
-- **PR** (ticket 0011): GitHub App opens an idempotent PR. Body
-  embeds the diff, the signed clip URL, the before/after RLS trace,
-  the branch-project URL (judge can poke at it live), and the confidence
-  breakdown. CI status checks: `branch-project replay`, `existing tests`,
-  `no policy blast`.
+- **Safety rail** (ticket 0021). A deterministic check: does the patch
+  widen access? If yes, override the model's self-report.
+- **Confidence score** (ticket 0020). 0–100, mixing diff size, policy
+  blast radius, similarity to past merged fixes, and the replay verdict.
+  Routes:
+  - `≥85` — open a PR
+  - `60–84` — open a draft PR with the failing trace
+  - `<60` — open a GitHub issue, no diff
+- **PR** (ticket 0011). The GitHub App opens (or updates) one PR per
+  session. The body has the patch, a signed link to the clip, the
+  before/after RLS trace, a link to the fork the judge can click, and
+  the confidence breakdown. CI checks: branch-replay, existing tests,
+  no policy blast.
 
 ## Components
 
@@ -283,209 +279,188 @@ orders(id, tenant_id, total, created_at)
 
 ## Realtime channel
 
-**One channel per session:** `hush:session:<session_id>`. The receipt
-page subscribes on mount and renders five step rows as messages arrive:
+One channel per session: `hush:session:<session_id>`. The receipt page
+subscribes on mount and shows five step rows as messages arrive:
 
 ```
 captured → log-tapped → diagnosed → branch-green → shipped
 ```
 
-Each stage publishes one message; the row updates from spinner to ✓.
-Ticket 0015 wires capture; ticket 0009 wires stages 2–5; ticket 0022
-renders the diagnosis card body when `diagnosed` arrives.
+Each stage publishes one message; the row flips from spinner to ✓.
+Ticket 0015 wires Capture; ticket 0009 wires Stages 2–5; ticket 0022
+fills in the diagnosis card when `diagnosed` arrives.
 
-A tenant-scoped channel (`bug_stream:<tenant_id>`) is a post-hackathon
-idea for an "incident inbox" view — **not built**, do not subscribe.
+A tenant-scoped channel (`bug_stream:<tenant_id>`) is a future "incident
+inbox" idea — **not built**, do not subscribe.
 
-## Demo-time perf budget
+## Perf budget
 
-See [ADR 0001](decisions/0001-test-on-a-fork.md) for the full table.
-Total target: ≤22s programmatic, ≤45s on stage. Anything that breaks
-this budget breaks the "in under a minute" claim in the pitch.
+Full table in [ADR 0001](decisions/0001-test-on-a-fork.md). Target: ≤22s
+in code, ≤45s on stage. Breaking this breaks the "under a minute" claim
+in the pitch.
 
 ## What we are NOT building
 
-- General-purpose session replay (we ship 30s windows on signal only).
-- Mobile, native, iframe, cross-origin capture.
+- General-purpose session replay. We ship 30s windows on signal.
+- Mobile, native, iframe, or cross-origin capture.
 - Cross-tab session stitching.
-- A learn-from-rejections pgvector loop *during the hackathon* (Q&A
-  answer only — see Critical analysis §D).
-- A Devin integration *during the hackathon* (Q&A roadmap only — §D).
-- Auto-merge. Hush only opens PRs; humans merge.
-- Customer-facing billing, multi-tenant admin, or settings UI.
+- A pgvector "learn from rejections" loop (Q&A only — see §D).
+- A Devin integration (Q&A roadmap only — §D).
+- Auto-merge. Hush opens PRs; humans merge.
+- Customer-facing billing, admin, or settings UI.
 
 ## Open questions
 
-- [ ] rrweb v2 vs v1 — Builder, by T+1h.
-- [ ] Does the on-stage trigger fire `rage_click` or `dead_click`? — see
-      §B below — Architect + Storyteller, by T+2h.
-- [ ] Branch projects inherit parent `insforge.toml` at spin-up or empty?
-      — Architect, by T+1h.
-- [ ] Branch-project minimum TTL — do we need a renewer? — Architect, by T+1h.
-- [ ] Realtime survives across branch projects, or do we bridge prod → fork
-      events? — Architect, by T+1h.
-- [ ] Storage per-write cost at demo scale — Architect, by T+1h.
+- [ ] rrweb v1 vs v2 — Builder, by T+1h.
+- [ ] Stage trigger: rage-click or dead-click? See §B — Architect +
+      Storyteller, by T+2h.
+- [ ] Does a fork inherit `insforge.toml` at spin-up, or start empty?
+      Architect, by T+1h.
+- [ ] Minimum branch-project TTL — do we need a renewer? Architect, by T+1h.
+- [ ] Does Realtime survive across branch projects, or do we bridge?
+      Architect, by T+1h.
+- [ ] Storage per-write cost at demo scale. Architect, by T+1h.
 
 ---
 
 ## Critical analysis (6 Jun)
 
-> Cross-cutting issues that span tickets and docs. Read this before
-> claiming a P0 ticket — most of these need a one-person decision, not
-> a meeting. Each item names the owner role.
+> Issues that cross tickets or docs. Read this before claiming a P0.
+> Most are one-person decisions. Each item names the owner.
 
-### A — Realtime channel was inconsistent across tickets
+### A — Two Realtime channels for one receipt page
 
-The capture ticket I authored proposed `bug_stream:<tenant_id>`; downstream
-ticket 0009 uses `hush:session:<id>`. Two channels, one receipt page →
-broken. **Resolution above:** session-scoped is canonical. Capture ticket
-0013 must publish to `hush:session:<id>`, not `bug_stream`. Tenant
-channel is a post-hackathon "inbox" idea, not built.
+The capture ticket I first wrote published to `bug_stream:<tenant_id>`.
+Ticket 0009 uses `hush:session:<id>`. The receipt page can't subscribe
+to both cleanly. **Picked:** session-scoped. Capture publishes to
+`hush:session:<id>`. The tenant channel is a post-hackathon "inbox"
+idea, not built.
 
-*Action:* update ticket 0013 acceptance criteria to `hush:session:<id>`
-when claimed.
+*Action:* update ticket 0013's acceptance criteria when claimed.
 
-### B — Pitch says "rage-click," architecture says "dead-click is best for RLS-misfire"
+### B — Pitch says "rage-click," but the RLS bug naturally produces a dead-click
 
-The bug class (RLS returns 0 rows → empty page) naturally produces a
-**dead-click** (or no click at all), not a rage-click. The pitch script
-gets rage-click by having the user mash a Reload button — a scripted
-theatrical move, not the natural user behavior.
+The bug — RLS returns 0 rows, page is empty — usually makes a user
+stare, not click. The pitch script gets the rage-click by having the
+user mash a Reload button. That's a scripted move, not a natural one.
 
-This is fine, but the script and the architecture should agree explicitly:
+Pick one story and stick to it:
 
-- **On stage:** trigger is rage-click on the Reload button. Script it.
-- **In the product story:** primary signal is dead-click on a list row,
-  with rage-click on Reload as a secondary corroborator. Q&A answer.
+- **On stage:** rage-click on Reload. Script it.
+- **In the product story:** dead-click is the primary signal; rage-click
+  on Reload backs it up. Use this in Q&A.
 
-*Action:* Storyteller + Architect — pick one phrasing and align ticket
-0024's acceptance criteria with the demo's scripted action. Right now
-ticket 0024 implements all three signals, so no code change is needed —
-this is a doc + script alignment.
+Ticket 0024 already builds all three signals, so no code change. Just a
+doc and script alignment for the Storyteller and Architect.
 
 ### C — Two seed specs overlap (tickets 0010 and 0016)
 
 - Ticket 0010: two tenants (`acme`, `globex`), three orders for `acme`.
-- Ticket 0016: two seed users — one legacy JWT claim shape, one migrated.
+- Ticket 0016: two seed users — one with the old JWT shape, one with the
+  new one.
 
-These describe the same fixture from different angles, and they will
-drift if maintained separately. **The demo bug needs both:** the tenant
-split is what RLS scopes on; the JWT-shape split is what causes the
-filter to misfire. One file, one seed.
+These are the same fixture from two angles. If kept separate they will
+drift. The demo bug needs both halves: the tenant split is what RLS
+scopes on; the JWT-shape split is what makes the policy misfire.
 
-*Action:* Architect — fold ticket 0016's acceptance criteria into ticket
-0010's `infra/seed/demo.sql`. Ticket 0016 becomes "wire the policy that
-*reads* the wrong claim shape" — the bug itself, not the seed.
+*Action:* Architect — fold 0016's seed bits into `infra/seed/demo.sql`
+(ticket 0010). 0016 becomes "wire the policy that reads the wrong
+claim" — the bug, not the seed.
 
-### D — Pitch promises Devin + pgvector, neither is built
+### D — Pitch promises Devin and pgvector, neither is built
 
-- The pitch close says: *"Built on InsForge — branch projects, RLS,
-  realtime, pgvector, AI — plus rrweb for capture and Devin to drive the
-  patch."*
-- No ticket touches Devin. Diagnose (ticket 0018) calls InsForge AI.
-- No ticket touches pgvector. The "learn from rejections" loop is a Q&A
-  planted seed (already correctly footnoted in `pitch-script.md`).
+The pitch close used to say: *"Built on InsForge — branch projects, RLS,
+realtime, pgvector, AI — plus rrweb for capture and Devin to drive the
+patch."*
 
-A judge who reads the pitch and the repo will notice. Two clean choices:
+No ticket touches Devin. Diagnose (ticket 0018) calls InsForge AI
+directly. No ticket touches pgvector. The "learn from rejections" loop
+is a Q&A planted seed, not code.
 
-1. **Drop both names from the close** and let the planted seed carry the
-   learn-loop. (Recommended — honest, no scope creep.)
-2. **Add a fake-but-honest "Devin would generate the diff" step** —
-   prompt InsForge AI as if it were Devin, surface the call in logs.
-   (Too cute. Skip.)
+A judge who reads the pitch and the repo will notice. Two options:
 
-*Action:* Storyteller — update `demo/pitch-script.md` close per option 1.
-*I've applied the smallest defensible edit (footnote both as roadmap) in
-this pass; reverse it if you'd rather drop the names entirely.*
+1. **Drop both names from the close.** Let the planted seed carry the
+   learn-loop. *Recommended.*
+2. Wrap the InsForge AI call as a fake "Devin" step. Too cute, skip.
+
+*Action:* Storyteller — option 1. I've made the edit in
+`demo/pitch-script.md`; reverse if you disagree.
 
 ### E — Brand consistency (resolved)
 
-Earlier in the build, parts of the codebase still carried the old
-working name in headlines, asset metadata, and ADR signoffs. That
-sweep is now complete: the active brand everywhere — pitch, slides,
-brand kit (`assets/brand/`), `ideas/FINAL.html`, ADR 0001, glossary,
-agent inbox — is **Hush**. Any Witness-era materials live only in
-git history; nothing in the working tree carries the old name.
+The rename to **Hush** is done. Pitch, slides, brand kit (`assets/brand/`),
+`ideas/FINAL.html`, ADR 0001, glossary, and the agent inbox all use the
+new name. Old "Witness" mentions only live in git history.
 
-*Action:* none. Section retained so the numbering downstream stays
-stable; safe to delete on next pass.
+*Action:* none. Keep this entry so the letters downstream don't shift;
+delete on the next pass.
 
 ### F — No ticket for the toy app shell
 
-Tickets 0023 (embed rrweb) and 0024 (frustration detector) reference
-"the toy app" as if it exists. Tickets 0013 (`/capture` edge fn),
-0010 (seed), 0016 (RLS bug) reference an `orders` table and "My Orders"
-page also as if they exist.
+Tickets 0023 (rrweb), 0024 (signals), 0013 (`/capture`), 0010 (seed),
+and 0016 (RLS bug) all assume the toy app and its `orders` page exist.
+Nobody owns that build.
 
-Either the toy app is hour-zero infra everyone assumes, or it's a
-missing P0 ticket. **Recommended:** add ticket — "Toy app shell —
-Vite/React skeleton with Orders page, login fixture, InsForge client
-wired" — Builder, P0, no dependencies, before 0023 / 0024 / 0016 can
-ship.
+Either the team agrees it's hour-zero work everyone shares, or it
+needs a ticket: *"Toy app shell — Vite/React skeleton with Orders
+page, login fixture, InsForge client wired."* Builder, P0, no deps,
+blocks 0023 / 0024 / 0016.
 
-*Action:* Builder or Architect — drop the ticket at the next free ID.
-I didn't write it because it sits outside the Capture brainstorm scope.
+*Action:* Builder or Architect — write the ticket at the next free ID.
 
 ### G — The "70% of bugs don't crash" stat is uncitable
 
-`demo/pitch-script.md` line: *"70% of user-reported bugs never throw an
-error."* Already flagged in `ideas/FINAL-analysis.md §2.3`. A technical
-judge will ask the source and we won't have one.
+`demo/pitch-script.md` used to say *"70% of user-reported bugs never
+throw an error."* Already flagged in `ideas/FINAL-analysis.md §2.3`.
+No source we can defend.
 
 Two safe rewrites:
+
 - *"Most user-reported bugs never reach your error tracker."*
-- *"Sentry caught 0% of the last 5 bugs reported by a real customer of
-   ours."* (only if true and we can name them)
+- *"Sentry caught 0% of the last 5 bugs a real customer reported."*
+  (Only if true and named.)
 
-*Action:* Storyteller — pick one. *I've applied the directional rewrite
-in this pass.*
+*Action:* I applied the directional rewrite. Storyteller — keep or swap.
 
-### H — Capture edge-fn latency isn't budgeted
+### H — `/capture` latency isn't budgeted
 
-ADR 0001 budgets stage 4 (branch test) tightly. Stage 1 (`/capture`)
-does five things — gzip, Storage write, DB insert, log query, Realtime
-publish — and isn't on the perf budget. A cold edge fn can blow 2–3s,
-which eats the receipt-page-lights-up moment.
+ADR 0001 budgets stage 4 carefully. Stage 1 — gzip, Storage write, DB
+insert, log query, Realtime publish — isn't on the budget. A cold edge
+fn can take 2–3s and eat the receipt-page moment.
 
-*Action:* Architect (on ticket 0013) — add p95 ≤500ms target; warm the
-edge fn at demo start the same way we pre-warm branches.
+*Action:* Architect, on ticket 0013 — target p95 ≤500ms and warm the
+edge fn at demo start, same as the fork pool.
 
-### I — Confidence formula assumes a "past-merged" corpus we don't have
+### I — The confidence formula leans on a corpus we don't have
 
-Ticket 0020 mixes (diff_size × policy_blast × past-merged similarity ×
-verdict). At hour 9 we have zero merged history. Similarity collapses
-to 0 and the score is fiction. The pitch shows `92% = diff(95) ×
-blast(98) × similarity(89)` — that 89 is made up.
+Ticket 0020 multiplies diff size × policy blast × past-merged similarity
+× verdict. At hour 9 we have zero merged history. Similarity is 0 and
+the score is fiction. The pitch shows `92% = diff(95) × blast(98) ×
+similarity(89)` — that 89 is invented.
 
-*Action:* Architect (on ticket 0020) — either seed a small corpus of
-synthetic "past PRs" (5–10 hand-written) so similarity is non-zero, or
-remove the similarity factor and rebalance. Demo-honest answer is the
-former.
+*Action:* Architect, on ticket 0020 — seed 5–10 hand-written "past
+PRs" so similarity is real, or drop the factor and rebalance.
 
-### J — Trace-only fallback (ticket 0012) collapses the InsForge moat
+### J — The trace-only fallback gives up the InsForge moat
 
-If the branch pool is empty, ticket 0012 evaluates the policy locally
-against the captured request. Works, but the pitch's slide 6
-*"prod (red) and branch (green)"* split-screen is gone. Q&A: *"so when
-the fork is down, you're just a SQL linter?"*
+If the fork pool is empty, ticket 0012 checks the policy locally. It
+works, but slide 6's "prod red, branch green" split-screen is gone.
+Q&A risk: *"so when the fork is down, you're just a SQL linter?"*
 
-*Action:* Architect — explicitly mark the fallback path **degraded** in
-the receipt-page UI (e.g. amber banner: "branch unavailable — verifying
-against captured request"). Look honest beats looking like the fork was
-vapor.
+*Action:* Architect — mark the fallback **degraded** in the receipt
+UI. An amber banner ("branch unavailable — checking against captured
+request") looks honest. Silent fallback looks like the fork was vapor.
 
-### K — `request_log` is the new load-bearing primitive and isn't called out anywhere
+### K — `request_log` is hour-zero infra with no ticket
 
-Stages 2–4 all read from `request_log`. Without it, correlation is
-guesswork. The table needs to exist before *any* downstream stage works
-(the toy app needs to log; the edge fns need to log). Hour-zero infra
-with no ticket.
+Stages 2–4 all read `request_log`. Without it, correlation is guesswork.
+The table and the auto-logging middleware need to exist before any
+downstream stage works.
 
-*Action:* Architect — fold the `request_log` schema and the auto-logging
-middleware into ticket 0013 (capture edge fn) as a prerequisite, or
-split it out as a new ticket.
+*Action:* Architect — either fold the schema and the logging middleware
+into ticket 0013, or open a new ticket.
 
 ---
 
-*Drafted 2026-06-06. Resolutions in bold. Anything unresolved here will
+*Drafted 2026-06-06. Bold means resolved. Anything still open will
 surface as a bug on stage.*

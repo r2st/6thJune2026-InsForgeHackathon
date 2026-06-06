@@ -12,10 +12,10 @@ demo_path: yes — this IS the bug the receipt page diagnoses
 
 ## Goal
 
-Build the load-bearing demo bug: a too-strict RLS policy on `orders` that
-silently filters one user's records. The user sees an empty list and
-rage/dead-clicks, capture fires, correlation surfaces the RLS decision,
-Diagnose produces the TOML diff.
+Build the demo bug everything else hinges on: an RLS policy on `orders`
+that silently filters out one user's rows. The user sees an empty list
+and rage- or dead-clicks. Capture fires. Correlate surfaces the RLS
+decision. Diagnose produces the TOML diff.
 
 ## Why it matters for the demo
 

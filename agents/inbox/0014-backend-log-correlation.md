@@ -7,7 +7,7 @@ owner:
 started:
 status: inbox
 depends_on: [0013]
-demo_path: yes — this is the pivot's load-bearing trick
+demo_path: yes — the move that makes the pivot work
 ---
 
 ## Goal
@@ -19,9 +19,8 @@ as `request_log_window` (JSONB).
 
 ## Why it matters for the demo
 
-This is the *only* reason the pivoted Hush can claim to find backend
-causes from frontend symptoms. Without correlation, we're just another
-session-replay tool.
+Without this link, Hush can't claim to trace frontend symptoms to
+backend causes. We'd be another session-replay tool.
 
 ## Acceptance criteria
 
