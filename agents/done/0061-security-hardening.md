@@ -3,9 +3,9 @@ id: 0061
 title: Security hardening — ingest abuse controls, secret rotation, SAST/dep scanning
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (loop)
+started: 2026-06-07
+status: in-progress
 depends_on: [0048, 0052]
 demo_path: no — product (post-hackathon)
 phase: production
@@ -52,3 +52,30 @@ speed — production turns it back on.
   ([[feedback_no_security_scans]] was a speed decision, not a product stance).
 
 ## Outcome
+
+Shipped the **pure ingest-abuse-control core** in `functions/ingestGuard.ts`
+(+ 15 tests, `functions/ingestGuard.test.ts`, tsc clean; full suite 596 green):
+
+- **guardIngest(req, config, bucket, seenNonces, now)** — admits a capture only if
+  it passes, cheapest-first, with the right status: forbidden origin (403) →
+  oversized payload (413) → stale/replay (400) → rate limit (429) → admit (200).
+- **originAllowed** — per-site origin allowlist with exact + one-level `*.domain`
+  wildcard, case-insensitive; **replayStatus** — rejects a stale timestamp (outside
+  the skew window) or a reused nonce (replay/poison protection).
+- **Rate limit reuses `TokenBucket`** from `llmChain` (no second limiter), and the
+  token is spent **only after the static checks pass** — so a bad-origin flood can't
+  drain a legitimate workspace's bucket (tested).
+
+These sit in front of the existing prompt-injection wall (`sanitise.ts`) — captured
+session content stays untrusted input to diagnose and can't escalate into a wider
+`insforge.toml` diff (already enforced; unchanged here).
+
+**Seam (deferred):** the origin allowlist source from the site connector [[0050]],
+the time-pruned nonce store, secret rotation [[0052]], least-privilege scope
+config, and the documented threat model + IR runbook in `docs/security/`.
+**Intentionally NOT done:** re-enabling the gitleaks/opsera SAST/dep scan in
+`.github/workflows/` — the repo's standing speed-mode instruction
+([[feedback_no_security_scans]]) keeps auto-scans off; turning them back on is a
+deliberate human decision for production, left as the seam.
+
+How to verify: `pnpm -F @hush/functions test ingestGuard.test.ts`.
