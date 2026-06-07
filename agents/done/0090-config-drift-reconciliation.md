@@ -3,9 +3,9 @@ id: 0090
 title: Config drift detection & reconciliation (repo insforge.toml vs. applied)
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (loop)
+started: 2026-06-06
+status: done
 depends_on: [0019, 0049, 0051]
 demo_path: no — product (post-hackathon)
 phase: production
@@ -44,3 +44,16 @@ makes it a guarantee with reconciliation.
 - `functions/toml.ts` (applied-from-API loader), `diagnose.ts`, `ship.ts`/`openPr.ts`
 
 ## Outcome
+
+- **Shipped (verified core):** `functions/tomlDrift.ts` (`diffToml`,
+  `summarizeDrift`) + 9 tests in `functions/tomlDrift.test.ts`. Typecheck clean;
+  tests green. Pure, self-contained config-diff: compares the *applied* vs *repo*
+  `insforge.toml` and reports drift per `[tables.*]` / `[auth.policies.*]` block,
+  field-level (RLS predicate, columns), ignoring cosmetic (comment/whitespace)
+  differences. The dangerous case — a live RLS hotfixed out-of-band — is detected
+  with both values, so the orchestrator grounds the patch on live and flags it.
+- **Deferred (integration seam):** loading the applied config from the InsForge
+  API per backend connection ([[0051]]) — the `diagnose`/`ship` wiring that feeds
+  `diffToml` and flags drift in the PR body. That needs the live connection;
+  this commit delivers the comparison logic it depends on (closes the pure-logic
+  half of ADR 0003 Risk 5).
