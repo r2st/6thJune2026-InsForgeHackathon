@@ -3,9 +3,9 @@ id: 0065
 title: Scale & performance — load test, fork concurrency, ingest throughput, cost guardrails
 role: architect
 priority: P2
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (loop)
+started: 2026-06-07
+status: in-progress
 depends_on: [0053, 0055]
 demo_path: no — product (post-hackathon)
 phase: production
@@ -50,3 +50,27 @@ and load testing, cost and latency blow up silently.
   a re-seen bug shouldn't pay for a fresh diagnose+fork.
 
 ## Outcome
+
+Shipped the **pure scale-guardrail core** in `functions/scale.ts` (+ 13 tests,
+`functions/scale.test.ts`, tsc clean):
+
+- **CostMeter** — per-workspace daily caps on LLM tokens + fork-minutes. Over
+  budget DEGRADES to `queue` (+ notify), never bills past the cap — no surprise
+  bill; a single spend larger than the whole daily cap is rejected outright.
+- **admitFork(state)** — admits a fork only when BOTH the per-workspace and the
+  global (finite branch-project pool) caps have a slot, so one busy workspace can't
+  starve others; not-admitted ⇒ queue, never drop.
+- **backpressure(depth, soft, hard)** — accept → queue-async → shed as the ingest
+  queue fills, with a 0..1 saturation gauge so backpressure is visible; capture
+  stays async so a spike never blocks the host page.
+- **dedupDecision(fp, seen, now, window)** — a bug shape re-seen within the recall
+  window short-circuits to the cached run instead of paying for a fresh
+  diagnose+fork (the pgvector dedup + Memoir recall path as a cost control).
+
+**Seam (deferred):** the load-test harness (k6/artillery) in `scripts/` with
+published p50/p95 budgets, the real async ingest queue in `ingest.ts`, the fork
+pool wiring [[0053]], and cost-metering tables in `infra/insforge.toml`. Composes
+with the LLM reliability chain [[0055]] and triage noise budget [[0087]]. These
+need infra + load tooling — stay open there.
+
+How to verify: `pnpm -F @hush/functions test scale.test.ts`.
