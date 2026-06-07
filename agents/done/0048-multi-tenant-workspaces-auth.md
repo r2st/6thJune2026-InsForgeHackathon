@@ -3,9 +3,9 @@ id: 0048
 title: Multi-tenant workspaces + customer auth (product foundation)
 role: architect
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (loop)
+started: 2026-06-07
+status: in-progress
 depends_on: []
 demo_path: no — product (post-hackathon)
 phase: production
@@ -52,3 +52,28 @@ workspace identity. This is the foundation — build it first.
 - Pairs with [[0052-secrets-vault]] (per-workspace credentials).
 
 ## Outcome
+
+Shipped the **pure workspace-auth core** in `functions/lib/auth.ts` (+ 17 tests,
+`functions/lib/auth.test.ts`, tsc clean), built on the existing `lib/jwt.ts`:
+
+- **resolveWorkspaceIds / activeWorkspace** — resolve the membership set and the
+  active workspace from the JWT, and crucially **never trust a client-supplied
+  workspace id that isn't in the token** (a requested workspace is honored only if
+  the token proves membership — the cross-workspace boundary).
+- **roleFor + capability gates** — `owner`/`admin`/`member` with least-privilege
+  default; `canConnectIntegrations`/`canManageMembers` are owner/admin-only,
+  `canDeleteWorkspace` is owner-only.
+- **rlsPredicate(table)** — emits the exact `workspace_id = ANY((auth.jwt() ->
+  'workspace_ids')::uuid[])` primitive Hush itself diagnoses; `canReadRow` is the
+  app-layer defense-in-depth mirror (A can never read B's row).
+- **verifyCaptureKey** — validates a short-lived, workspace-scoped capture key
+  (capture-kind + workspace_id + unexpired) so a site can post sessions without a
+  user session and a leaked key has a bounded blast radius.
+
+**Seam (deferred):** the `workspaces`/`workspace_members`/`users` tables + the
+per-table `workspace_id` FK and RLS policies in `infra/insforge.toml`, the InsForge
+auth sign-up/sign-in/invite flows + auth pages in `apps/dashboard/`, capture-key
+minting/rotation, and the A-can't-read-B RLS isolation integration test. These need
+InsForge schema/migrations + UI — stay open there. Pairs with [[0052]].
+
+How to verify: `pnpm -F @hush/functions test lib/auth.test.ts`.
