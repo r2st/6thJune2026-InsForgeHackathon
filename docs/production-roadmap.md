@@ -59,6 +59,26 @@ Several come straight from the hackathon's live-integration scars.
 | [0065](../agents/inbox/0065-scale-performance.md) | Scale & performance — load test, concurrency, cost guardrails | Scale | P2 |
 | [0066](../agents/inbox/0066-docs-onboarding-landing.md) | Docs, onboarding & landing — customer docs, SDK ref, public site | GTM | P2 |
 
+## Phase 3 — operate, trust & grow (epic: `operate-trust-grow`)
+
+The product surface (P1) makes Hush *usable*; hardening (P2) makes it *shippable*.
+Phase 3 is what makes customers *keep* it: own the PRs it opens, earn autonomy,
+never break prod, prove ROI, and run the business.
+
+| # | Ticket | Pillar | Pri |
+|---|---|---|---|
+| [0067](../agents/inbox/0067-pr-lifecycle-management.md) | PR lifecycle — track, respond to review, rebase, close stale | Trust | P0 |
+| [0068](../agents/inbox/0068-human-in-the-loop-feedback.md) | Human-in-the-loop review & feedback → Memoir | Trust | P1 |
+| [0069](../agents/inbox/0069-auto-rollback-regression-detection.md) | Auto-rollback & post-fix regression detection | Safety | P1 |
+| [0070](../agents/inbox/0070-observe-only-dry-run-mode.md) | Observe-only / dry-run mode + graduated trust | Adoption | P1 |
+| [0071](../agents/inbox/0071-outcome-measurement.md) | Outcome measurement — did the fix reduce frustration? | ROI | P1 |
+| [0072](../agents/inbox/0072-prompt-model-eval-harness.md) | Prompt & model evaluation harness (quality gate) | Quality | P1 |
+| [0073](../agents/inbox/0073-dr-backups-continuity.md) | DR, backups & business continuity | Ops | P1 |
+| [0074](../agents/inbox/0074-compliance-program.md) | Compliance — SOC 2 / GDPR DPA / data residency | Enterprise | P2 |
+| [0075](../agents/inbox/0075-admin-support-status.md) | Internal admin, support tooling & status page | Ops | P2 |
+| [0076](../agents/inbox/0076-capture-sdk-hardening.md) | Capture SDK hardening — perf, CSP, adapters, versioning | Trust | P1 |
+| [0077](../agents/inbox/0077-product-analytics-activation.md) | Product analytics & activation (funnel, retention) | Growth | P2 |
+
 ## Critical path to a first external customer
 
 `0048 (workspaces) → 0052 (secrets vault) → 0049 (GitHub) + 0050 (sites) + 0051 (backend) → 0053 (fork pool) → 0054 (dashboard)`,
