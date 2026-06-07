@@ -3,9 +3,9 @@ id: 0062
 title: Generalize the bug surface beyond the demo RLS case
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (loop)
+started: 2026-06-07
+status: in-progress
 depends_on: [0051]
 demo_path: no — product (post-hackathon)
 phase: production
@@ -59,3 +59,30 @@ from the run, not constants.
   user frustration is not a reliable trigger for leaks.
 
 ## Outcome
+
+Shipped the **pure classification + scope core** in `functions/bugTaxonomy.ts`
+(+ 15 tests, `functions/bugTaxonomy.test.ts`, tsc clean):
+
+- **classifyBug(signals)** — derives the bug CLASS from generalized, source-agnostic
+  signals (row deltas, named-policy/claim presence, cross-tenant evidence, joins,
+  auth-config drift) instead of demo constants. Taxonomy: `rls_filter_misfire`,
+  `stale_jwt_claim`, `over_restrictive_policy`, `over_permissive_leak`,
+  `policy_regression_join`, `auth_config_drift`, `unknown`. Leak is checked first
+  so a cross-tenant exposure is never mistaken for a vanished-row fix.
+- **scopeFor(class, oracleAbstained)** — deny-by-default dispatch ceiling per class:
+  only the restore-own-rows classes (filter misfire, stale claim) auto-fix to PR;
+  softer/widening-risk classes cap at draft; leaks and auth drift route to issue +
+  human (leaks explicitly to the canary path [[0088]]). If the expectation oracle
+  (`oracle.ts`) abstained, even safe classes drop to issue. Generalizes the
+  existing self-escalation route. `assessBug` does classify + scope in one call.
+
+**Seam (deferred — the bulk of this epic ticket):** the per-class FIXTURE library +
+end-to-end tests in `functions/fixtures/`, generalizing the hardcoded expected-row
+`3` in `replay.ts` (oracle.ts already derives expectedRows via the policy
+counterfactual — wire it in), widening the safety rail / TOML-AST validator
+([[0021]]/[[0032]]) to multi-clause/join/function-ref diffs, and the per-class
+differential replay suite [[0033]]. These need the customer-backend connector
+[[0051]] and live diagnose/replay wiring — external, stay open under this ticket's
+follow-ups. This core gives those the classification + scope contract to build on.
+
+How to verify: `pnpm -F @hush/functions test bugTaxonomy.test.ts`.
