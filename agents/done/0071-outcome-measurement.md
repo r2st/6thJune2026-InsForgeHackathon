@@ -3,9 +3,9 @@ id: 0071
 title: Outcome measurement — did the fix actually reduce frustration? (close the loop)
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (loop)
+started: 2026-06-07
+status: in-progress
 depends_on: [0050, 0057]
 demo_path: no — product (post-hackathon)
 phase: production
@@ -42,3 +42,27 @@ fix that merges but doesn't move the signal is a weak fix.
 - `infra/insforge.toml` (impact metrics), `apps/dashboard/` (ROI view)
 
 ## Outcome
+
+Shipped the **pure outcome-measurement core** in `functions/outcome.ts` (+ 15
+tests, `functions/outcome.test.ts`, tsc clean):
+
+- **measureImpact(before, after)** — compares the targeted signal's rate across a
+  baseline vs post-fix window with a real **two-proportion z-test** (`|z| ≥ 1.96`
+  ⇒ p < 0.05). Verdict is `improved` / `no_change` / `worsened`, and explicitly
+  `inconclusive` when either window has < `MIN_OBSERVATIONS` (30) — it never
+  fabricates an impact number from thin traffic.
+- **isCalibrationMiss(confidence, impact)** — a high-confidence fix (≥80) that
+  shipped with no measurable improvement is a learning signal fed back to
+  [[0043]]/Memoir confidence and [[0069]] regression watch; `inconclusive` is
+  never counted as a miss.
+- **workspaceRoi(outcomes)** — ROI rollup: bugs caught, fixes shipped, fixes with
+  *proven* impact, frustration averted (baseline volume × proven relative
+  reduction), and support tickets likely avoided (10% escalation heuristic). Only
+  significant `improved` fixes contribute — honest numbers only.
+
+**Seam (deferred):** the scheduled `outcome` aggregator that builds the windows
+from request_log/signal aggregation, persisting impact metrics in
+`infra/insforge.toml`, and the dashboard ROI view [[0054]]. These depend on the
+site connector [[0050]] and observability [[0057]] — external, stay open there.
+
+How to verify: `pnpm -F @hush/functions test outcome.test.ts`.
