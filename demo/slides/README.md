@@ -2,6 +2,15 @@
 
 [`index.html`](index.html) is the deck. Open it in any browser. No build step.
 
+Live presentation and demo links:
+
+| Surface | URL | Description |
+|---|---|---|
+| Pitch deck | https://w369egnp.insforge.site/pitch.html | The deployed presentation. Arrow keys / click to advance, `F` for fullscreen. |
+| Receipt demo | https://w369egnp.insforge.site/r/demo?demo=1 | The full catch-and-fix arc: capture → correlate → diagnose → fork-test → PR. |
+| Victim app | https://hush-acme-store.vercel.app/orders?user=migrated | Acme Store with the silent bug: migrated user sees 0 orders. |
+| Fix PR | https://github.com/r2st/hush-victim-acme/pull/1 | The reviewable `insforge.toml` policy diff that fixes the demo bug. |
+
 ## Present
 
 ```bash
@@ -21,7 +30,7 @@ Press **F** to fullscreen as soon as it loads. The deck is built at 1920×1080 a
 |---|---|
 | `→` · `space` · `PageDown` · click | Next slide |
 | `←` · `PageUp` | Previous slide |
-| `1`–`9` · `0` | Jump to slide 1–10 |
+| `1`–`9` · `0` | Jump to slides 1–9; `0` jumps to slide 11 |
 | `Home` · `End` | First / last slide |
 | `F` | Toggle fullscreen |
 
@@ -34,13 +43,14 @@ Touch: swipe left/right on tablets. URL hash deep-links: `#5` opens slide 5.
 | 01 | Hero — *Hush.* | open |
 | 02 | Customer's empty orders page | problem story |
 | 03 | The 70% gap | stat |
-| 04 | What Hush does | one-liner |
-| 05 | Receipt page lights up | demo beat 1 |
-| 06 | Same session, two backends | demo beat 2 — money shot |
+| 04 | What Hush does | how it catches bugs |
+| 05 | Receipt page lights up | demo beat 1 — rage click + request log |
+| 06 | Same session, two backends | demo beat 2 — RLS row drop + fork proof |
 | 07 | Four-line TOML diff, shipped | demo beat 3 — PR |
 | 08 | Confidence tiers | defense |
 | 09 | Why InsForge | substrate vs engine |
-| 10 | Close | tagline + planted seed |
+| 10 | Why these tools | sponsor/tool loop |
+| 11 | Close | tagline + live demo links |
 
 The two slides that **must** land: **06** (the prod/branch split — proof) and **07** (the PR — money shot). Everything else supports those.
 

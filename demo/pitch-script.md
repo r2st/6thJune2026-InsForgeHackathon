@@ -34,8 +34,8 @@ Read aloud with a timer. If you're over by 10s, cut a sentence. Cuts are at the 
 ## 0:40 – 0:55 — Solution one-liner (slide 4)
 
 > "We built **Hush.** — the bug-fixer for the bugs that don't crash.
-> Hush watches the session, replays it on a forked InsForge backend,
-> patches `insforge.toml`, and ships the PR. In under a minute."
+> Hush catches frustration, ties it to the backend log, proves the fix
+> on a forked InsForge backend, and ships the PR."
 
 ## 0:55 – 2:15 — Live demo (slides 5 → 7)
 
@@ -43,13 +43,13 @@ Happy path. Pre-loaded data. No login. Three beats.
 
 | Time   | Slide | What happens on screen                                                | What you say                                                                 |
 |--------|-------|-----------------------------------------------------------------------|------------------------------------------------------------------------------|
-| 0:55   | 5     | Customer rage-clicks. Receipt panel lights up. Session captured · backend log tapped · anomaly. | "Hush saw the rage-click and pulled the matching backend log." |
-| 1:20   | 6     | Diagnosis: RLS policy `orders_select` reads `auth.jwt() ->> 'tenant'`. JWT migrated to `tenant_ids[]` last week. Branch project spawns; prod (red) and branch (green) replay side-by-side. | "It traced the empty page to one RLS policy. Then it forked the backend and *proved* the fix on the fork, against the same session." |
+| 0:55   | 5     | Customer rage-clicks. Receipt panel lights up. Session captured · request log matched · RLS row drop detected. | "Hush does not need an exception. It saw the rage-click, matched the request log by session id, and found the policy dropping 3 rows to 0." |
+| 1:20   | 6     | Diagnosis: RLS policy `orders_select` reads `auth.jwt() ->> 'tenant'`. JWT migrated to `tenant_ids[]` last week. Branch project spawns; prod (red) and branch (green) replay side-by-side. | "It traced the empty page to one RLS policy. Then it forked the backend and *proved* the fix on the fork, against the same request." |
 | 1:50   | 7     | GitHub PR opens. Four-line `insforge.toml` diff. Confidence 90%. CI green. Session clip + before/after RLS trace attached. | *"And here's the proof — a four-line TOML patch, with the session clip and the RLS trace embedded. From rage-click to PR in under a minute."* |
 
 **Fallback:** if anything live breaks, switch to `demo/recordings/latest.mp4` and narrate over it. Don't apologize — keep going. The receipt page (slide 5) and the branch replay (slide 6) are the two beats that *must* land; the PR shot is the closer.
 
-## 2:15 – 2:40 — Confidence tiers + why InsForge (slides 8 → 9)
+## 2:15 – 2:40 — Confidence tiers + why InsForge + tools (slides 8 → 10)
 
 > "Hush doesn't spam your PR queue. Every finding is scored —
 > high-confidence small diffs open a PR, mediums open a draft, lows file
@@ -60,7 +60,11 @@ Happy path. Pre-loaded data. No login. Three beats.
 > the fix a four-line diff instead of a refactor. Supabase has neither.
 > Convex has neither. **InsForge is the engine, not the substrate.**"
 
-## 2:40 – 3:00 — Close (slide 10)
+> "The rest of the stack has one job each: rrweb captures, Memoir tunes
+> confidence from past outcomes, Lim.run corroborates the fork visually, and
+> Replicas / Devin can land the patch."
+
+## 2:40 – 3:00 — Close (slide 11)
 
 > "Sentry catches the bugs that crash your server. Hush catches the
 > bugs that quietly break your customers. Built on InsForge — branch
@@ -75,8 +79,8 @@ Happy path. Pre-loaded data. No login. Three beats.
      Critical analysis §D for the full thread. -->
 
 >
-> "Next we wire the learn-from-rejections loop: every closed PR becomes a
-> negative training shape, so Hush gets quieter over time, not noisier."
+> "The live demo is the receipt link, the victim app is the empty-orders link,
+> and the proof is the PR: prod 0 rows, branch 3 rows."
 
 ---
 

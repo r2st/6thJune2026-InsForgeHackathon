@@ -12,7 +12,7 @@
 | | Link | What you'll see |
 |---|---|---|
 | ▶ Start here — Demo (no backend, can't flake) | https://w369egnp.insforge.site/r/demo?demo=1 | The full five-step arc — capture → correlate → diagnose → fork-test → ship — streamed live on the receipt page. |
-| 🖥 Pitch deck | https://w369egnp.insforge.site/pitch.html | 10-slide presentation. Arrow-keys / click to advance, `F` for fullscreen. |
+| 🖥 Pitch deck | https://w369egnp.insforge.site/pitch.html | 11-slide presentation. Arrow-keys / click to advance, `F` for fullscreen. |
 | 🐛 The bug (victim app) | https://hush-acme-store.vercel.app/orders?user=migrated | "Acme Store / My Orders" renders empty for a migrated user — the silent RLS bug. Drop `?user=migrated` to see the 3 orders that were always there. |
 | ✅ The fix (real PR) | https://github.com/r2st/hush-victim-acme/pull/1 | A real, open pull request: a 4-line `insforge.toml` diff that fixes the policy. |
 | 📡 Receipt page (live status) | https://w369egnp.insforge.site/ | The judge-facing live status surface. |

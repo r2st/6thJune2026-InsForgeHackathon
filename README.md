@@ -35,6 +35,26 @@ from the frustrated user all the way to the backend policy that caused it, and
 ships the fix as a reviewable pull request — before the user finishes writing
 the support ticket.
 
+### How Hush catches the bug
+
+Hush does **not** wait for an exception. It opens a run only when user behavior
+and backend evidence line up:
+
+1. **Behavioral trigger** — the embedded capture layer records the session with
+   rrweb and fires on a rage-click, dead click, or abandoned form.
+2. **Shared session id** — the same session id is stamped onto frontend capture
+   and backend requests, so the symptom can be joined to the request log.
+3. **RLS evidence** — the request log stores the policy decision, including how
+   many rows existed before RLS and how many survived after RLS.
+4. **Demo bug proof** — for the migrated Acme user, `/api/orders` returns
+   `200 OK` with zero rows, while the log says `orders.orders_select` saw 3 rows
+   before the policy and 0 after it. The JWT carries `tenant_ids[]`; the policy
+   still reads the old singular `tenant` claim.
+5. **Fork replay** — Hush applies the proposed `insforge.toml` diff on an
+   InsForge branch project and replays the same request against prod and the
+   fork. Prod stays at 0 rows; the fork returns 3. That before/after replay is
+   the proof that the bug is real and the patch works.
+
 When a user gets stuck (rage-clicks, a dead click, an abandoned form), Hush
 runs a five-step loop:
 
@@ -94,7 +114,7 @@ earns its place because removing it removes a step.
 
 ## Live demo
 
-**Pitch deck:** [https://w369egnp.insforge.site/pitch.html](https://w369egnp.insforge.site/pitch.html) — 10 slides, arrow-keys / click to advance, `F` for fullscreen.
+**Pitch deck:** [https://w369egnp.insforge.site/pitch.html](https://w369egnp.insforge.site/pitch.html) — 11 slides, arrow-keys / click to advance, `F` for fullscreen.
 
 **Click-path (the 90-second pitch):**
 [1) Acme Store — empty orders](https://hush-acme-store.vercel.app/orders?user=migrated) →
@@ -103,7 +123,7 @@ earns its place because removing it removes a step.
 
 | Surface | URL | State |
 |---|---|---|
-| **Pitch deck** (the 10-slide presentation) | https://w369egnp.insforge.site/pitch.html | ✅ deployed |
+| **Pitch deck** (the 11-slide presentation) | https://w369egnp.insforge.site/pitch.html | ✅ deployed |
 | **Receipt page** (judge-facing live status) | https://w369egnp.insforge.site/ | ✅ deployed |
 | **Receipt — demo mode** (full arc, no backend needed) | https://w369egnp.insforge.site/r/demo?demo=1 | ✅ deployed · **start here** |
 | **Backend** (InsForge project `hush`, seeded demo bug) | https://w369egnp.us-east.insforge.app/api/health | ✅ live — API host; bare `/` returns `Cannot GET /` by design, check `/api/health` |

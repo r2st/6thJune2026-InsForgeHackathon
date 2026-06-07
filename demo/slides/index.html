@@ -448,6 +448,36 @@
     text-align: right;
   }
   #s-close .seed .q { color: var(--accent); }
+  #s-close .demo-links {
+    margin-top: 36px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  #s-close .demo-link {
+    max-width: 520px;
+  }
+  #s-close .demo-link .title {
+    font-size: 15px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  #s-close .demo-link a {
+    display: inline-block;
+    max-width: 100%;
+    font-size: 22px;
+    color: var(--good);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+  }
+  #s-close .demo-link .desc {
+    font-size: 16px;
+    color: var(--ink-dim);
+    margin-top: 2px;
+  }
 
   /* Nav hints */
   .navhint {
@@ -550,12 +580,12 @@
     <section class="slide" id="s-one">
       <span class="eyebrow">What Hush does</span>
       <p class="quote">
-        Hush <span class="a">watches</span> the session,<br/>
-        <span class="a">replays</span> it on a forked backend,<br/>
-        <span class="g">patches</span> <code>insforge.toml</code>,<br/>
-        and ships the PR — in under a minute.
+        Hush <span class="a">catches frustration</span>,<br/>
+        <span class="a">ties it</span> to the backend log,<br/>
+        <span class="g">proves</span> the fix on a fork,<br/>
+        and ships the PR.
       </p>
-      <div class="attrib">watch · correlate · diagnose · test on a fork · ship</div>
+      <div class="attrib">rage/dead click · request log · RLS rows_before→rows_after · fork replay</div>
       <div class="deckmark">hush · live</div>
       <div class="pagenum">04 / 11</div>
     </section>
@@ -566,7 +596,7 @@
         <div class="side">
           <div class="beat-num">DEMO · 0:00 – 0:20</div>
           <h2>The receipt page<br/>lights up.</h2>
-          <p>Hush sees the rage-click, captures the session, and taps the matching backend request log.</p>
+          <p>No exception is required. The rage-click and the matching <code>/api/orders</code> log carry the same session id.</p>
         </div>
         <div class="receipt">
           <div class="head">
@@ -580,13 +610,13 @@
           </div>
           <div class="step done">
             <div class="n">2</div>
-            <div class="label-l">Backend log tapped</div>
-            <div class="meta">edge-fn · 41 req</div>
+            <div class="label-l">Request log matched</div>
+            <div class="meta">session id</div>
           </div>
           <div class="step live">
             <div class="n">3</div>
-            <div class="label-l">Anomaly detected</div>
-            <div class="meta">RLS · 1 hit</div>
+            <div class="label-l">RLS row drop detected</div>
+            <div class="meta">3 → 0</div>
           </div>
           <div class="step idle">
             <div class="n">4</div>
@@ -615,7 +645,7 @@
         <div class="side">
           <div class="beat-num">DEMO · 0:20 – 0:50 · money shot</div>
           <h2>Same session.<br/>Two backends.</h2>
-          <p>Hush forks the backend, applies the TOML diff, replays the session. Prod still leaks. Branch is green.</p>
+          <p>The log says RLS filtered 3 rows to 0. Hush patches the stale JWT claim, then replays prod vs. the branch.</p>
         </div>
         <div class="branchwrap">
           <div class="receipt" style="padding: 22px 30px;">
@@ -785,22 +815,27 @@
       <div class="stack-row">
         <div class="item"><span class="k">InsForge</span> · branch projects · RLS · realtime · pgvector · AI</div>
         <div class="item"><span class="k">rrweb</span> · session capture</div>
-        <div class="item"><span class="k">Devin</span> · TOML patch agent</div>
+        <div class="item"><span class="k">Replicas / Devin</span> · TOML patch agent</div>
       </div>
       <div class="seed">
-        Next up: <span class="q">learn-from-rejections</span><br/>
-        loop · closed PRs become<br/>negative training shapes.
+        Catching signal: <span class="q">rage click + request log</span><br/>
+        Proof signal: prod 0 rows,<br/>branch 3 rows.
       </div>
-      <div style="margin-top:36px;display:flex;gap:32px;flex-wrap:wrap;">
-        <div>
-          <div style="font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Live now</div>
-          <div style="font-size:22px;color:var(--good);">w369egnp.insforge.site/r/demo?demo=1</div>
-          <div style="font-size:16px;color:var(--ink-dim);margin-top:2px;">receipt · the full arc, no backend</div>
+      <div class="demo-links">
+        <div class="demo-link">
+          <div class="title">Live demo</div>
+          <a href="https://w369egnp.insforge.site/r/demo?demo=1" target="_blank" rel="noopener">w369egnp.insforge.site/r/demo?demo=1</a>
+          <div class="desc">receipt · capture → correlate → diagnose → fork-test → PR</div>
         </div>
-        <div>
-          <div style="font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Victim app</div>
-          <div style="font-size:22px;color:var(--good);">hush-acme-store.vercel.app/orders</div>
-          <div style="font-size:16px;color:var(--ink-dim);margin-top:2px;">Acme Store · legacy ↔ migrated toggle</div>
+        <div class="demo-link">
+          <div class="title">Victim app</div>
+          <a href="https://hush-acme-store.vercel.app/orders?user=migrated" target="_blank" rel="noopener">hush-acme-store.vercel.app/orders</a>
+          <div class="desc">Acme Store · migrated user sees 0 orders</div>
+        </div>
+        <div class="demo-link">
+          <div class="title">Fix PR</div>
+          <a href="https://github.com/r2st/hush-victim-acme/pull/1" target="_blank" rel="noopener">github.com/r2st/hush-victim-acme/pull/1</a>
+          <div class="desc">4-line <code>insforge.toml</code> policy diff</div>
         </div>
       </div>
       <div class="deckmark">hush · live</div>
