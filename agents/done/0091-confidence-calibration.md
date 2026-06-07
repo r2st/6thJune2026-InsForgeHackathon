@@ -3,9 +3,9 @@ id: 0091
 title: Confidence calibration against real outcomes
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (loop)
+started: 2026-06-06
+status: done
 depends_on: [0020, 0071, 0072]
 demo_path: no — product (post-hackathon)
 phase: production
@@ -47,3 +47,19 @@ none (ADR 0003, Risk 6). The tier routing (PR/draft/issue) and any autonomy
   this fits the numbers to outcomes instead of hand-tuning.
 
 ## Outcome
+
+## Outcome
+
+- **Shipped (verified core):** `functions/calibration.ts` (`calibrationReport`,
+  `recalibrate`, `meetsAutonomyBar`) + 11 tests. Typecheck clean; tests green.
+  Pure statistics: reliability bins (predicted vs. observed correct-rate), Brier
+  score, ECE; a monotonic (isotonic-style) recalibration map that pulls an
+  over-confident score toward its observed rate; and an autonomy gate. Honest
+  about small samples — below MIN_SAMPLES it reports `reliable:false` and
+  `recalibrate` passes through unchanged (never fakes a correction).
+- **`meetsAutonomyBar`** wires Risk 6 to Risk-of-autonomy: a workspace can only
+  enable auto-PR ([[0070]]) once its high-tier (≥85) predictions are empirically
+  high-merge — calibration gates autonomy, as the ADR requires.
+- **Deferred (seam):** logging predicted-confidence→outcome (joined from
+  [[0067]]/[[0071]]) and feeding `recalibrate` into `score.ts`/dispatch — needs
+  live outcome history; this is the math it consumes.
