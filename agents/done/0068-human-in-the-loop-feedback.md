@@ -3,9 +3,9 @@ id: 0068
 title: Human-in-the-loop review & feedback loop (approve/reject diagnosis → Memoir)
 role: builder
 priority: P0
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (loop)
+started: 2026-06-07
+status: in-progress
 depends_on: [0054, 0043]
 demo_path: no — product (post-hackathon)
 phase: production
@@ -46,3 +46,28 @@ workspace graduates to auto-PR.
   `functions/memory.ts`, `infra/insforge.toml` (autonomy settings)
 
 ## Outcome
+
+Shipped the **pure review-gate + feedback core** in `functions/reviewGate.ts`
+(+ 14 tests, `functions/reviewGate.test.ts`, tsc clean):
+
+- **requiresReview(autonomy, tier)** — per-workspace graduated trust, monotonic:
+  `review-all` gates high + medium; `review-medium-only` auto-ships high (pr),
+  reviews medium (draft_pr); `auto-PR-high` gates nothing. An issue is never gated
+  (not a code write). `DEFAULT_AUTONOMY = 'review-all'`.
+- **decisionToLearning(decision)** — maps approve/edit/reject to a Memoir signal:
+  approve `+10` raise; edit `+4` raise but demands re-validation; reject categorized
+  so the loss lands right — `not_a_bug` `-15` (the existential detection-precision
+  signal), `wrong_fix` `-10` (bug stands, fix penalized), `out_of_scope` `-2`
+  near-neutral (a preference, not a quality miss).
+- **canShipAfterReview(decision, revalidated)** — pulls the gates together: a run
+  ships only if the human approved AND any edited diff has been re-validated
+  (safety + fork replay); rejected runs never ship.
+
+**Seam (deferred):** the dashboard review surface [[0054]] (diagnosis/diff/verdict
+with Approve/Edit/Reject), the `bug_decisions` table + Memoir write [[0043]], the
+autonomy setting in `infra/insforge.toml`, and gating `fix-trigger.ts` on
+`requiresReview`/`canShipAfterReview`. The edit re-validation reuses the existing
+safety rail + fork replay. External UI/infra — stay open there. Pairs with the
+observe/draft/auto mode gate [[0070]].
+
+How to verify: `pnpm -F @hush/functions test reviewGate.test.ts`.
