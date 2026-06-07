@@ -46,6 +46,39 @@ Read each function header — the required env vars are listed there. The full s
 pnpm -F @hush/functions run deploy
 ```
 
+## Runtime contract (Deno — read before writing a new function)
+
+The deployed runtime is **Deno**, not Node. Unit tests run in Node, so a function
+can pass every test and still crash live. The bundler
+([`scripts/deploy-insforge-functions.mjs`](../scripts/deploy-insforge-functions.mjs))
+closes most of the gap; the rest is enforced by the parity guardrail
+([`edgeParity.ts`](edgeParity.ts) + [`scripts/check-edge-parity.mjs`](../scripts/check-edge-parity.mjs)).
+
+Rules a new function must follow:
+
+- **No `Buffer`/`process` beyond the shim.** The bundle banner shims only
+  `globalThis.Buffer` and `process.env`. `process.cwd()`, `process.argv`,
+  `__dirname`, `__filename` are **undefined in Deno** — use `new URL(import.meta.url)`.
+- **No runtime disk reads of computed paths.** They `ENOENT` in Deno (the asset
+  isn't in the bundle). To ground a function on a sibling asset, use exactly:
+  ```ts
+  const ASSET = fileURLToPath(new URL('./prompts/x.md', import.meta.url));
+  const text = readFileSync(ASSET, 'utf8'); // inlined at bundle time
+  ```
+  The inline-asset esbuild plugin rewrites that shape to the file's literal content.
+  Any other `readFileSync(somePath, …)` fails the parity check.
+- **`node:*` imports must be prefixed** (`node:fs`, not `fs`) so they externalize.
+- **Intentional Node-only fallbacks opt out visibly** with
+  `// edge-parity-ignore: <reason>` on the read line (or the line above) — used by
+  the injectable `loadToml`/pool defaults that the deployed path overrides.
+
+Run the guardrail locally:
+
+```bash
+node scripts/check-edge-parity.mjs          # exit 1 on any error
+node scripts/check-edge-parity.mjs --warn    # include warnings
+```
+
 ## House rules
 
 - **No cross-file type duplication.** Shared types live in [`types.ts`](types.ts).

@@ -38,6 +38,7 @@ export function poolPath(): string {
 export function readPool(path = poolPath()): Pool {
   let raw: string;
   try {
+    // edge-parity-ignore: demo-only fork-pool file read by the local prewarm/demo harness, not the deployed edge function.
     raw = readFileSync(path, 'utf8');
   } catch {
     throw new Error(

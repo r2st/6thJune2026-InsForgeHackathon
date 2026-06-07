@@ -76,6 +76,7 @@ function defaultLoadToml(_branchId: string): string {
   const fromEnv = process.env.HUSH_TOML_PATH;
   const here = dirname(fileURLToPath(import.meta.url));
   const path = fromEnv ?? resolve(here, '..', 'infra', 'insforge.toml');
+  // edge-parity-ignore: injectable Node/dev default — the orchestrator injects loadToml in the deployed path; not reached in Deno.
   return readFileSync(path, 'utf8');
 }
 

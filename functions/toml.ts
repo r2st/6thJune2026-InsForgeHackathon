@@ -166,5 +166,6 @@ function loadCanonicalToml(): string {
   const fromEnv = process.env.HUSH_TOML_PATH;
   const here = dirname(fileURLToPath(import.meta.url));
   const path = fromEnv ?? resolve(here, '..', 'infra', 'insforge.toml');
+  // edge-parity-ignore: Node/dev fallback — the deployed bundle inlines the toml via infraToml.ts; this path is never hit in Deno.
   return readFileSync(path, 'utf8');
 }
