@@ -30,6 +30,9 @@ from the run, not constants.
 - [ ] **Expected-rows / correlation** generalized: derive the "what the user
       should have seen" signal from the diagnosis + request shape, not a hardcoded
       `3` (the `replay.ts` TODO).
+- [ ] Treat `rows_before` as evidence, not blind truth: validate the expected-row
+      oracle against the request shape, policy metadata, and fork/prod probes;
+      if the oracle is missing or ambiguous, cap the run to issue/draft.
 - [ ] **Bug taxonomy coverage:** RLS filter misfires, stale/missing JWT claims,
       over-restrictive *and* over-permissive policies, policy regressions across
       tables/joins, and auth-config drift — each with a fixture + an end-to-end test.
@@ -52,5 +55,7 @@ from the run, not constants.
 
 - Pair each new bug class with a fixture *and* an adversarial "looks fixed but
   isn't" case — the two-signal discipline scales by coverage, not optimism.
+- For over-permissive/leak classes, coordinate with [[0088-canary-policy-probes-for-silent-leaks]];
+  user frustration is not a reliable trigger for leaks.
 
 ## Outcome

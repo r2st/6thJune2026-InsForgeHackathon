@@ -3,9 +3,9 @@ id: 0055
 title: LLM reliability — provider failover, BYO-key, quota/rate-limit handling
 role: architect
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (loop)
+started: 2026-06-07
+status: done
 depends_on: [0052]
 demo_path: no — product (post-hackathon)
 phase: production
@@ -51,3 +51,29 @@ Anthropic switchable) already exists — productionize the reliability around it
   Gemini the default; make the *chain* the unit, not a single provider.
 
 ## Outcome
+
+Shipped the **pure reliability core** in `functions/llmChain.ts` (+ 17 tests,
+`functions/llmChain.test.ts`, tsc clean):
+
+- **Failover chain** — `runWithFailover(chain, callOne)` runs an ordered list of
+  `(provider, model)` specs, advancing on transient/availability failures and
+  recording every attempt (so the receipt can show which provider answered).
+  `defaultShouldFailover` classifies by status: advance on 429/5xx/402/403/401/
+  network; **fail fast on 400/422** (a malformed request the next provider would
+  also reject — advancing just burns quota). `AllProvidersFailedError` carries the
+  full attempt trace for the "couldn't diagnose — retry later" run state.
+- **BYO-key + ordering** — `resolveChain(env)` builds the chain from env:
+  Gemini→Anthropic→gemini-flash-lite by default, Anthropic-first when
+  `HUSH_LLM_PROVIDER=anthropic`, single-link when a workspace supplies only one
+  key. Model overrides via `GEMINI_MODEL`/`ANTHROPIC_MODEL`.
+- **Rate-limit awareness** — `TokenBucket` (injected clock, deterministic):
+  per-provider/per-workspace token bucket so one noisy workspace can't exhaust the
+  shared pool. capacity + refill-per-sec, `tryTake(n)` / `available()`.
+
+**Seam (deferred, like the other fix-quality modules):** wiring this around
+`llm.ts`'s `defaultCreateClient` inside `diagnose.ts` — feed `resolveChain()`
+into `runWithFailover`, gate each call on the workspace's `TokenBucket`, and on
+`AllProvidersFailedError` set the run to a visible degraded state. Usage-metering
+per workspace/provider and the vault-backed BYO key load depend on
+[[0052-secrets-vault]] / [[0058-billing-plans]] (external infra) and stay open
+there. The schema-translation parity already lives in `llm.ts` and is unchanged.

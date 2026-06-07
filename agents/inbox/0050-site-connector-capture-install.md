@@ -37,6 +37,9 @@ frustration to the right place.
 - [ ] **Install verification:** a "Verify" button confirms Hush received a test
       session from the site (handshake ping), with a clear installed/not-installed
       state in the dashboard.
+- [ ] **Session propagation:** the snippet stamps `x-hush-session-id` onto
+      same-origin/API calls where possible, and documents the backend-forwarding
+      requirement for [[0086-production-request-log-rls-instrumentation]].
 - [ ] **Site → repo + backend mapping:** each site declares which GitHub repo
       ([[0049-github-app-connect-repos]]) and which backend connection
       ([[0051-customer-backend-connector]]) it uses, so a run knows where to fork
@@ -58,5 +61,7 @@ frustration to the right place.
 - Ties the loop together: a session now carries (workspace, site) → which decides
   repo + backend for steps 4–5. This replaces the demo's single hardcoded tenant.
 - Closes the spirit of [[0047-demo-login-tenant-claimed-token]] at product scale.
+- Capture install alone is not enough for production detection; it must pair with
+  backend evidence from [[0086-production-request-log-rls-instrumentation]].
 
 ## Outcome

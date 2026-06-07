@@ -2,7 +2,7 @@
 id: 0068
 title: Human-in-the-loop review & feedback loop (approve/reject diagnosis → Memoir)
 role: builder
-priority: P1
+priority: P0
 owner:
 started:
 status: inbox
@@ -23,6 +23,10 @@ to each team's preferences and earns autonomy over time.
 Teams don't grant an agent write-access to their repo on day one. A review step
 is how trust is earned; the captured approve/reject is also the highest-signal
 training data for Memoir (better than the merge/close signal alone).
+
+This is now P0 for a first external customer: Hush should prove value in
+observe-only mode, then let humans approve the first draft/fix path before the
+workspace graduates to auto-PR.
 
 ## Acceptance criteria
 

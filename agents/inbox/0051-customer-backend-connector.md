@@ -32,6 +32,9 @@ forks *that*. Without this, there's no falsifiable proof per customer.
       the secrets vault ([[0052-secrets-vault]]) per workspace.
 - [ ] `backend_connections` table: project id, region, host, credential ref,
       health status; a site maps to one backend.
+- [ ] Connection health distinguishes **fork/replay access** from **evidence
+      access**. A backend can be forkable but still not production-ready until
+      [[0086-production-request-log-rls-instrumentation]] is installed.
 - [ ] The fork step (`applyDiff` + `replay` + `fingerprint`) targets the
       **customer's** project: `branch create` from their project, seed from a
       bounded snapshot of only the rows the failing request touches (not full prod
@@ -55,5 +58,7 @@ forks *that*. Without this, there's no falsifiable proof per customer.
 - Privacy is load-bearing: seed forks from the **minimal affected rows**, with a
   documented data-handling boundary ([[0056-privacy-retention-consent]]).
 - Productionizes what [[0053-fork-pool-in-insforge]] schedules at scale.
+- Do not treat "backend connected" as "Hush can catch production bugs" until the
+  request-log/RLS instrumentation contract ([[0086]]) is verified.
 
 ## Outcome
