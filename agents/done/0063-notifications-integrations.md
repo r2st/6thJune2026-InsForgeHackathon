@@ -3,9 +3,9 @@ id: 0063
 title: Notifications & integrations (Slack / email / webhook on PR, draft, issue)
 role: builder
 priority: P1
-owner:
-started:
-status: inbox
+owner: claude-opus-4-8 (loop)
+started: 2026-06-07
+status: in-progress
 depends_on: [0048, 0054]
 demo_path: no — product (post-hackathon)
 phase: production
@@ -48,3 +48,28 @@ moment Hush acts.
 - Reuses the InsForge email path that already exists; Slack is the headline add.
 
 ## Outcome
+
+Shipped the **pure notification core** in `functions/notify.ts` (+ 13 tests,
+`functions/notify.test.ts`, tsc clean):
+
+- **buildMessage(notice)** — tier-aware, distinct, actionable: `pr` → "review this
+  fix", `draft_pr` → "needs a human", `issue` → "can't auto-fix". Body carries the
+  diagnosis summary, confidence (+ veto reason when a weak signal limited the tier),
+  and the prod/fork verdict; CTA deep-links the PR/issue (falls back to the run).
+- **routeChannels(tier, rules)** — resolves the per-workspace tier→channel rules
+  (slack/email/webhook), deduped; an unrouted tier routes nowhere (silence is valid
+  config, not an error).
+- **deliveryMode(tier, policy)** — digest vs immediate: a `pr` is always immediate
+  (the "before the support ticket" promise) even with digest on; routine tiers roll
+  up so a noisy workspace gets a summary, not a firehose.
+- **planDelivery(notice, rules, policy)** — the full plan (one task per channel +
+  mode + message), `silent` when nothing is routed. The caller dispatches each task
+  best-effort with retry (`reliability.retryDecision`) and never lets a delivery
+  failure change the run outcome.
+
+**Seam (deferred):** the actual Slack (per-workspace install) / email (reuses the
+existing InsForge email path) / webhook transports, the `notification_channels` +
+routing rules in `infra/insforge.toml`, and the channel-setup UI in
+`apps/dashboard/`. External integrations/UI — stay open there.
+
+How to verify: `pnpm -F @hush/functions test notify.test.ts`.
