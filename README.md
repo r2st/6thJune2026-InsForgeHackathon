@@ -75,6 +75,23 @@ patch.
 · edge functions) · rrweb · Memoir · Lim.run · Replicas · Devin · Vercel ·
 Next.js.
 
+## Why these tools
+
+Each service does one job in the loop. We didn't bolt sponsors on — every one
+earns its place because removing it removes a step.
+
+| Service | Job in Hush | Why this one |
+|---|---|---|
+| **InsForge** | The platform **and** the moat | The fix is a diff against declarative **`insforge.toml`**, and we test it by forking the whole backend (schema + auth + RLS) into a **branch project** and replaying against prod *and* the fork. Supabase has RLS but no branch projects; Neon has branches but no auth layer. Hush literally cannot exist on another stack — that's why it's an InsForge project, not an InsForge-flavored one. Also provides Postgres + pgvector (dedup/similarity), Realtime (the live receipt page), Storage (session clips), AI (the diagnosis call), and edge functions (the whole pipeline). |
+| **Replicas** | The **fix agent** (ship step) | A background coding-agent platform (`POST /v1/replica`). Hush hands it the diagnosis + the `insforge.toml` diff as a task and it lands the PR — same role as Devin, swappable. It's the production-grade "an agent actually writes and opens the fix" half, not a hand-rolled PR call. |
+| **Lim.run** | **See-the-fix-live** corroboration | Boots a real cloud instance pointed at the *fork* and yields a shareable preview URL — a clickable before/after a judge can open (empty on prod, populated on the fork). It only ever *adds* visual confidence; the falsifiable verdict stays the policy replay, so Lim.run can never block or fake a pass. |
+| **Memoir** | **Learn-from-rejections** memory | "Git for AI memory." Every resolved fix is recorded; at score time Hush recalls similar past outcomes — a *merged* neighbour raises confidence, a *rejected* one lowers it. So Hush gets quieter and sharper for each team. Verified live: a merged neighbour lifts the similarity signal 50 → 100. |
+
+> Honesty note: **InsForge, Memoir, and Lim.run are live-verified**; **Replicas**
+> is wired and unit-tested at the ship step (live dispatch pending an API key).
+> Each integration fails *closed* — no key ⇒ the loop runs unchanged on the
+> default path. We never claim a sponsor box we can't demo.
+
 ## Live demo
 
 **Pitch deck:** [https://w369egnp.insforge.site/pitch.html](https://w369egnp.insforge.site/pitch.html) — 10 slides, arrow-keys / click to advance, `F` for fullscreen.
